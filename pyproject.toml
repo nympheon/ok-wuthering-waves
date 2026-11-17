@@ -7,23 +7,18 @@ name = "ok-ww"
 version = "0.0.1"
 requires-python = ">=3.11"
 dependencies = [
+    "dulwich==1.2.21",
     "mcp==2.3.0",
-    "ok-script[ocr,qt]==3.0.0b3",
+    "ok-script[ocr,qt]==3.0.5b9",
     "ok-pyside-minimal==6.12.0.post2",
-    "onnxocr-ppocrv5>=0.0.20",
-    "openvino",
+    "onnxocr-ppocrv6>=0.0.1",
+    "openvino>=2026.4.1",
     "opencv-python",
-    "pyappify>=1.0.13"
+    "pyappify[standalone]>=1.0.20"
 ]
 
 [project.optional-dependencies]
 dev = [
     "polib",
     "pytest",
-]
-docs = [
-    "mkdocs-material>=9.5,<10",
-]
-web-test = [
-    "ok-script[web]==3.0.0b3",
 ]

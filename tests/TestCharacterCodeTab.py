@@ -15,7 +15,7 @@ from PySide6.QtCore import QPoint, QRect, QSize, Qt, QTimer
 from PySide6.QtGui import QFontDatabase, QImage, QPainter
 
 from PySide6.QtWidgets import QApplication, QStyleOptionViewItem
-from PySide6.QtWidgets import QLabel, QLineEdit, QTableWidget, QTextEdit
+from PySide6.QtWidgets import QLabel, QLineEdit, QTableWidget, QTextEdit, QWidget
 from ok.ui.qt.kit.buttons import Button
 from ok.ui.qt.kit.dialogs import Dialog
 from ok.ui.qt.kit.inputs import ComboBox
@@ -40,6 +40,7 @@ from src.char.Verina import Verina
 from src.char.YangYangSp import YangYangSp
 from src.gui.CharacterCodeTab import (
     STATE_DOT_SIZE, CharacterCodeTab, ExportTeamDialog, ImportTeamDialog, TeamInfoDialog,
+    WorkshopSettingsDialog,
     TeamSelectionDialog, WorkshopDialog, fetch_all_workshop_teams, fetch_workshop_codes,
     team_state_color, workshop_team_url,
 )
@@ -73,6 +74,35 @@ class TestCharacterCodeTab(unittest.TestCase):
             self.assertEqual(tab.editor.toPlainText(), read_team_char_code(team, tab.current_char_cls))
         finally:
             tab.deleteLater()
+
+    def test_workshop_settings_dialog_saves_source_for_next_open(self):
+        window = QWidget()
+        dialog = WorkshopSettingsDialog(window)
+        try:
+            dialog.source_edit.setText('https://example.org/my-workshop/')
+            self.assertTrue(dialog.validate())
+            reopened = WorkshopSettingsDialog(window)
+            try:
+                self.assertEqual(reopened.source_edit.text(), 'https://example.org/my-workshop')
+                self.assertEqual(workshop_team_url((Baizhi, Augusta, Aemeath)),
+                                 'https://example.org/my-workshop/teams/Aemeath_Augusta_Baizhi.json')
+            finally:
+                reopened.deleteLater()
+        finally:
+            dialog.deleteLater()
+            window.deleteLater()
+
+    def test_workshop_settings_cancel_keeps_saved_source(self):
+        window = QWidget()
+        dialog = WorkshopSettingsDialog(window)
+        try:
+            dialog.source_edit.setText('https://example.org/unsaved')
+            dialog.reject()
+            self.assertEqual(workshop_team_url((Baizhi, Augusta, Aemeath)),
+                             'https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json')
+        finally:
+            dialog.deleteLater()
+            window.deleteLater()
 
     def test_create_team_defaults_to_detected_team(self):
         tab = CharacterCodeTab()
@@ -214,13 +244,13 @@ class TestCharacterCodeTab(unittest.TestCase):
     def test_workshop_url_uses_sorted_team_slug(self):
         self.assertEqual(
             workshop_team_url((Baizhi, Augusta, Aemeath)),
-            "https://cfokwwchar.ok-script.com/teams/Aemeath_Augusta_Baizhi.json",
+            "https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json",
         )
 
     def test_workshop_url_sanitizes_character_name_punctuation(self):
         self.assertEqual(
             workshop_team_url((YangYangSp, Chisa, Suisui)),
-            "https://cfokwwchar.ok-script.com/teams/Chisa_Suisui_Yangyang_Xuanling.json",
+            "https://eeeeeeeedison.github.io/wwlibrary/teams/Chisa_Suisui_Yangyang_Xuanling.json",
         )
 
     def test_workshop_codes_are_sorted_by_timestamp_descending(self):
@@ -251,7 +281,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
         log_info.assert_called_once_with(
             "char code workshop request: "
-            "https://cfokwwchar.ok-script.com/teams/Aemeath_Augusta_Baizhi.json"
+            "https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json"
         )
 
     def test_workshop_404_is_an_empty_list(self):
@@ -269,7 +299,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(codes[0]["name"], "Test code")
         self.assertEqual(codes[0]["team"], "Test team")
         request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://cfokwwchar.ok-script.com/teams.json")
+        self.assertEqual(request.full_url, "https://eeeeeeeedison.github.io/wwlibrary/teams.json")
         self.assertEqual(request.get_header("User-agent"), "ok-wuthering-waves")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
 
@@ -277,12 +307,12 @@ class TestCharacterCodeTab(unittest.TestCase):
         tab = CharacterCodeTab()
         try:
             for field, url, expected_url in (
-                ("downloadUrl", "https://cfokwwchar.ok-script.com/team.zip",
-                 "https://cfokwwchar.ok-script.com/team.zip"),
+                ("downloadUrl", "https://eeeeeeeedison.github.io/wwlibrary/team.zip",
+                 "https://eeeeeeeedison.github.io/wwlibrary/team.zip"),
                 ("rawUrl", "https://raw.githubusercontent.com/example/team.zip",
                  "https://raw.githubusercontent.com/example/team.zip"),
                 ("downloadUrl", "https://okwwcharcode.ok-script.com/codes/team%20name.zip",
-                 "https://cfokwwchar.ok-script.com/codes/team%20name.zip"),
+                 "https://eeeeeeeedison.github.io/wwlibrary/codes/team%20name.zip"),
             ):
                 with (
                     self.subTest(url=url),

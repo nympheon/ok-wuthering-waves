@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from PySide6.QtCore import QPointF, Qt, QSize, QUrl, Signal
@@ -38,12 +38,9 @@ from src.char.CustomCharLoader import (
     normalize_team, read_builtin_char_code, read_team_char_code, read_team_manifest,
     save_team_code_as_import, switch_all_teams_code_mode, switch_team_code_mode, team_code_state,
 )
+from src.char.WorkshopSource import archive_url, index_url, load_settings, repository_url, save_settings
 
 BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/refs/heads/master/src/char/BaseChar.py"
-UPLOAD_TEAM_URL = "https://github.com/ok-oldking/ok-ww-char-code"
-WORKSHOP_TEAMS_ALL_URL = "https://cfokwwchar.ok-script.com/teams.json"
-WORKSHOP_TEAM_URL = "https://cfokwwchar.ok-script.com/teams/{slug}.json"
-WORKSHOP_ARCHIVE_HOSTS = {"cfokwwchar.ok-script.com", "raw.githubusercontent.com"}
 WORKSHOP_USER_AGENT = "ok-wuthering-waves"
 logger = Logger.get_logger(__name__)
 
@@ -451,6 +448,24 @@ class TranslatedDialog(Dialog):
         return value_widget
 
 
+class WorkshopSettingsDialog(Dialog):
+    def __init__(self, parent):
+        super().__init__(parent, '工坊设置', ok_text='保存', cancel_text='取消')
+        self.settings = load_settings()
+        self.body.addWidget(QLabel('角色代码工坊地址', self.panel))
+        self.source_edit = QLineEdit(self.settings['base_url'], self.panel)
+        self.source_edit.setMinimumWidth(360)
+        self.body.addWidget(self.source_edit)
+
+    def validate(self):
+        try:
+            save_settings({**self.settings, 'base_url': self.source_edit.text()})
+        except (OSError, ValueError) as error:
+            show_info_bar(self, str(error), title='工坊设置', error=True)
+            return False
+        return True
+
+
 def workshop_team_slug(team):
     names = sorted((
         re.sub(r"[^A-Za-z0-9-]+", "_", get_english_char_name(name)).strip("_")
@@ -460,11 +475,11 @@ def workshop_team_slug(team):
 
 
 def workshop_team_url(team):
-    return WORKSHOP_TEAM_URL.format(slug=quote(workshop_team_slug(team), safe="_-"))
+    return index_url(f'teams/{quote(workshop_team_slug(team), safe="_-")}.json')
 
 
 def fetch_all_workshop_teams():
-    url = WORKSHOP_TEAMS_ALL_URL
+    url = index_url()
     logger.info(f"char code workshop all teams request: {url}")
     try:
         with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=15) as response:
@@ -926,6 +941,9 @@ class CharacterCodeTab(CustomTab):
         team_buttons.addLayout(first_team_button_row)
         team_buttons.addLayout(second_team_button_row)
         team_buttons.addLayout(third_team_button_row)
+        self.workshop_settings_button = Button('工坊设置', icon='gear')
+        self.workshop_settings_button.clicked.connect(self._configure_workshop)
+        team_buttons.addWidget(self.workshop_settings_button)
         left_layout.addLayout(team_buttons)
 
         right = QWidget(splitter)
@@ -1544,6 +1562,13 @@ class CharacterCodeTab(CustomTab):
             return
         self._preview_and_import_archive(archive_path)
 
+    def _configure_workshop(self):
+        dialog = WorkshopSettingsDialog(self.window())
+        try:
+            dialog.exec()
+        finally:
+            dialog.deleteLater()
+
     def _open_workshop(self):
         # An import selects the imported team, so ask before anything is downloaded.
         if not self._guard_unsaved_changes():
@@ -1558,16 +1583,8 @@ class CharacterCodeTab(CustomTab):
         dialog.exec()
 
     def _import_workshop_code(self, code, parent):
-        url = code.get("downloadUrl") or code.get("rawUrl")
-        parsed = urlparse(str(url or ""))
-        # Published workshop indexes can still contain the previous server's URLs.
-        if parsed.hostname == "okwwcharcode.ok-script.com":
-            parsed = parsed._replace(netloc=urlparse(WORKSHOP_TEAMS_ALL_URL).netloc)
-            url = parsed.geturl()
-        if parsed.scheme != "https" or parsed.hostname not in WORKSHOP_ARCHIVE_HOSTS:
-            show_info_bar(parent, self.tr("Workshop download URL is invalid."), title=self.tr("Error"), error=True)
-            return
         try:
+            url = archive_url(code.get('downloadUrl') or code.get('rawUrl'))
             with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=30) as response:
                 content = response.read(20_000_001)
             if len(content) > 20_000_000:
@@ -1660,7 +1677,7 @@ class CharacterCodeTab(CustomTab):
         show_info_bar(self.window(), self.tr("Ask AI template copied. Paste it into an AI chatbot."), title=self.tr("Copied"))
 
     def _open_upload_team(self):
-        QDesktopServices.openUrl(QUrl(UPLOAD_TEAM_URL))
+        QDesktopServices.openUrl(QUrl(repository_url()))
 
     def _update_char_image(self):
         self.char_image_label.clear()

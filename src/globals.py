@@ -10,6 +10,9 @@ logger = Logger.get_logger(__name__)
 class Globals:
 
     def __init__(self, exit_event):
+        if ((og.config or {}).get('gui') or {}).get('type') == 'qt':
+            from src.gui.SourceAboutTab import install_source_ui
+            install_source_ui()
         self._yolo_model = None
         self.mini_map_arrow = None
         self.logged_in = False

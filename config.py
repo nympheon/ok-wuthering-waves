@@ -158,7 +158,7 @@ monthly_card_config_option = ConfigOption('Monthly Card Config', {
 
 config = {
     'debug': False,  # Optional, default: False
-    'custom_tasks': True,
+    'custom_tasks': False,
     "gui": {
         "type": "qt",
     },
@@ -181,7 +181,6 @@ config = {
     'global_configs': [basic_config_option, key_config_option, char_config_option, monthly_card_config_option],
     'custom_tabs': [
         ["src.gui.CharacterCodeTab", "CharacterCodeTab"],
-        ["src.gui.MultiAccountConfigTab", "MultiAccountConfigTab"],
     ],
     'ocr': {
         'lib': 'onnxocr',
@@ -191,7 +190,7 @@ config = {
             'use_npu': True,
         }
     },
-    'plugin':True,
+    'plugin': False,
     'my_app': ['src.globals', 'Globals'],
     'start_timeout': 120,  # default 60
     'wait_until_settle_time': 0,
@@ -220,7 +219,7 @@ config = {
         'launch_arguments': get_game_launch_arguments,
         'exe': 'Client-Win64-Shipping.exe',
         'hwnd_class': 'UnrealWindow',
-        'interaction': 'PostMessage',
+        'interaction': ['PostMessage', 'Pynput'],
         'capture_method': ['WGC', 'WGC_HDR','BitBlt_RenderFull'],  # Windows版本支持的话, 优先使用WGC, 否则使用BitBlt_Full
         'check_hdr': False,
         'force_no_hdr': False,
@@ -239,28 +238,10 @@ config = {
         'resize_to': [(2560, 1440), (1920, 1080), (1600, 900), (1280, 720)],
         'min_size': (1280, 720)
     },
-    'links': {
-        'default': {
-            'github': 'https://github.com/ok-oldking/ok-wuthering-waves',
-            'discord': 'https://discord.gg/vVyCatEBgA',
-            'download': 'https://ok-script.com/ok-ww',
-            'sponsor': 'https://patreon.com/ok_oldking',
-            'share': 'Download OK-WW from https://ok-script.com/ok-ww',
-            'faq': 'https://ok-script.com/ok-ww/'
-        },
-        'zh_CN': {
-            'github': 'https://github.com/ok-oldking/ok-wuthering-waves',
-            'discord': 'https://discord.gg/vVyCatEBgA',
-            'sponsor': 'https://afdian.com/a/ok-oldking',
-            'share': '下载okww https://ok-script.com/ok-ww',
-            'faq': 'https://ok-script.com/ok-ww',
-            'qq_group': 'https://qm.qq.com/q/jw2NltIEWA',
-            'qq_channel': 'https://pd.qq.com/s/djmm6l44y',
-        },
-    },
+    'links': {},
     'about': """
     <p style="color:red;">
-    <strong>本软件是免费开源的。</strong> 如果你被收费，请立即退款。请访问QQ频道或GitHub下载最新的官方版本。
+    <strong>本软件是免费开源的。</strong> 如果你被收费，请立即退款。
     </p>
     <p style="color:red;">
         <strong>本软件仅供个人使用，用于学习Python编程、计算机视觉、UI自动化等。</strong> 请勿将其用于任何营利性或商业用途。
@@ -291,7 +272,6 @@ config = {
         ["src.task.EnhanceEchoTask", "EnhanceEchoTask"],
         ["src.task.ChangeEchoTask", "ChangeEchoTask"],
         ["src.task.GardenTask", "GardenTask"],
-        ["src.task.TacetEliminationTask", "TacetEliminationTask"],
         # ["src.task.DiagnosisTask", "DiagnosisTask"],
     ], 'trigger_tasks': [
         ["src.task.AutoCombatTask", "AutoCombatTask"],
@@ -301,10 +281,4 @@ config = {
         ["src.task.FastTravelTask", "FastTravelTask"],
         ["src.task.MouseResetTask", "MouseResetTask"],
     ], 'scene': ["src.scene.WWScene", "WWScene"],
-    'update_pyappify': {
-        'to_version': '1.2.3',
-        'zip_url': 'https://github.com/ok-oldking/ok-wuthering-waves/releases/download/v3.5.30/ok-ww-win32.zip',
-        'sha256': '447207edbfb6944beb994347048e155df99775eb18c87dcae54dda125071c94a',
-    }
-
 }
