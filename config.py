@@ -159,7 +159,7 @@ monthly_card_config_option = ConfigOption('Monthly Card Config', {
 
 config = {
     'debug': False,  # Optional, default: False
-    'custom_tasks': False,
+    'custom_tasks': True,
     "gui": {
         "type": "qt",
     },
@@ -212,6 +212,7 @@ config = {
                              'a_garden_restart', 'suisui_forte2', 'e_forte', 'f_break_full']
     },
     'windows': {  # required  when supporting windows game
+        'start_exe': False,
         'top_hwnd_class': [re.compile('CAgreementDlg'), re.compile('CLoginDlg_P_'),
                            'CefBrowserWindow', 'Chrome_RenderWidgetHostHWND', '#32770',
                            re.compile('CNativeLoginDlg'), 'Static', 'ComboBox', 'ComboLBox', 'Button'

@@ -1,0 +1,5 @@
+# Project-validated replacements for ok-script 3.0.5's historical restrictions.
+# pycaw: session enumeration and volume/mute APIs are verified on this PC.
+pycaw==20260927
+# pywin32 312 omits mfc140u.dll; this PC already has the MFC redistributable.
+pywin32==312
