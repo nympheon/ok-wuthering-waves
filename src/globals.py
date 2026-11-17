@@ -12,6 +12,8 @@ class Globals:
     def __init__(self, exit_event):
         if ((og.config or {}).get('gui') or {}).get('type') == 'qt':
             from src.gui.SourceAboutTab import install_source_ui
+            from src.identity import apply_qt_identity
+            apply_qt_identity()
             install_source_ui()
         self._yolo_model = None
         self.mini_map_arrow = None

@@ -23,11 +23,15 @@ class TestSourceStartup(unittest.TestCase):
         about_module = importlib.import_module('ok.ui.qt.about.AboutTab')
         with patch.object(about_module, 'AboutTab'), patch.object(og, 'config', {'gui': {'type': 'qt'}}):
             Globals(None)
-            page = about_module.AboutTab({'gui_title': 'OK-WW'})
+            page = about_module.AboutTab({'gui_title': '回声 · EchoDesk'})
             try:
                 self.assertIsInstance(page, SourceAboutTab)
                 self.assertIsNone(page.update_card)
                 self.assertEqual(page.findChildren(QPushButton), [])
+                self.assertEqual(self.app.applicationName(), 'EchoDesk')
+                self.assertEqual(self.app.applicationDisplayName(), '回声 · EchoDesk')
+                self.assertEqual(self.app.organizationName(), 'Nympheon')
+                self.assertEqual(self.app.desktopFileName(), 'Nympheon.EchoDesk')
                 # The real framework returns before invoking an update check.
                 MainWindow._startup_update_check(SimpleNamespace(about_tab=page))
             finally:

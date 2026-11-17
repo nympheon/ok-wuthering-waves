@@ -41,7 +41,7 @@ from src.char.CustomCharLoader import (
 from src.char.WorkshopSource import archive_url, index_url, load_settings, repository_url, save_settings
 
 BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/refs/heads/master/src/char/BaseChar.py"
-WORKSHOP_USER_AGENT = "ok-wuthering-waves"
+WORKSHOP_USER_AGENT = "EchoDesk"
 logger = Logger.get_logger(__name__)
 
 # The team list marks each team with a haloed dot, and both switch buttons wear the

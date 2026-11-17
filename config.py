@@ -7,6 +7,7 @@ from ok.util.GlobalConfig import create_basic_options
 from src.game_launcher import get_game_launch_arguments
 from src.task.process_feature import process_feature
 from src.task.task_icons import task_icon
+from src.identity import DISPLAY_NAME, LOG_NAME
 
 version = "dev"
 
@@ -251,13 +252,10 @@ config = {
     </p>
 """,
     'screenshots_folder': "screenshots",
-    'gui_title': 'OK-WW',  # Optional
+    'gui_title': DISPLAY_NAME,
     'game_name': 'Wuthering Waves',
     # 'coco_feature_folder': get_path(__file__, 'assets/coco_feature'),  # required if using feature detection
-    'log_file': 'logs/ok-ww.log',  # Optional, auto rotating every day
-    'error_log_file': 'logs/ok-ww_error.log',
-    'launcher_log_file': 'logs/launcher.log',
-    'launcher_error_log_file': 'logs/launcher_error.log',
+    'log_file': f'logs/{LOG_NAME}.log',
     'version': version,
     'onetime_tasks': [  # tasks to execute
         ["src.task.DailyTask", "DailyTask"],

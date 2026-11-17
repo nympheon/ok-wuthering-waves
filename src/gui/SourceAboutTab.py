@@ -3,6 +3,7 @@
 from importlib import import_module
 
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from src.identity import DISPLAY_NAME
 
 
 class SourceAboutTab(QWidget):
@@ -12,7 +13,7 @@ class SourceAboutTab(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(28, 20, 28, 32)
-        layout.addWidget(QLabel(config.get('gui_title', 'OK-WW'), self))
+        layout.addWidget(QLabel(config.get('gui_title', DISPLAY_NAME), self))
         layout.addWidget(QLabel('个人源码版', self))
         layout.addStretch(1)
 
