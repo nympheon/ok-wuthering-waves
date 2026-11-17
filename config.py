@@ -8,6 +8,9 @@ from src.game_launcher import get_game_launch_arguments
 from src.task.process_feature import process_feature
 from src.task.task_icons import task_icon
 from src.identity import DISPLAY_NAME, LOG_NAME
+from src.ocr import install_ocr_backend
+
+install_ocr_backend()
 
 version = "dev"
 
@@ -188,7 +191,7 @@ config = {
         'auto_simplify': True,
         'params': {
             'use_openvino': True,
-            'use_npu': True,
+            'use_npu': False,  # src.ocr selects Intel integrated GPU, then CPU.
         }
     },
     'plugin': False,
