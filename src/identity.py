@@ -14,8 +14,11 @@ LOG_NAME = 'echodesk'
 
 def configure_process_identity():
     import ok
+    import ok.util.GlobalConfig as global_options
     from ok.util.logger import config_logger
 
+    # Disable both startup creation and the framework's shortcut settings.
+    global_options.shortcut_supported = lambda: False
     # The pinned framework resolves this callable before constructing the app.
     ok.config_logger = partial(config_logger, name=LOG_NAME)
     if os.name == 'nt':
