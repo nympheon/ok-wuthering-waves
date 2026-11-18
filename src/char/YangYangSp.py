@@ -30,17 +30,17 @@ class YangYangSp(BaseChar):
         try:
             while self.time_elapsed_accounting_for_freeze(start) < duration:
                 if self.liberation_available():
-                    self.logger.debug('liberation_available')
+                    self.logger.debug('共鸣解放可用')
                     if not self.click_liberation(send_click=False, wait_if_cd_ready=0):
                         pass
                     else:
                         duration += 2
                 elif self.resonance_available():
-                    self.logger.debug('resonance_available')
+                    self.logger.debug('共鸣技能可用')
                     if resonance_available == 0:
                         resonance_available = time.time()
                     if resonance_available != 0 and time.time() - resonance_available > 0.2:
-                        self.logger.debug('resonance available for 0.2')
+                        self.logger.debug('共鸣技能已可用 0.2 秒')
                         self.click_resonance(send_click=False, time_out=1)
                 elif not echo_used:
                     resonance_available = 0

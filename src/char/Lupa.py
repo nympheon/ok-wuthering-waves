@@ -26,7 +26,7 @@ class Lupa(BaseChar):
         if self.res_wolf() and not in_outro:
             return self.switch_next_char()
         if self.judge_forte() == 2 and not self.task.find_one('lupa_wolf_icon2', threshold=0.85):
-            self.logger.debug('perform forte full')
+            self.logger.debug('共鸣回路能量已满，执行对应连招')
             if self.flying():
                 self.task.wait_until(lambda: not self.is_forte_full(), post_action=self.click_with_interval, time_out=2)
             else:
@@ -41,7 +41,7 @@ class Lupa(BaseChar):
                 self.res_wolf()
             else:
                 return self.switch_next_char()
-        self.logger.debug(f'resonance percent {self.current_resonance()}')
+        self.logger.debug(f'共鸣技能能量比例 {self.current_resonance()}')
         if self.current_resonance() > 0.05 and self.click_resonance()[0]:
             self.last_liberation = -1
             if self.liberation_available():
@@ -56,7 +56,7 @@ class Lupa(BaseChar):
             else:
                 return self.switch_next_char()
         if self.still_in_liberation():
-            self.logger.debug('perform in liberation')
+            self.logger.debug('执行共鸣解放期间的连招')
             self.click_jump_with_click(4)
             if self.flying():
                 self.task.wait_until(lambda: not self.is_forte_full(), post_action=self.click_with_interval, time_out=2)
@@ -101,7 +101,7 @@ class Lupa(BaseChar):
             self.task.next_frame()
 
     def res_wolf(self, timeout=1):
-        self.logger.debug('perform res wolf')
+        self.logger.debug('施放狼形态共鸣技能')
         start = time.time()
         click = False
         while True:
@@ -144,7 +144,7 @@ class Lupa(BaseChar):
                 amplitude = n[i]
                 frequncy = i
             i += 1
-        self.logger.info(f'forte with freq {frequncy} & amp {amplitude}')
+        self.logger.info(f'计算共鸣回路能量，频率 {frequncy}，振幅 {amplitude}')
         return (min_freq <= frequncy <= max_freq) or amplitude >= min_amp
 
     def calculate_forte_num(self, forte_color, box, num=1, min_freq=39, max_freq=41, min_amp=50):
@@ -165,7 +165,7 @@ class Lupa(BaseChar):
                 break
             left -= step
             forte -= 1
-        self.logger.info(f'Frequncy analysis with forte {forte}')
+        self.logger.info(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
 

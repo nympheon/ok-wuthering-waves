@@ -37,21 +37,21 @@ class OnnxYolo8Detect:  # Renamed class
         # options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL # Optional
 
         available_providers = ort.get_available_providers()
-        logger.info(f"Available ONNX Runtime providers: {available_providers}")
+        logger.info(f"ONNX Runtime 可用的执行提供程序：{available_providers}")
 
         # Prioritize DirectML, then CUDA, then CPU
         providers = []
         if og.use_dml and 'DmlExecutionProvider' in available_providers:
-            logger.info("Attempting to use DirectML Execution Provider.")
+            logger.info("尝试使用 DirectML 执行提供程序")
             providers.append(('DmlExecutionProvider', {'device_id': 0}))
         elif 'CUDAExecutionProvider' in available_providers:
-            logger.info("Attempting to use CUDA Execution Provider.")
+            logger.info("尝试使用 CUDA 执行提供程序")
             providers.append(('CUDAExecutionProvider', {'device_id': 0}))
 
         providers.append('CPUExecutionProvider')  # Always include CPU as a fallback
 
         try:
-            logger.info(f"Initializing ONNX Runtime session with providers: {providers} for model: {self.weights}")
+            logger.info(f"初始化 ONNX Runtime 会话，执行提供程序 {providers}，模型 {self.weights}")
             self.session = ort.InferenceSession(self.weights, sess_options=options, providers=providers)
 
             # Get input/output names
@@ -66,19 +66,19 @@ class OnnxYolo8Detect:  # Renamed class
             if self.preprocess_target_h != self.model_actual_input_h or \
                     self.preprocess_target_w != self.model_actual_input_w:
                 logger.warning(
-                    f"User-specified preprocessing HxW ({self.preprocess_target_h}x{self.preprocess_target_w}) "
-                    f"differs from ONNX model's expected input HxW ({self.model_actual_input_h}x{self.model_actual_input_w}). "
-                    f"Using user-specified dimensions ({self.preprocess_target_h}x{self.preprocess_target_w}) for preprocessing. "
-                    "Ensure this is intended and the model supports dynamic input sizes or this specific size."
+                    f"指定的预处理尺寸（高×宽，{self.preprocess_target_h}×{self.preprocess_target_w}）"
+                    f"与 ONNX 模型输入尺寸（{self.model_actual_input_h}×{self.model_actual_input_w}）不一致。"
+                    f"将按指定尺寸（{self.preprocess_target_h}×{self.preprocess_target_w}）预处理。"
+                    "请确认模型支持动态输入尺寸或该指定尺寸。"
                 )
 
-            logger.info(f"ONNX Runtime model loaded successfully using {self.session.get_providers()}.")
-            logger.info(f"Model Input: '{self.input_name}' with shape {model_input_shape}")
-            logger.info(f"Model Output: '{self.output_name}' with shape {self.session.get_outputs()[0].shape}")
+            logger.info(f"ONNX Runtime 模型加载成功，使用的执行提供程序：{self.session.get_providers()}")
+            logger.info(f"模型输入“{self.input_name}”，形状 {model_input_shape}")
+            logger.info(f"模型输出“{self.output_name}”，形状 {self.session.get_outputs()[0].shape}")
 
         except Exception as e:
-            logger.error(f"Error initializing ONNX Runtime session: {e}")
-            raise RuntimeError("Could not initialize ONNX Runtime model") from e
+            logger.error(f"初始化 ONNX Runtime 会话失败：{e}")
+            raise RuntimeError("无法初始化 ONNX Runtime 模型") from e
         # --- End ONNX Runtime Initialization ---
 
     def letterbox(self, img: np.ndarray, new_shape: Tuple[int, int] = (640, 640)) -> Tuple[np.ndarray, Tuple[int, int]]:
@@ -203,5 +203,5 @@ class OnnxYolo8Detect:  # Renamed class
 
             return sort_boxes(boxes)  # Assuming sort_boxes is available
         except Exception as e:
-            logger.error(f'ONNX Runtime yolo detect error: {e}')
+            logger.error(f'ONNX Runtime YOLO 检测出错：{e}')
             return []

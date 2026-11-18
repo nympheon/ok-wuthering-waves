@@ -35,11 +35,11 @@ def load_settings():
     try:
         raw = json.loads(path.read_text(encoding='utf-8-sig'))
         if not isinstance(raw, dict):
-            raise ValueError('Expected an object')
+            raise ValueError('工坊设置应为 JSON 对象')
     except FileNotFoundError:
         raw = {}
     except (OSError, UnicodeError, ValueError) as error:
-        logger.warning('Cannot read workshop settings %s: %s', path, error)
+        logger.warning('无法读取角色代码工坊设置 %s：%s', path, error)
         raw = {}
     settings = dict(raw)
     try:

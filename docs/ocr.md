@@ -31,15 +31,15 @@ OCR 固定优先使用 **Intel 核显＋动态输入**，核显不可用、初�
 
 ## 启动检查与故障定位
 
-正常启动在 `logs/echodesk.log` 搜索 `OCR backend ready`。测试运行器通常写 `logs/ok-script.log`。
+正常启动在 `logs/echodesk.log` 搜索 `OCR 后端已就绪`。测试运行器通常写 `logs/ok-script.log`。
 
 ```text
-OCR backend ready | device=GPU.0 | name=Intel(R) Graphics (iGPU) | input=dynamic (det=[?,3,?,?], rec=[?,3,48,?]) | fallback=CPU | discrete_gpu=FORBIDDEN | npu=disabled | self_test=ok | ... | reason=none
+OCR 后端已就绪 | 设备=GPU.0 | 名称=Intel(R) Graphics (iGPU) | 输入=动态 (det=[?,3,?,?], rec=[?,3,48,?]) | 回退设备=CPU | 独立显卡=禁止 | NPU=禁用 | 自检=通过 | ... | 回退原因=无
 ```
 
-每个 OCR 实例启动只输出一次这条摘要。若启动时已回退，摘要是 WARNING，`device=CPU`，`reason` 给出原因。运行中回退则另外输出一次 `OCR backend switched to CPU`。
+每个 OCR 实例启动只输出一次这条摘要。若启动时已回退，摘要是 WARNING，`设备=CPU`，`回退原因` 给出原因。运行中回退则另外输出一次 `OCR 后端已切换至 CPU`。
 
-更新驱动后，先确认摘要中的设备全名和 `input=dynamic`；编号变化本身不是故障。若回退，检查 `reason` 中的驱动、设备、模型编译或自检错误。没有 Intel 核显可用时，CPU 是预期结果，不能通过移除集成显卡检查或改为泛指 `GPU` 来恢复。
+更新驱动后，先确认摘要中的设备全名和 `输入=动态`；编号变化本身不是故障。若回退，检查 `回退原因` 中的驱动、设备、模型编译或自检错误。没有 Intel 核显可用时，CPU 是预期结果，不能通过移除集成显卡检查或改为泛指 `GPU` 来恢复。
 
 ## 复现验证
 

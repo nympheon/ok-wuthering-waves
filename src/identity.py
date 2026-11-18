@@ -27,7 +27,7 @@ def configure_process_identity():
         setter.restype = ctypes.c_long
         result = setter(APP_ID)
         if result < 0:
-            logging.getLogger(__name__).warning('Could not set application identity: HRESULT %s', result)
+            logging.getLogger(__name__).warning('无法设置应用程序标识，HRESULT %s', result)
 
 
 def apply_qt_identity():

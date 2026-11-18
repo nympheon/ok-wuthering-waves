@@ -64,12 +64,12 @@ class Cantarella(BaseChar):
         
     def on_combat_end(self, chars):
         next_char = str((self.index + 1) % len(chars) + 1)
-        self.logger.debug(f'Cantarella on_combat_end {self.index} switch next char: {next_char}')
+        self.logger.debug(f'战斗结束，坎特蕾拉（槽位 {self.index}）切换至 {next_char}')
         self.task.send_key(next_char)
 
     def is_forte_full(self):
         box = self.task.box_of_screen_scaled(5120, 2880, 3034, 2640, 3090, 2700, name='forte_full', hcenter=True)
         white_percent = self.task.calculate_color_percentage(forte_white_color, box)
-        self.logger.debug(f'forte_color_percent {white_percent}')
+        self.logger.debug(f'共鸣回路条颜色占比 {white_percent}')
         return white_percent > 0.06
         

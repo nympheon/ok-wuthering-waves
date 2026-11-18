@@ -54,10 +54,10 @@ class AutoCombatTask(BaseCombatTask, TriggerTask):
             for char_name in char_names:
                 self.get_feature_by_name(char_name)
         except Exception as e:
-            logger.warning(f'warm_up_char_features failed: {e}')
+            logger.warning(f'预加载角色特征失败：{e}')
             return
         self.char_features_warmed_up = True
-        logger.info(f'warm_up_char_features loaded {len(char_names)} character templates')
+        logger.info(f'预加载了 {len(char_names)} 个角色特征模板')
 
     def run(self):
         if self._reset_combat_on_run:
@@ -90,7 +90,7 @@ class AutoCombatTask(BaseCombatTask, TriggerTask):
                 self.log_error(self.tr('Characters dead'), notify=True)
                 break
             except NotInCombatException as e:
-                logger.info(f'auto_combat_task_out_of_combat {int(time.time() - combat_start)} {e}')
+                logger.info(f'自动战斗已退出，战斗持续 {int(time.time() - combat_start)} 秒，原因：{e}')
                 break
         if ret:
             self.combat_end()

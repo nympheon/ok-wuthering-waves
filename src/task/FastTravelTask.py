@@ -24,6 +24,6 @@ class FastTravelTask(BaseWWTask, TriggerTask):
                 match=self.match)
 
             if results:
-                self.log_debug("has result")
+                self.log_debug("已找到传送目标")
                 self.click_traval_button()
                 return True

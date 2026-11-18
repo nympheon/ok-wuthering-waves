@@ -54,7 +54,7 @@ class Brant(BaseChar):
             liber = True
         while True:
             if self.is_forte_full() and self.resonance_available():
-                self.logger.debug('perform anchar')
+                self.logger.debug('布兰特施放强化共鸣技能')
                 self.resonance_forte_full()
                 self.last_liberation = -1
                 self.wait_down(4)
@@ -120,7 +120,7 @@ class Brant(BaseChar):
             return
         from src.char.Lupa import Lupa
         for _, char in enumerate(self.task.chars):
-            self.logger.debug(f'teammate char: {char.char_name}')
+            self.logger.debug(f'队友角色为 {char.char_name}')
             if isinstance(char, Lupa):
                 self.char_lupa = char
                 self.attribute = 1

@@ -35,7 +35,7 @@ class DomainTask(WWOneTimeTask, BaseCombatTask):
             return False
         self.sleep(0.5)
         if self.realm_entry_at_heal_point:
-            logger.info('revive_action: left realm at heal point, skip teleport')
+            logger.info('已在治疗点离开异界，跳过传送')
             return True
         self.revive_at_tower_and_heal()
         return True

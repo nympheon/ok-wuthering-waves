@@ -54,7 +54,7 @@ class Phoebe(BaseChar):
         if self.attribute == 1:
             self.click_echo(time_out=0)
         if self.flying():
-            self.logger.info('flying')
+            self.logger.info('角色正在空中')
             self.continues_normal_attack(0.1)
             return self.switch_next_char()
 
@@ -68,7 +68,7 @@ class Phoebe(BaseChar):
 
         wait_ui_time = 0.35 - (time.time() - start)
         if wait_ui_time > 0 and self.star_available and self.judge_forte() == 0:
-            self.logger.info('wait for UI')
+            self.logger.info('等待战斗界面恢复')
             self.continues_normal_attack(wait_ui_time)
 
         status_entered = self.absolution_or_confession()
@@ -87,7 +87,7 @@ class Phoebe(BaseChar):
             if (self.attribute == 2 and
                     self.state["starflash_combo"] < 2 and
                     self.get_zani_state() != 1):
-                self.logger.info('phoebe: try second starflash_combo')
+                self.logger.info('菲比尝试第二次星闪连招')
                 self.starflash_combo()
         self._try_liberation_now()
         if self.resonance_available():
@@ -108,14 +108,14 @@ class Phoebe(BaseChar):
         if not self.first_rotation_done:
             self.first_rotation_done = True
             if not self.is_con_full():
-                self.logger.info('phoebe: first rotation, wait for full con')
+                self.logger.info('菲比首轮输出，等待协奏能量充满')
                 self.continues_normal_attack(5.0, until_con_full=True)
 
     def zani_linkage(self):
-        self.logger.debug('zani linkage')
+        self.logger.debug('执行赞妮联动流程')
         result = self.get_zani_state()
         if self.char_zani.blazes >= 0.9:
-            self.logger.info('stop applying spectro frazzle')
+            self.logger.info('停止施加光噪效应')
             if not self.resonance_available():
                 if result == 0 or self.char_zani.liberation_time_left() > 3:
                     self.continues_normal_attack(1, interval=0.15)
@@ -129,14 +129,14 @@ class Phoebe(BaseChar):
             return True
 
     def check_attribute_mismatch(self):
-        self.logger.debug('check attribute mismatch')
+        self.logger.debug('检查角色定位是否一致')
         box = self.task.box_of_screen_scaled(3840, 2160, 1890, 2010, 1915, 2030, name='phoebe_middle_star',
                                              hcenter=True)
         self.task.draw_boxes(box.name, box)
         star_light_percent = self.task.calculate_color_percentage(phoebe_star_light_color, box)
-        self.logger.debug(f'middle_star_light_percent {star_light_percent}')
+        self.logger.debug(f'中央星形图标亮色占比 {star_light_percent}')
         star_blue_percent = self.task.calculate_color_percentage(phoebe_star_blue_color, box)
-        self.logger.debug(f'middle_star_blue_percent {star_blue_percent}')
+        self.logger.debug(f'中央星形图标蓝色占比 {star_blue_percent}')
         if star_light_percent > 0.25 or star_blue_percent > 0.25:
             if star_light_percent > star_blue_percent:
                 attribute = 1
@@ -146,7 +146,7 @@ class Phoebe(BaseChar):
             self.star_available = False
             return False
         if self.attribute != attribute:
-            self.logger.info('attribute mismatch')
+            self.logger.info('当前角色定位与预期不符')
             old_attribute = self.attribute
             self.attribute = attribute
             self.cast_remaining_skills(liber=False)
@@ -162,7 +162,7 @@ class Phoebe(BaseChar):
             skill_count = 2
         else:
             return start
-        self.logger.info('cast remaining skills')
+        self.logger.info('施放剩余技能')
         for _ in range(skill_count):
             if liber and self.state["liberation"] < 1:
                 if self.liberation_available() and self.click_liberation(send_click=False):
@@ -182,7 +182,7 @@ class Phoebe(BaseChar):
         return forte
 
     def starflash_combo(self):
-        self.logger.info('perform starflash_combo')
+        self.logger.info('执行星闪连招')
         start = time.time()
         check_forte = start
         condition = self.get_prayer_condition()
@@ -206,7 +206,7 @@ class Phoebe(BaseChar):
 
     def perform_heavy_attack(self):
         if self.absolution_or_confession() == State.UNAVAILABLE:
-            self.logger.info('perform heavy_attack')
+            self.logger.info('执行重击')
             flying = False
             outer_start = time.time()
             while self.heavy_attack_ready():
@@ -223,7 +223,7 @@ class Phoebe(BaseChar):
                     self.task.next_frame()
                 self.task.mouse_up()
                 if flying:
-                    self.logger.info('flying')
+                    self.logger.info('角色正在空中')
                     self.task.wait_until(lambda: not self.flying(),
                                          post_action=lambda: self.click(interval=0.1, after_sleep=0.1), time_out=2)
                     outer_start = time.time()
@@ -246,7 +246,7 @@ class Phoebe(BaseChar):
         box = self.task.box_of_screen_scaled(2560, 1440, 2110, 1236, 2217, 1343, name='phoebe_resonance', hcenter=False)
         self.task.draw_boxes(box.name, box)
         blue_percent = self.calculate_color_percentage_in_masked(phoebe_blue_color, box, 0.425, 0.490)
-        self.logger.debug(f'blue_percent {blue_percent}')
+        self.logger.debug(f'蓝色占比 {blue_percent}')
         return blue_percent > 0.15
 
     def heavy_attack_ready(self):
@@ -310,15 +310,15 @@ class Phoebe(BaseChar):
                     self.task.next_frame()
                 key_up()
                 if self.flying():
-                    self.logger.info('flying')
+                    self.logger.info('角色正在空中')
                     self.task.wait_until(lambda: not self.flying(),
                                          post_action=lambda: self.click(interval=0.1, after_sleep=0.1), time_out=2)
                     outer_start = time.time()
                 self.task.next_frame()
             if self.attribute == 2:
-                self.logger.info('Enters confession status')
+                self.logger.info('进入告解状态')
             else:
-                self.logger.info('Enters absolution status')
+                self.logger.info('进入赦罪状态')
             self.continues_right_click(0.05)
             self.star_available = True
             self.reset_action()
@@ -348,7 +348,7 @@ class Phoebe(BaseChar):
             return False
         if not self.liberation_available():
             return False
-        self.logger.info('cast available liberation before switch')
+        self.logger.info('切换角色前施放可用的共鸣解放')
         if self.click_liberation(send_click=True):
             self.state["priority_liberation_cast"] = 1
             self.state["liberation"] += 1
@@ -366,7 +366,7 @@ class Phoebe(BaseChar):
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
         if not has_intro and self.last_outro_time > 0 and self.time_elapsed_accounting_for_freeze(
                 self.last_outro_time, intro_motion_freeze=True) < 4.5:
-            self.logger.info('performing outro, switch priority no')
+            self.logger.info('正在执行延奏技能，禁止切换角色')
             return SwitchPriority.NO
         return super().get_switch_priority(current_char, has_intro, target_low_con)
 
@@ -377,13 +377,13 @@ class Phoebe(BaseChar):
                                              hcenter=True)
         if self.attribute == 1:
             forte_percent = self.task.calculate_color_percentage(phoebe_star_light_color, box)
-            self.logger.debug(f'middle_star_light_percent {forte_percent}')
+            self.logger.debug(f'中央星形图标亮色占比 {forte_percent}')
             if forte_percent > 0.25:
                 self.star_available = True
                 return True
         elif self.attribute == 2:
             forte_percent = self.task.calculate_color_percentage(phoebe_star_blue_color, box)
-            self.logger.debug(f'middle_star_blue_percent {forte_percent}')
+            self.logger.debug(f'中央星形图标蓝色占比 {forte_percent}')
             if forte_percent > 0.25:
                 self.star_available = True
                 return True
@@ -400,7 +400,7 @@ class Phoebe(BaseChar):
             self.attribute = 2
         else:
             self.attribute = 1
-        self.logger.debug(f"set attribute: {'support' if self.attribute == 2 else 'attacker'}")
+        self.logger.debug(f"设置角色定位：{'辅助' if self.attribute == 2 else '输出'}")
 
     def judge_frequncy_and_amplitude(self, gray, min_freq, max_freq, min_amp):
         height, width = gray.shape[:]
@@ -447,8 +447,8 @@ class Phoebe(BaseChar):
                     fail_count += 1
             left += step
         if warning:
-            self.logger.debug('Frequncy analysis error, return the forte before mistake.')
-        self.logger.debug(f'Frequncy analysis with forte {forte}')
+            self.logger.debug('频率分析失败，沿用上次的共鸣回路能量')
+        self.logger.debug(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
     def get_zani_state(self):
@@ -459,14 +459,14 @@ class Phoebe(BaseChar):
         if self.attribute != 2:
             return False
         self.logger.debug(
-            f'state_liberation {self.state["liberation"]} state_starflash_combo {self.state["starflash_combo"]}')
+            f'共鸣解放状态 {self.state["liberation"]}，星闪连招状态 {self.state["starflash_combo"]}')
         if self.state["liberation"] >= 1 and self.state["starflash_combo"] >= 2:
             return True
         return False
 
     def reset_action(self):
         if self.attribute == 2:
-            self.logger.info('reset action')
+            self.logger.info('重置动作')
             self.state = {
                 "enter_status": 0,
                 "starflash_combo": 0,

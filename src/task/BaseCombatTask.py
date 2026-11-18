@@ -129,7 +129,7 @@ class BaseCombatTask(CombatCheck):
                     continue
                 to_minus += duration - freeze_time
         if to_minus != 0:
-            self.log_debug(f'time_elapsed_accounting_for_freeze to_minus {to_minus}')
+            self.log_debug(f'计算战斗耗时时扣除冻结时间 {to_minus} 秒')
         return time.time() - start - to_minus
 
     def send_key_and_wait_animation(self, key, check_function, total_wait=7, enter_animation_wait=0.6):
@@ -147,21 +147,21 @@ class BaseCombatTask(CombatCheck):
             if check_function():
                 if animation_start > 0:
                     self._in_liberation = False
-                    logger.debug(f'animation ended')
+                    logger.debug('动画已结束')
                     return
                 else:
                     if time.time() - start > enter_animation_wait:
-                        logger.info(f'send_key_and_wait_animation failed to enter animation')
+                        logger.info('发送按键后未能进入动画')
                         return
-                    logger.debug(f'animation not started send key {key}')
+                    logger.debug(f'动画尚未开始，发送按键 {key}')
                     self.send_key(key, after_sleep=0.1)
             else:
                 if animation_start == 0:
                     animation_start = time.time()
-                    logger.debug(f'animation started: {animation_start}')
+                    logger.debug(f'动画已开始，开始时间 {animation_start}')
                 self._in_liberation = True
             self.next_frame()
-        logger.info(f'send_key_and_wait_animation timed out {key}')
+        logger.info(f'发送按键 {key} 后等待动画超时')
 
     def refresh_cd(self):
         if self.scene.cd_refreshed:
@@ -187,7 +187,7 @@ class BaseCombatTask(CombatCheck):
             else:
                 cds['echo'] = cd
         self.scene.cd_refreshed = True
-        self.log_debug(f'cd refreshed: {cds} {time.time() - cds["time"]}')
+        self.log_debug(f'技能冷却信息已刷新：{cds}，距记录时间 {time.time() - cds["time"]} 秒')
 
     def _cd_ocr_relative_x(self, x):
         """Translate a 16:9 HUD x-coordinate to the current screen width.
@@ -240,13 +240,13 @@ class BaseCombatTask(CombatCheck):
             self.close_revive_popup()  # ① 关闭复活弹窗 (点按钮优先, esc 兜底)
             if self.realm_entry_at_heal_point and self.in_realm():
                 self.ensure_main(time_out=120)  # 退本回到信标, 游戏自动回血
-                logger.info('revive_action: left realm at heal point, skip teleport')
+                logger.info('已在治疗点离开异界，跳过传送')
                 return True
             self.revive_at_tower_and_heal()
-            logger.info(f'revive_action success')
+            logger.info('复活角色成功')
             return True
         except Exception as e:
-            logger.error(f'revive_action failed', e)
+            logger.error('复活角色失败', e)
             return False
 
     def get_revive_search_boss_name(self):
@@ -283,7 +283,7 @@ class BaseCombatTask(CombatCheck):
                 self.box_of_screen(0.1, 0.1, 0.9, 0.9),
                 ['map_way_point', 'map_way_point_big'], 0.6) is not None,
                                time_out=4, raise_if_not_found=False):
-            logger.warning('revive_at_tower_and_heal: map not opened, retry探测')
+            logger.warning('复活后治疗：地图尚未打开，重试检测')
             self.click(0.89, 0.92, after_sleep=1)
         # ④ 在已打开的地图上找最近传送点回血
         self._travel_to_nearest_waypoint()
@@ -329,7 +329,7 @@ class BaseCombatTask(CombatCheck):
         if self.wait_feature('revive_confirm_hcenter_vcenter', threshold=0.8, time_out=2):
             self.log_info(self.tr('raise_not_in_combat char dead'))
             if self.reset_to_false(reason=message):
-                logger.error(f'reset to false failed: {message}')
+                logger.error(f'重置战斗状态失败：{message}')
             from src.task.AutoCombatTask import AutoCombatTask
             if not isinstance(self, AutoCombatTask) and self.revive_action():
                 exception_type = CharRevivedException
@@ -338,7 +338,7 @@ class BaseCombatTask(CombatCheck):
                 exception_type = CharDeadException
                 self.info_set('Revive', 'Failed')
         elif self.reset_to_false(reason=message):
-            logger.error(f'reset to false failed: {message}')
+            logger.error(f'重置战斗状态失败：{message}')
         if exception_type is None:
             exception_type = NotInCombatException
         raise exception_type(message)
@@ -569,12 +569,12 @@ class BaseCombatTask(CombatCheck):
         self.info['Combat Count'] = self.info.get('Combat Count', 0) + 1
         try:
             while self.in_combat():
-                logger.debug(f'combat_once loop {self.chars}')
+                logger.debug(f'执行一轮战斗，当前队伍 {self.chars}')
                 self.get_current_char().perform()
         except CharDeadException as e:
             raise e
         except NotInCombatException as e:
-            logger.info(f'combat_once out of combat break {e}')
+            logger.info(f'已退出战斗，结束战斗循环：{e}')
         self.combat_end()
         if self.switch_healer_enabled():
             self.switch_healer()
@@ -595,7 +595,7 @@ class BaseCombatTask(CombatCheck):
         duration = 0.8
         total_index = 0
         for count in range(circle_count):
-            logger.debug(f'running first circle_count{circle_count} circle {total_index} duration:{duration}')
+            logger.debug(f'执行首轮连招，循环计数 {circle_count}，动作序号 {total_index}，耗时 {duration} 秒')
             for direction in directions:
                 if total_index > 2 and (total_index + 1) % 2 == 0:
                     if not (count == circle_count - 1 and direction == directions[-1]):
@@ -643,15 +643,15 @@ class BaseCombatTask(CombatCheck):
         buff_remaining = self._buff_remaining(char) if buff_active else 0
         switch_cd = char.last_switch_time >= 0 and self._target_has_switch_cd(char)
         logger.debug(
-            f'switch selection candidate={char} index={char.index} role={char.char_type} '
-            f'priority={priority} buff_active={buff_active} buff_remaining={buff_remaining:.2f} '
-            f'buff_time={char.buff_time} last_buff_time={char.last_buff_time:.3f} '
-            f'switch_cd={switch_cd} last_switch_time={char.last_switch_time:.3f}')
+            f'切换候选角色 {char}，槽位 {char.index}，定位 {char.char_type}，'
+            f'优先级 {priority}，增益生效 {buff_active}，剩余 {buff_remaining:.2f} 秒，'
+            f'增益时长 {char.buff_time} 秒，上次获得增益的时间 {char.last_buff_time:.3f}，'
+            f'处于切换冷却 {switch_cd}，上次切换时间 {char.last_switch_time:.3f}')
 
     def _log_switch_choice(self, current_char, target, has_intro, reason):
         logger.info(
-            f'switch selection result current={current_char}({current_char.char_type}) '
-            f'target={target}({target.char_type}) has_intro={has_intro} reason={reason}')
+            f'切换选择结果，当前角色 {current_char}（{current_char.char_type}），'
+            f'目标角色 {target}（{target.char_type}），触发变奏技能 {has_intro}，原因 {reason}')
         return target
 
     def _buff_remaining(self, char):
@@ -734,9 +734,9 @@ class BaseCombatTask(CombatCheck):
                     char.HEALER_FULL_CON_SWITCH_LOCKOUT
                     - char.time_elapsed_accounting_for_freeze(char.last_full_con_switch_time),
                     char.last_switch_in_time, char.index))
-                return self._log_switch_choice(current_char, target, has_intro, 'healer_lockout_fallback')
+                return self._log_switch_choice(current_char, target, has_intro, '优先选择即将解除切换锁定的治疗角色')
             return self._log_switch_choice(
-                current_char, current_char, has_intro, 'no_candidate_above_no_priority')
+                current_char, current_char, has_intro, '没有可切换的队友')
 
         highest_priority = max(priority for priority, _ in prioritized_candidates)
         candidates = [char for priority, char in prioritized_candidates if priority == highest_priority]
@@ -745,12 +745,12 @@ class BaseCombatTask(CombatCheck):
             if highest_priority >= SwitchPriority.MUST:
                 target = self._oldest_switch_target(candidates) or current_char
                 return self._log_switch_choice(
-                    current_char, target, has_intro, f'priority_{highest_priority}')
+                    current_char, target, has_intro, f'候选角色的最高优先级为 {highest_priority}')
             target = self._choose_intro_switch_target(candidates) or current_char
             if target != current_char and not target.is_main_dps and not target.has_buff():
-                reason = f'intro_unbuffed_{target.char_type.value.lower()}'
+                reason = '优先让增益已失效的辅助角色触发变奏技能'
             else:
-                reason = 'intro_role_order_main_sub_healer'
+                reason = '变奏技能就绪，按主输出、副输出、治疗角色的顺序选择'
             return self._log_switch_choice(current_char, target, has_intro, reason)
 
         candidates_without_switch_cd = [char for char in candidates if not self._target_has_switch_cd(char)]
@@ -759,13 +759,13 @@ class BaseCombatTask(CombatCheck):
 
         target = self._choose_switch_target_by_buff_time(current_char, candidates)
         if target != current_char and not target.is_main_dps and not target.has_buff():
-            reason = f'unbuffed_{target.char_type.value.lower()}'
+            reason = '优先选择增益已失效的辅助角色'
         elif current_char.is_main_dps and not target.is_main_dps:
-            reason = 'lowest_support_buff_remaining'
+            reason = '选择增益剩余时间最短的辅助角色'
         elif not current_char.is_main_dps and target.is_main_dps:
-            reason = 'support_buffs_active_return_to_main_dps'
+            reason = '辅助增益仍在生效，切回主输出角色'
         else:
-            reason = 'fallback_role_order'
+            reason = '按默认角色顺序选择'
         return self._log_switch_choice(current_char, target, has_intro, reason)
 
     def _apply_intro_flags(self, current_char, switch_to, has_intro):
@@ -787,7 +787,7 @@ class BaseCombatTask(CombatCheck):
         if not has_intro:
             current_con = current_char.get_current_con()
             if current_con > 0.8 and current_con != 1:
-                logger.info(f'switch_next_char current_con {current_con:.2f} almost full, sleep and check again')
+                logger.info(f'当前协奏能量 {current_con:.2f} 接近满值，稍后重新检测')
                 self.sleep(0.05)
                 self.next_frame()
                 current_con = current_char.get_current_con()
@@ -796,14 +796,14 @@ class BaseCombatTask(CombatCheck):
 
         switch_to = self._choose_switch_target(current_char, has_intro, target_low_con=target_low_con)
         if not switch_to or switch_to == current_char:
-            logger.warning(f"{current_char} can't find next char to switch to, performing too fast add a normal attack")
+            logger.warning(f"找不到 {current_char} 的可切换队友，补一次普攻后重试")
             current_char.continues_normal_attack(0.2)
             return
         self._apply_intro_flags(current_char, switch_to, has_intro)
         logger.info(
-            f'switch_next_char {current_char}({current_char.char_type}) -> {switch_to}({switch_to.char_type}) '
-            f'has_intro {switch_to.has_intro} has_sub_dps_intro {switch_to.has_sub_dps_intro} '
-            f'current_con {current_con}')
+            f'角色切换 {current_char}（{current_char.char_type}）→ {switch_to}（{switch_to.char_type}），'
+            f'触发变奏技能 {switch_to.has_intro}，触发副输出角色变奏技能 {switch_to.has_sub_dps_intro}，'
+            f'当前协奏能量 {current_con}')
         # if self.debug:
         #     self.screenshot(f'switch_next_char_{current_con}')
         from src.char.ShoreKeeper import ShoreKeeper
@@ -823,11 +823,11 @@ class BaseCombatTask(CombatCheck):
                                                            target_low_con=target_low_con)
                     if not switch_to or switch_to == current_char:
                         logger.warning(
-                            f"{current_char} can't find next char to switch to after intro refresh, "
-                            f"performing too fast add a normal attack")
+                            f"刷新变奏技能状态后，仍找不到 {current_char} 的可切换队友，"
+                            "补一次普攻后重试")
                         current_char.continues_normal_attack(0.2)
                         return
-                    logger.info(f'switch_next_char refreshed target after intro became available: {switch_to}')
+                    logger.info(f'变奏技能就绪，重新选择切换目标：{switch_to}')
                 self._apply_intro_flags(current_char, switch_to, has_intro)
                 if has_intro:
                     current_char.f_break(check_f_on_switch=True)
@@ -839,26 +839,26 @@ class BaseCombatTask(CombatCheck):
                 self.send_key(switch_to.index + 1)
                 self.sleep(0.001)
                 last_click = now
-                self.log_debug('switch not detected, send click')
+                self.log_debug('未检测到角色切换，点击鼠标')
                 self.click()
                 self.sleep(0.001)
             in_team, current_index, size = self.in_team()
             if not in_team:
-                logger.info(f'not in team while switching chars_{current_char}_to_{switch_to} {now - start}')
+                logger.info(f'切换角色 {current_char} → {switch_to} 时未检测到队伍界面，已耗时 {now - start} 秒')
                 # if self.debug:
                 #     self.screenshot(f'not in team while switching chars_{current_char}_to_{switch_to} {now - start}')
                 # Intro animations can briefly hide the whole party HUD.
                 # Wait for it to return before deciding that combat ended.
                 if now - start > self.switch_char_time_out:
                     self.raise_not_in_combat(
-                        f'switch too long failed chars_{current_char}_to_{switch_to}, {now - start}')
+                        f'切换角色 {current_char} → {switch_to} 超时失败，耗时 {now - start} 秒')
                 self.next_frame()
                 continue
             if current_index != switch_to.index:
                 if now - start > 10:
                     if self.debug:
                         self.screenshot(f'switch_not_detected_{current_char}_to_{switch_to}')
-                    self.raise_not_in_combat('failed switch chars')
+                    self.raise_not_in_combat('切换角色失败')
             else:
                 self.in_liberation = False
                 if not has_intro:
@@ -874,9 +874,9 @@ class BaseCombatTask(CombatCheck):
             self.next_frame()
 
         if post_action:
-            logger.debug(f'post_action {post_action}')
+            logger.debug(f'执行切换后回调 {post_action}')
             post_action(switch_to, has_intro)
-        logger.info(f'switch_next_char end {(current_char.last_switch_time - start):.3f}s')
+        logger.info(f'角色切换结束，耗时 {(current_char.last_switch_time - start):.3f} 秒')
 
     def find_mouse_forte(self):
         return self.find_one('mouse_forte', horizontal_variance=0.025, vertical_variance=0.015, threshold=0.6,
@@ -942,7 +942,7 @@ class BaseCombatTask(CombatCheck):
             if char and char.is_current_char:
                 return char
         if raise_exception and not self.in_team()[0]:
-            self.raise_not_in_combat('can find current char!!')
+            self.raise_not_in_combat('无法识别当前上场角色')
         # self.load_chars()
         return None
 
@@ -982,7 +982,7 @@ class BaseCombatTask(CombatCheck):
         if self._in_combat:
             self.next_frame()
             if not self.in_combat():
-                self.raise_not_in_combat('sleep check not in combat')
+                self.raise_not_in_combat('等待期间检测到战斗已结束')
 
     def check_combat(self):
         """检查当前是否处于战斗状态, 如果不是则抛出异常。"""
@@ -991,11 +991,11 @@ class BaseCombatTask(CombatCheck):
         if self._in_combat and not self.in_combat():
             # if self.debug:
             #     self.screenshot('not_in_combat_calling_check_combat')
-            self.raise_not_in_combat('combat check not in combat')
+            self.raise_not_in_combat('战斗检查发现当前未处于战斗状态')
 
     def set_key(self, key, box):
         best = self.find_best_match_in_box(box, ['t', 'e', 'r', 'q'], threshold=0.7)
-        logger.debug(f'set_key best match {key}: {best}')
+        logger.debug(f'按键 {key} 的最佳匹配结果：{best}')
         if best and best.name != self.key_config[key]:
             self.key_config[key] = best.name
             self.log_info(self.tr('set_key {key} to {name}').format(key=key, name=best.name))
@@ -1050,7 +1050,7 @@ class BaseCombatTask(CombatCheck):
         else:
             if len(self.chars) == 3:
                 self.chars = self.chars[:2]
-                logger.info(f'team size changed to 2')
+                logger.info('队伍人数变为 2')
 
         apply_team_char_classes(self, self.chars)
 
@@ -1148,7 +1148,7 @@ class BaseCombatTask(CombatCheck):
                     best_index = i
             self.get_current_char().ring_index = best_index
             self.log_debug(
-                f'_ensure_ring_index {self.get_current_char()} to {self.get_current_char().ring_index} {con_templates[best_index]}')
+                f'修正 {self.get_current_char()} 的协奏环属性为 {self.get_current_char().ring_index}，匹配模板 {con_templates[best_index]}')
         return self.get_current_char().ring_index
 
     def get_con_box(self):
@@ -1194,10 +1194,10 @@ class BaseCombatTask(CombatCheck):
             percent = max_area / self.con_full_size[str(target_index)]
         if not max_is_full and percent >= 1:
             self.logger.warning(
-                f'is_con_full not full but percent greater than 1, set to 0.99, {percent} {max_is_full}')
+                f'协奏能量未满，但识别值 {percent} 超过 1，按 0.99 处理，满值检测结果 {max_is_full}')
             percent = 0.99
         if percent > 1:
-            self.logger.error(f'is_con_full percent greater than 1, set to 1, {percent} {max_is_full}')
+            self.logger.error(f'协奏能量识别值 {percent} 超过 1，按 1 处理，满值检测结果 {max_is_full}')
             percent = 1
 
         box.confidence = percent
@@ -1290,7 +1290,7 @@ class BaseCombatTask(CombatCheck):
         if ring_count > 1:
             is_full = False
             the_area = 0
-            self.logger.warning(f'is_con_full found multiple rings {ring_count}')
+            self.logger.warning(f'检测到 {ring_count} 个协奏能量环')
 
         return the_area, is_full
 
@@ -1304,7 +1304,7 @@ class BaseCombatTask(CombatCheck):
                 match = self.find_one(lib_ready_templates[char.ring_index], box=box, threshold=0.8)
                 if match:
                     char._liberation_available = True
-                    self.log_debug('checking liberation_available by template {} {}'.format(char, match))
+                    self.log_debug('根据模板判断 {} 的共鸣解放是否可用，匹配结果 {}'.format(char, match))
                     # self.screenshot('liberation_available_{}_{}_{}'.format(char, match.name, match.confidence))
 
 

@@ -32,7 +32,7 @@ class Carlotta(BaseChar):
             return self.do_perform_interlock()
         self.bullet = 0
         if self.has_intro:
-            self.logger.debug('has_intro wait click 1.3 sec')
+            self.logger.debug('触发变奏技能，等待 1.3 秒')
             self.bullet = 1
             self.continues_normal_attack(1.3)
         if self.heavy_click_forte(check_fun=self.is_mouse_forte_full):
@@ -69,12 +69,12 @@ class Carlotta(BaseChar):
 
     def click_liberation(self, con_less_than=-1, send_click=False, wait_if_cd_ready=0.1,
                          animation_min_duration=0, click_f=True):
-        self.logger.debug('click_liberation start')
+        self.logger.debug('开始施放共鸣解放')
         start = time.time()
         last_click = 0
         clicked = False
         while self.liberation_available():  # clicked and still in team wait for animation
-            self.logger.debug('click_liberation liberation_available click')
+            self.logger.debug('共鸣解放可用，发送按键')
             now = time.time()
             if now - last_click > 0.1:
                 self.send_liberation_key()
@@ -88,10 +88,10 @@ class Carlotta(BaseChar):
             if self.task.wait_until(lambda: not self.task.in_team()[0], time_out=0.4,
                                     post_action=self.click_with_interval):
                 self.task.in_liberation = True
-                self.logger.debug('not in_team successfully casted liberation')
+                self.logger.debug('角色界面已隐藏，共鸣解放施放成功')
             else:
                 self.task.in_liberation = False
-                self.logger.error('clicked liberation but no effect')
+                self.logger.error('已按共鸣解放键，但未检测到技能响应')
                 return False
         else:
             return clicked
@@ -108,7 +108,7 @@ class Carlotta(BaseChar):
                 last_f_click = now
             if now - start > 7:
                 self.task.in_liberation = False
-                self.task.raise_not_in_combat('too long a liberation, the boss was killed by the liberation')
+                self.task.raise_not_in_combat('共鸣解放动画超时，首领可能已被击败')
             self.task.next_frame()
         duration = time.time() - start
         self.add_freeze_duration(start, duration)
@@ -116,13 +116,13 @@ class Carlotta(BaseChar):
         self.task.in_liberation = False
         self._liberation_available = False
         if clicked:
-            self.logger.info(f'click_liberation end {duration}')
+            self.logger.info(f'共鸣解放操作结束，耗时 {duration} 秒')
         return clicked
 
     def click_resonance(self, post_sleep=0, has_animation=False, send_click=True, animation_min_duration=0,
                         check_cd=False, time_out=0):
         clicked = False
-        self.logger.debug(f'click_resonance start')
+        self.logger.debug('开始施放共鸣技能')
         last_click = 0
         last_op = 'click'
         resonance_click_time = 0
@@ -137,11 +137,11 @@ class Carlotta(BaseChar):
             self.check_combat()
             now = time.time()
             current_resonance = self.current_resonance()
-            self.logger.debug(f'click_resonance break percent {current_resonance}')
+            self.logger.debug(f'停止按共鸣技能键，当前能量 {current_resonance}')
             if self.has_cd('resonance'):
-                self.logger.debug(f'click_resonance not available break')
+                self.logger.debug('共鸣技能不可用，停止按键')
                 break
-            self.logger.debug(f'click_resonance resonance_available click {current_resonance}')
+            self.logger.debug(f'共鸣技能可用，发送按键，当前能量 {current_resonance}')
 
             if now - last_click > 0.1:
                 if send_click and (current_resonance == 0 or last_op == 'resonance'):
@@ -163,7 +163,7 @@ class Carlotta(BaseChar):
         if clicked:
             self.sleep(post_sleep)
         duration = time.time() - resonance_click_time if resonance_click_time != 0 else 0
-        self.logger.debug(f'click_resonance end clicked {clicked} duration {duration} animated {animated}')
+        self.logger.debug(f'共鸣技能操作结束，已按键 {clicked}，耗时 {duration} 秒，触发动画 {animated}')
         return clicked, duration, animated
 
     def echo_available(self):
@@ -196,7 +196,7 @@ class Carlotta(BaseChar):
         return self.forte
 
     def get_ready(self):
-        self.logger.debug(f'carlotta_state :{self.forte},{self.resonance_available()}')
+        self.logger.debug(f'珂莱塔当前状态，共鸣回路能量 {self.forte}，共鸣技能可用 {self.resonance_available()}')
         return (self.forte > 2) or (self.resonance_available() and self.forte > 0) or self.liberation_ready
 
     def do_perform_interlock(self):
@@ -303,7 +303,7 @@ class Carlotta(BaseChar):
                 amplitude = n[i]
                 frequncy = i
             i += 1
-        self.logger.info(f'forte with freq {frequncy} & amp {amplitude}')
+        self.logger.info(f'计算共鸣回路能量，频率 {frequncy}，振幅 {amplitude}')
         return (min_freq <= frequncy <= max_freq) or amplitude >= min_amp
 
     def calculate_forte_num(self, forte_color, box, num=1, min_freq=39, max_freq=41, min_amp=50):
@@ -324,7 +324,7 @@ class Carlotta(BaseChar):
                 break
             left -= step
             forte -= 1
-        self.logger.info(f'Frequncy analysis with forte {forte}')
+        self.logger.info(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
     def shorekeeper_auto_dodge(self):

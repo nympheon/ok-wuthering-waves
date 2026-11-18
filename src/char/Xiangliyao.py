@@ -17,7 +17,7 @@ class Xiangliyao(BaseChar):
             while not self.click_resonance(send_click=True)[0]:
                 self.continues_normal_attack(1)
         elif self.echo_available():
-            self.logger.debug('click_echo')
+            self.logger.debug('施放声骸技能')
             self.click_echo()
         else:
             self.click_resonance(send_click=True)

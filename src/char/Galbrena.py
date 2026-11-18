@@ -7,7 +7,7 @@ class Galbrena(BaseChar):
 
     def do_perform(self):
         if self.has_intro:
-            self.logger.debug('has_intro wait and heavy attack for 86F and dodge')
+            self.logger.debug('触发变奏技能，等待后执行 86 帧的重击并闪避')
             self.task.mouse_down()
             self.sleep(1)
             if self.need_fast_perform():
@@ -42,7 +42,7 @@ class Galbrena(BaseChar):
         best = self.task.find_best_match_in_box(self.task.get_box_by_name('box_target_enemy_long'),
                                                ['has_target', 'no_target'],
                                                threshold=0.6)
-        self.logger.debug(f'check res {best}')
+        self.logger.debug(f'共鸣技能图标匹配结果 {best}')
         return best
         
     def shorekeeper_auto_dodge(self):

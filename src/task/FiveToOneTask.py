@@ -49,7 +49,7 @@ class FiveToOneTask(BaseCombatTask):
             self.config_type[key] = {'type': "multi_selection", 'options': self.main_stats}
 
     def run(self):
-        self.log_debug(f"all_stats: {self.all_stats}")
+        self.log_debug(f"声骸合成统计：{self.all_stats}")
         self.log_info(self.tr('Starting task'))
         self.ensure_main()
         self.log_info(self.tr('On the main screen'))

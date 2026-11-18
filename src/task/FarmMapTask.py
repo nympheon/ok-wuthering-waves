@@ -88,7 +88,7 @@ class BigMap(WWOneTimeTask, BaseCombatTask):
         before = len(self.stars)
         self.stars.remove(star)
         self.info_set('Stars', len(self.stars))
-        self.log_debug(f'removed star {before} -> {len(self.stars)}')
+        self.log_debug(f'星标已移除，数量从 {before} 变为 {len(self.stars)}')
 
     def find_my_location(self, screenshot=False):
         frame = self.big_map_frame
@@ -102,7 +102,7 @@ class BigMap(WWOneTimeTask, BaseCombatTask):
         # in_big_maps = self.find_feature(frame=frame, template=mat, threshold=0.01, box=self.bounding_box)
         if not in_big_map:
             raise RuntimeError(self.tr('can not find my cords on big map!'))
-        self.log_debug(f'found in_big_map: {in_big_map}')
+        self.log_debug(f'大地图检测结果 {in_big_map}')
         if self.debug and in_big_map:
             self.draw_boxes('stars', self.stars)
             self.draw_boxes('my_box', self.my_box, color='green')
@@ -221,7 +221,7 @@ class FarmMapTask(BigMap):
                     else:
                         continue
                 elif distance == self.last_distance:
-                    logger.info(f'might be stuck, try {[self.stuck_index % 4]}')
+                    logger.info(f'可能卡住，尝试脱困方案 {[self.stuck_index % 4]}')
                     self.send_key(self.stuck_keys[self.stuck_index % 4][0],
                                   down_time=self.stuck_keys[self.stuck_index % 4][1], after_sleep=0.5)
                     self.stuck_index += 1

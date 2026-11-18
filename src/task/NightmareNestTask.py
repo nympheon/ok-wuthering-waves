@@ -129,7 +129,7 @@ class NightmareNestTask(WWOneTimeTask, BaseCombatTask):
                 self.sleep(3)
                 if need_find and not self.walk_find_echo(time_out=5, backward_time=2.5):
                     dropped = self.yolo_find_echo(turn=True, use_color=False, time_out=30)[0]
-                    logger.info(f'farm echo yolo find {dropped}')
+                    logger.info(f'声骸识别模型检测掉落结果 {dropped}')
                     if not dropped and not is_team:
                         # 保底：没有收取到声骸时，重新打开图鉴传送回当前聚落（传送点面朝金色声骸群），再搜索一次
                         self.log_info(self.tr('no echo collected, re-teleport to current nest as fallback'))
@@ -144,7 +144,7 @@ class NightmareNestTask(WWOneTimeTask, BaseCombatTask):
                             self.run_until(lambda: False, 'w', time_out=2, running=True)
                             if not self.walk_find_echo(time_out=5, backward_time=2.5):
                                 dropped = self.yolo_find_echo(turn=True, use_color=False, time_out=30)[0]
-                                logger.info(f'farm echo yolo find after re-teleport {dropped}')
+                                logger.info(f'重新传送后，声骸识别模型检测掉落结果 {dropped}')
                             else:
                                 dropped = True
                                 self.log_info(self.tr('farm echo walk find true after re-teleport'))

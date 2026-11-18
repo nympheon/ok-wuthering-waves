@@ -5,7 +5,7 @@ from src.char.BaseChar import BaseChar
 class Jiyan(BaseChar):
     def do_perform(self):
         if self.has_intro:
-            self.logger.debug('jiyan wait intro')
+            self.logger.debug('忌炎等待变奏技能')
             self.continues_normal_attack(duration=2.0)
             # fly check not work for jiyan
         if self.click_liberation():

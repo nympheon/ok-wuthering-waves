@@ -50,11 +50,11 @@ class OpenVinoYolo8Detect:
             self.input_width = self.input_layer.shape[2]
             self.input_height = self.input_layer.shape[3]
             logger.info(
-                f"OpenVINO model compiled successfully for {device_used} {self.input_width}x{self.input_height}."
+                f"OpenVINO 模型编译成功，设备 {device_used}，输入尺寸 {self.input_width}×{self.input_height}"
             )
         except Exception as e:
-            logger.error(f"Error initializing OpenVINO: {e}")
-            raise RuntimeError("Could not initialize OpenVINO model") from e
+            logger.error(f"初始化 OpenVINO 失败：{e}")
+            raise RuntimeError("无法初始化 OpenVINO 模型") from e
 
     def letterbox(self, img: np.ndarray, new_shape: Tuple[int, int] = (640, 640)) -> Tuple[np.ndarray, Tuple[int, int]]:
         shape = img.shape[:2]
@@ -140,5 +140,5 @@ class OpenVinoYolo8Detect:
 
             return sort_boxes(boxes)
         except Exception as e:
-            logger.error(f'OpenVINO yolo detect error: {e}')
+            logger.error(f'OpenVINO YOLO 检测出错：{e}')
             return []

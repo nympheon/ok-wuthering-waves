@@ -34,7 +34,7 @@ class ShoreKeeper(BaseChar):
         if self.has_intro:
             self.task.skip_combat_check = True
             try:
-                self.logger.debug('ShoreKeeper wait intro animation')
+                self.logger.debug('守岸人等待变奏技能动画')
                 time.sleep(0.1)
                 if not self.task.in_team_and_world():
                     self.task.wait_in_team_and_world(time_out=4, raise_if_not_found=False)
@@ -67,5 +67,5 @@ class ShoreKeeper(BaseChar):
                 self.task.next_frame()
         if clicked:
             self.dodge_count -= 1
-            self.logger.info('ShoreKeepers auto dodge success!')
+            self.logger.info('守岸人自动闪避成功')
         return clicked

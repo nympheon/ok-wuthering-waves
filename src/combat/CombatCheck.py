@@ -83,7 +83,7 @@ class CombatCheck(BaseWWTask):
         if self.can_break:
             return True
         if self.find_one(Labels.f_break_full, threshold=0.92):
-            self.logger.debug('found f_break_full')
+            self.logger.debug('检测到完整的 F 键破韧提示（f_break_full）')
             self.can_break = True
             return True
         if not self.can_break and not self._in_liberation and time.time() - self.last_break_check_time > 1:
@@ -114,7 +114,7 @@ class CombatCheck(BaseWWTask):
                 numbers = self.ocr(box=count_down_area, match=count_down_re)
                 if self.debug:
                     self.screenshot(f'count_down disappeared {count_down:.2f}%')
-                logger.info(f'count_down disappeared {numbers} {count_down:.2f}%')
+                logger.info(f'倒计时已消失，识别数字 {numbers}，颜色占比 {count_down:.2f}%')
                 if not numbers:
                     self.has_count_down = False
                     return False
@@ -127,7 +127,7 @@ class CombatCheck(BaseWWTask):
                 numbers = self.ocr(box=count_down_area, match=count_down_re)
                 if numbers:
                     self.has_count_down = True
-                logger.info(f'set count_down to {self.has_count_down}  {numbers} {count_down:.2f}%')
+                logger.info(f'设置倒计时状态为 {self.has_count_down}，识别数字 {numbers}，颜色占比 {count_down:.2f}%')
             return self.has_count_down
 
     @property
@@ -158,18 +158,18 @@ class CombatCheck(BaseWWTask):
             has_health = self.check_health_bar()
             retarget_timeout = 30 if has_health else self.target_enemy_time_out
             if self.target_enemy(wait=True, time_out=retarget_timeout, check_health=has_health):
-                logger.debug(f'retarget enemy succeeded')
+                logger.debug('重新锁定敌人成功')
                 return self.scene.set_in_combat()
             if self.should_check_monthly_card() and self.handle_monthly_card():
                 return self.scene.set_in_combat()
-            logger.error('target_enemy failed, try recheck break out of combat')
+            logger.error('锁定敌人失败，重新检查战斗是否结束')
             return self.reset_to_false(reason='target enemy failed')
         else:
             from src.task.AutoCombatTask import AutoCombatTask
             chars_loaded = self.load_chars()
             has_target = self.has_target()
             if not has_target and target:
-                self.log_debug('try target')
+                self.log_debug('尝试锁定敌人')
                 self.middle_click(after_sleep=0.1)
             in_combat = has_target or ((self.config.get('Auto Target') or not isinstance(self,
                                                                                          AutoCombatTask)) and self.check_health_bar())
@@ -192,7 +192,7 @@ class CombatCheck(BaseWWTask):
         except TaskDisabledException:
             raise
         except Exception as e:
-            logger.error(f'do_check_in_combat:', e)
+            logger.error('检查战斗状态时出错', e)
         finally:
             self.in_sleep_check = False
 
@@ -200,7 +200,7 @@ class CombatCheck(BaseWWTask):
         if not self.config.get('Check Levitator', True):
             return True
         if levi := self.find_one('edge_levitator', threshold=0.6):
-            self.log_debug('edge levitator found {}'.format(levi))
+            self.log_debug('检测到控物模块，匹配结果 {}'.format(levi))
             return True
         if self.has_char(Roccia):
             if self.find_one('levitator_roccia', threshold=0.6):
@@ -210,7 +210,7 @@ class CombatCheck(BaseWWTask):
         start = time.time()
         self.sleep(0.2)
         if levi := self.find_one('edge_levitator', threshold=0.6):
-            self.log_debug('recheck edge levitator found {}'.format(levi))
+            self.log_debug('再次检测到控物模块，匹配结果 {}'.format(levi))
             return True
         while time.time() - start < 1 and self.in_team()[0]:
             self.send_key_down(self.key_config.get('Wheel Key'))
@@ -224,7 +224,7 @@ class CombatCheck(BaseWWTask):
         self.sleep(0.1)
         if not levitator:
             self.send_key_up(self.key_config.get('Wheel Key'))
-            raise Exception('no levitator tool in the tab wheel!')
+            raise Exception('Tab 键轮盘中没有控物模块')
         old = win32api.GetCursorPos()
         self.move(levitator.x, levitator.y)
         abs_pos = self.executor.interaction.capture.get_abs_cords(levitator.x, levitator.y)
@@ -237,11 +237,11 @@ class CombatCheck(BaseWWTask):
             if self.has_char(Roccia):
                 if self.find_one('levitator_roccia', threshold=0.6):
                     return True
-        self.log_debug(f'ensuring leviator succees {levitator}')
+        self.log_debug(f'确认控物模块成功，匹配结果 {levitator}')
         return self.target_enemy()
 
     def log_time(self, start, name):
-        logger.debug(f'check cost {name} {time.time() - start}')
+        logger.debug(f'检测项目 {name}，耗时 {time.time() - start} 秒')
         return True
 
     def ocr_lv_text(self):
@@ -289,7 +289,7 @@ class CombatCheck(BaseWWTask):
                                                threshold=threshold)
             if best and self.esc_count == 0:
                 if double_check:
-                    logger.error(f'try fix bear echo')
+                    logger.error('尝试处理熊形声骸技能导致的异常')
                     self.send_key('esc', after_sleep=2)
                     self.send_key('esc', after_sleep=1.5)
                     self.esc_count = 1
@@ -307,7 +307,7 @@ class CombatCheck(BaseWWTask):
                 return True
             else:
                 timeout = self.target_enemy_time_out if time_out is None else time_out
-                logger.info(f'target lost try retarget {timeout}')
+                logger.info(f'丢失目标，尝试重新锁定，超时设为 {timeout} 秒')
                 start = time.time()
                 health_lost_start = None
                 while time.time() - start < timeout:
@@ -320,7 +320,7 @@ class CombatCheck(BaseWWTask):
                             if health_lost_start is None:
                                 health_lost_start = time.time()
                             elif time.time() - health_lost_start > 1.2:
-                                logger.info('health bar disappeared during retarget')
+                                logger.info('重新锁定目标时血条消失')
                                 return False
                         else:
                             health_lost_start = None
@@ -366,7 +366,7 @@ class CombatCheck(BaseWWTask):
                 mask, area = get_mask_in_color_range(cropped,
                                                      boss_red_text_color)
                 if area / mask.shape[0] * mask.shape[1] < 0.05:
-                    logger.error(f'keep_boss_text_white cant find text with the correct color')
+                    logger.error('未找到颜色匹配的首领名称')
                     return None, 0
         return cropped, mask
 

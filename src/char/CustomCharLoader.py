@@ -131,7 +131,7 @@ def list_custom_teams():
             return []
         folders = list(root.iterdir())
     except OSError as e:
-        logger.warning(f"list custom teams failed for {root}: {e}")
+        logger.warning(f"无法列出 {root} 下的自定义队伍：{e}")
         return []
     teams = []
     for folder in folders:
@@ -145,7 +145,7 @@ def list_custom_teams():
         except ValueError:
             continue
         except OSError as e:
-            logger.warning(f"skip unreadable custom team folder {folder}: {e}")
+            logger.warning(f"跳过无法读取的自定义队伍目录 {folder}：{e}")
     return sorted(teams, key=lambda team: tuple(name.casefold() for name in team))
 
 
@@ -185,7 +185,7 @@ def read_team_manifest(team):
         try:
             manifest = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
-            logger.warning(f"read_team_manifest failed path={path}: {e!r}")
+            logger.warning(f"无法读取队伍清单 {path}：{e!r}")
     if not isinstance(manifest, dict):
         class_names = normalize_team(team)
         manifest = {
@@ -283,10 +283,10 @@ def normalize_custom_teams():
         try:
             filled = normalize_team_code(team)
         except Exception as e:
-            logger.error(f"normalize team code failed for {team}: {e}")
+            logger.error(f"整理队伍 {team} 的角色代码失败：{e}")
             continue
         if filled:
-            logger.info(f"filled missing imported copies of {team}: {filled}")
+            logger.info(f"已为队伍 {team} 补齐缺失的导入代码：{filled}")
             normalized[team] = filled
     return normalized
 
@@ -384,7 +384,7 @@ def switch_all_teams_code_mode(target):
             switch_team_code_mode(class_names, target)
             switched.append(class_names)
         except Exception as e:
-            logger.error(f"switch all teams code mode failed for {class_names}: {e}")
+            logger.error(f"批量切换队伍 {class_names} 的代码模式失败：{e}")
             failed.append((class_names, e))
     return {"target": target, "switched": switched, "already": already, "drifted": drifted, "failed": failed}
 
@@ -464,7 +464,7 @@ def load_team_char_class(char_cls, team):
             return char_cls
         return _load_team_char_class_from_file(char_cls, class_names, path)
     except Exception as e:
-        logger.error(f"load team character class failed for {char_cls.__name__}: {e}")
+        logger.error(f"加载队伍角色类 {char_cls.__name__} 失败：{e}")
         clear_team_char_cache(class_names, char_cls)
         return char_cls
 
@@ -648,7 +648,7 @@ def load_custom_char_modes():
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except Exception as e:
-        logger.error(f"load custom char modes failed: {e}")
+        logger.error(f"加载自定义角色代码模式失败：{e}")
         return {}
     return data if isinstance(data, dict) else {}
 
@@ -745,7 +745,7 @@ def load_custom_char_class(char_cls):
     try:
         return _load_custom_char_class_from_file(char_cls, path)
     except Exception as e:
-        logger.error(f"load custom char class failed for {char_cls.__name__}: {e}")
+        logger.error(f"加载自定义角色类 {char_cls.__name__} 失败：{e}")
         clear_custom_char_cache(char_cls)
         return char_cls
 

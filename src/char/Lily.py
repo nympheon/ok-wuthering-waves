@@ -46,7 +46,7 @@ class Lily(BaseChar):
             if not self.click_resonance(send_click=False, time_out=0.8)[0]:
                 self.click(interval=0.1)
             self.cycle_sleep()
-        self.logger.warning(f'Lily Concerto top-up timed out: target={target}')
+        self.logger.warning(f'莉莉补充协奏能量超时，目标值 {target}')
         return False
 
     def build_forte(self):
@@ -58,7 +58,7 @@ class Lily(BaseChar):
             if not self.click_resonance(send_click=False, time_out=0.8)[0]:
                 self.click(interval=0.1)
             self.cycle_sleep()
-        self.logger.warning('Lily Dream Perfume did not fill before timeout')
+        self.logger.warning('莉莉的共鸣回路能量未在时限内充满')
         return False
 
     def heavy_in_progress(self):
@@ -84,7 +84,7 @@ class Lily(BaseChar):
                 self.heavy_in_progress, time_out=self.HEAVY_START_TIMEOUT,
                 pre_action=self.check_combat))
             if not started:
-                self.logger.warning('Lily heavy channel did not start')
+                self.logger.warning('莉莉未开始持续重击')
                 return False
             finished = bool(self.task.wait_until(
                 lambda: not self.heavy_in_progress(), time_out=self.HEAVY_TIMEOUT,
@@ -94,7 +94,7 @@ class Lily(BaseChar):
         if finished:
             # The prompt disappears at the start of the uninterruptible finisher.
             self.sleep(0.7)
-            self.logger.info('Lily heavy finisher completed')
+            self.logger.info('莉莉已完成终结重击')
         else:
-            self.logger.warning('Lily heavy channel did not finish before timeout')
+            self.logger.warning('莉莉的持续重击未在时限内结束')
         return finished

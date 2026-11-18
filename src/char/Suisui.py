@@ -36,10 +36,10 @@ class Suisui(BaseChar):
             self.should_heavy = False
         while self.time_elapsed_accounting_for_freeze(start) < self.FORTE_TIMEOUT:
             if self.forte3_available():
-                self.logger.debug('forte3 available')
+                self.logger.debug('三段共鸣回路已就绪')
                 break
             elif self.forte2_available() or self.forte3_available():
-                self.logger.debug('forte2 available')
+                self.logger.debug('二段共鸣回路已就绪')
                 for i in range(7):
                     if self.forte3_available():
                         break
@@ -52,7 +52,7 @@ class Suisui(BaseChar):
             self.click()
             self.cycle_sleep(self.ATTACK_INTERVAL)
         else:
-            self.logger.warning('Suisui forte3 detection timed out')
+            self.logger.warning('穗穗三段共鸣回路检测超时')
             return
 
         liberation_clicked = False
@@ -66,7 +66,7 @@ class Suisui(BaseChar):
             if self.is_con_full() and self.forte3_available():
                 return
             self.click(after_sleep=0.1)
-        self.logger.warning('Suisui concerto fill timed out')
+        self.logger.warning('穗穗等待协奏能量充满超时')
 
     def try_e(self):
         if self.task.find_one(Labels.suisui_e1):

@@ -47,7 +47,7 @@ class AutoPickTask(TriggerTask, BaseWWTask):
             percent = self.calculate_color_percentage(f_white_color, f)
             if percent < 0.5:
                 combat.check_abyss_start(True)
-                self.log_debug(f'f white color percent: {percent} wait')
+                self.log_debug(f'F 键提示的白色占比为 {percent}，继续等待')
                 self.next_frame()
                 continue
             # Match only the selected interaction's icon, independent of its text.
@@ -70,14 +70,14 @@ class AutoPickTask(TriggerTask, BaseWWTask):
                 if self.config.get('Pick Up White List'):
                     f = self.find_f_with_text(self.config.get('Pick Up White List'))
                     if f:
-                        logger.info(f'found Pick Up White List {f}')
+                        logger.info(f'检测到拾取白名单中的交互提示：{f}')
                         self.send_fs()
                         return True
             else:
                 if self.config.get('Pick Up Black List'):
                     f = self.find_f_with_text(self.config.get('Pick Up Black List'))
                     if f:
-                        logger.info(f'found Pick Up Black List: {f}')
+                        logger.info(f'检测到拾取黑名单中的交互提示：{f}')
                         combat.check_abyss_start(True)
                         return False
                 self.send_fs()

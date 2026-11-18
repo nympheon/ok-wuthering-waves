@@ -44,12 +44,12 @@ def check_dependencies(distributions, locked, overrides):
         expected = replacements.get(name, requirement) if allow_override else requirement
         dist = installed.get(name)
         if dist is None:
-            errors.append(f'{source}: missing {expected}')
+            errors.append(f'{source}：缺少 {expected}')
         elif not expected.specifier.contains(dist.version):
-            errors.append(f'{source}: requires {expected}, installed {dist.version}')
+            errors.append(f'{source}：需要 {expected}，当前已安装版本为 {dist.version}')
 
     for req in locked:
-        check(req, 'lockfile', allow_override=False)
+        check(req, '依赖锁定文件', allow_override=False)
     for name, dist in installed.items():
         for value in dist.requires or ():
             check(Requirement(value), dist.metadata['Name'], ('', *extras.get(name, ())))
@@ -59,7 +59,7 @@ def check_dependencies(distributions, locked, overrides):
 def main():
     expected_python = (ROOT / '.python-version').read_text(encoding='utf-8').strip()
     if '.'.join(map(str, sys.version_info[:3])) != expected_python:
-        print(f'Expected Python {expected_python}; dependency check failed.')
+        print(f'依赖检查失败，需要 Python {expected_python}。')
         return 1
     locked = read_requirements(ROOT / 'requirements-dev.txt')
     project = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))['project']
@@ -70,8 +70,8 @@ def main():
     if errors:
         print('\n'.join(errors))
         return 1
-    print(f'Dependency check passed: {len(locked)} locked packages; '
-          f'project overrides: {", ".join(str(req) for req in overrides)}')
+    print(f'依赖检查通过，已锁定 {len(locked)} 个包。'
+          f'项目覆盖的依赖版本： {", ".join(str(req) for req in overrides)}')
     return 0
 
 

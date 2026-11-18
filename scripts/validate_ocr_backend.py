@@ -73,7 +73,7 @@ def startup(expected, capture):
         assert actual == [expected], actual
         assert component.session.inputs[0].partial_shape.is_dynamic
         assert component.force_shape is None
-    summaries = [message for message in capture.messages if 'OCR backend ready' in message]
+    summaries = [message for message in capture.messages if 'OCR 后端已就绪' in message]
     assert len(summaries) == 1, summaries
     return engine, summaries[0]
 
@@ -110,8 +110,8 @@ def main():
         with patch.object(engine.text_detector, '_run_openvino_async', side_effect=RuntimeError('validation: GPU device lost')):
             runtime_cases = check_images(engine, cases)
         assert engine.device == 'CPU'
-        assert sum('OCR backend ready' in message for message in capture.messages) == 1
-        assert sum('OCR backend switched to CPU' in message for message in capture.messages) == 1
+        assert sum('OCR 后端已就绪' in message for message in capture.messages) == 1
+        assert sum('OCR 后端已切换至 CPU' in message for message in capture.messages) == 1
         report['runtime_gpu_failure'] = dict(device=engine.device, reason=engine.fallback_reason, cases=runtime_cases)
 
         with patch('src.ocr.select_intel_igpu', side_effect=RuntimeError('validation: integrated adapter unavailable')):
@@ -121,10 +121,10 @@ def main():
         output = ROOT / 'cache' / 'ocr-validation' / 'installed-backend-validation.json'
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
-        print('PASS: actual Intel iGPU dynamic det/rec, exactly one startup summary, 31/31 targets.')
-        print('PASS: simulated GPU device loss recovered on real CPU models, 31/31 targets, one transition log.')
-        print('PASS: unavailable iGPU startup selected real CPU with reason, 31/31 targets.')
-        print(f'RESULT {output}')
+        print('通过：Intel 核显使用动态输入的检测和识别模型，仅输出一条启动摘要，命中 31/31 项。')
+        print('通过：模拟 GPU 设备丢失后，使用 CPU 模型恢复识别，命中 31/31 项，仅输出一条切换日志。')
+        print('通过：核显不可用时，启动时回退至 CPU 并记录原因，命中 31/31 项。')
+        print(f'验证结果已写入 {output}')
     finally:
         logger.removeHandler(capture)
 

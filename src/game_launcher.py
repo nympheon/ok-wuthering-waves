@@ -19,7 +19,7 @@ def _read_launcher_config(path, encoded=False):
         config = json.loads(data.decode('utf-8-sig'))
         return config if isinstance(config, dict) else {}
     except (OSError, ValueError, UnicodeError) as error:
-        logger.debug(f'Could not read launcher config {path}: {error}')
+        logger.debug(f'无法读取启动器配置 {path}：{error}')
         return {}
 
 
@@ -59,9 +59,9 @@ def get_game_launch_arguments():
         if device and device.get('device') == 'windows':
             game_exe_path = device_manager.get_exe_path(device)
             if game_exe_path and (package := detect_game_package(game_exe_path)):
-                logger.info(f'Detected game package {package} from launcher config')
+                logger.info(f'从启动器配置中识别到游戏资源包 {package}')
                 return f'-krqlv={package}'
-    logger.warning(GAME_ASSETS_QUALITY_ERROR)
+    logger.warning('读取游戏资源画质配置失败，将使用高清（HD）资源启动。')
     app = getattr(og, 'app', None)
     message = app.tr(GAME_ASSETS_QUALITY_ERROR) if app is not None else GAME_ASSETS_QUALITY_ERROR
     alert_error(message, tray=True)

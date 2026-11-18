@@ -79,7 +79,7 @@ class Xigelika(BaseChar):
         box = self.task.box_of_screen_scaled(5120, 2880, 3032, 2654, 3076, 2700, name='forte_full', hcenter=True)
         white_percent = self.task.calculate_color_percentage(forte_white_color, box)
         box.confidence = white_percent
-        self.logger.debug(f'sigrika find forte {white_percent}')
+        self.logger.debug(f'西格莉卡检测到共鸣回路颜色占比 {white_percent}')
         self.task.draw_boxes('forte_full', box)
         return white_percent > 0.1
         

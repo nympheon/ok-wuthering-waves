@@ -24,12 +24,12 @@ class Globals:
         if self._yolo_model is None:
             weights = get_path_relative_to_exe(os.path.join("assets", "echo_model", "echo.onnx"))
             if og.config.get("ocr").get("params").get("use_openvino"):
-                logger.info("yolo_model Using OpenVinoYolo8Detect")
+                logger.info("声骸识别使用 OpenVINO YOLOv8")
                 from src.OpenVinoYolo8Detect import OpenVinoYolo8Detect
                 self._yolo_model = OpenVinoYolo8Detect(
                     weights=weights)
             else:
-                logger.info("yolo_model Using OnnxYolo8Detect")
+                logger.info("声骸识别使用 ONNX Runtime YOLOv8")
                 from src.OnnxYolo8Detect import OnnxYolo8Detect
                 self._yolo_model = OnnxYolo8Detect(
                     weights=weights)

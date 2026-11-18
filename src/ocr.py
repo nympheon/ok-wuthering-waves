@@ -26,7 +26,7 @@ def select_intel_igpu(core):
         if kind == ov.properties.device.Type.INTEGRATED and 'intel' in name.casefold():
             return device, name
         rejected.append(f'{device}: {name}, {kind}')
-    raise RuntimeError('No Intel integrated GPU available; ' + '; '.join(rejected))
+    raise RuntimeError('；'.join(['未找到可用的 Intel 核显', *rejected]))
 
 
 class _DynamicPredictor(PredictBase):
@@ -42,7 +42,7 @@ class _DynamicPredictor(PredictBase):
         self.logger = logger
         model = self._core.read_model(self.model_dir)
         if not model.inputs[0].partial_shape.is_dynamic:
-            raise RuntimeError(f'OCR model must have dynamic inputs: {model_dir}')
+            raise RuntimeError(f'OCR 模型必须支持动态输入：{model_dir}')
         options = {'PERFORMANCE_HINT': 'LATENCY'}
         if self._device == 'CPU':
             options['CPU_RUNTIME_CACHE_CAPACITY'] = str(openvino_cpu_cache_capacity)
@@ -50,7 +50,7 @@ class _DynamicPredictor(PredictBase):
         actual = self.session.get_property('EXECUTION_DEVICES')
         actual = [actual] if isinstance(actual, str) else list(actual)
         if actual != [self._device]:
-            raise RuntimeError(f'OCR execution device mismatch: requested={self._device}, actual={actual}')
+            raise RuntimeError(f'OCR 执行设备不匹配，指定设备 {self._device}，实际设备 {actual}')
         self._async_queue = ov.AsyncInferQueue(self.session, jobs=openvino_num_requests)
         self._async_submit_lock = threading.Lock()
         self._async_queue.set_callback(self._on_openvino_complete)
@@ -63,7 +63,7 @@ class _DynamicPredictor(PredictBase):
             # its Event would hang forever; wait_all surfaces the native error.
             self._async_queue.wait_all()
         if job['error'] is not None:
-            raise RuntimeError('OpenVINO OCR output retrieval failed') from job['error']
+            raise RuntimeError('读取 OpenVINO OCR 输出失败') from job['error']
         return job['outputs']
 
 
@@ -87,7 +87,7 @@ class IntelGpuOCR(ONNXPaddleOcr):
         self.fallback_reason = 'none'
         kwargs.update(use_openvino=True, use_npu=False, use_angle_cls=False)
         super().__init__(logger=logger, **kwargs)
-        self._log_backend('OCR backend ready')
+        self._log_backend('OCR 后端已就绪')
 
     def _initialize_models(self, params):
         self.args = params
@@ -123,17 +123,19 @@ class IntelGpuOCR(ONNXPaddleOcr):
             result = ONNXPaddleOcr.ocr(self, image)
             texts = ''.join(text for _, (text, _) in result[0]).casefold()
             if 'okscript' not in texts:
-                raise RuntimeError(f'OCR backend self-test failed: {texts!r}')
+                raise RuntimeError(f'OCR 后端自检失败：{texts!r}')
 
     def _log_backend(self, event):
         shapes = ', '.join(
             f'{label}={component.session.inputs[0].partial_shape}'
             for label, component in (('det', self.text_detector), ('rec', self.text_recognizer))
         )
-        level = self.logger.info if self.fallback_reason == 'none' else self.logger.warning
-        level(f'{event} | device={self.device} | name={self.device_name} | input=dynamic '
-              f'({shapes}) | fallback=CPU | discrete_gpu=FORBIDDEN | npu=disabled '
-              f'| self_test=ok | openvino={ov.__version__} | reason={self.fallback_reason}')
+        is_fallback = self.fallback_reason != 'none'
+        level = self.logger.warning if is_fallback else self.logger.info
+        reason = self.fallback_reason if is_fallback else '无'
+        level(f'{event} | 设备={self.device} | 名称={self.device_name} | 输入=动态 '
+              f'({shapes}) | 回退设备=CPU | 独立显卡=禁止 | NPU=禁用 '
+              f'| 自检=通过 | OpenVINO={ov.__version__} | 回退原因={reason}')
 
     def ocr(self, *args, **kwargs):
         # Notification and task callers may overlap; switch both models together
@@ -146,7 +148,7 @@ class IntelGpuOCR(ONNXPaddleOcr):
                     raise
                 self.fallback_reason = ' '.join(str(error).split())
                 self._load_cpu()
-                self._log_backend('OCR backend switched to CPU')
+                self._log_backend('OCR 后端已切换至 CPU')
                 return super().ocr(*args, **kwargs)
 
 

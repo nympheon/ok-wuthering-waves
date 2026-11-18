@@ -23,7 +23,7 @@ class Augusta(BaseChar):
         while timeout():
             self.cycle_start()
             if self.check_majesty():
-                self.logger.debug('Augusta performs majesty')
+                self.logger.debug('奥古斯塔施放强化共鸣解放')
                 if self.perform_majesty():
                     self.send_echo_key()
                     return self.switch_next_char()
@@ -33,10 +33,10 @@ class Augusta(BaseChar):
                 if time.time() - start > time_out:
                     return self.switch_next_char()
             if self.resonance_available():
-                self.logger.debug('Augusta performs single resonance')
+                self.logger.debug('奥古斯塔单独施放共鸣技能')
                 now = time.time()
                 self.click_resonance()
-                self.logger.debug(f'time = {time.time() - now}')
+                self.logger.debug(f'耗时 {time.time() - now} 秒')
                 if time.time() - now < 1.4:
                     if self.flying():
                         continue
@@ -50,7 +50,7 @@ class Augusta(BaseChar):
                             self.send_echo_key()
                         return self.switch_next_char()
             if self.liberation_available():
-                self.logger.debug('Augusta performs single liberation')
+                self.logger.debug('奥古斯塔单独施放共鸣解放')
                 if self.task.wait_until(lambda: not self.liberation_available(), post_action=self.send_liberation_key,
                                         time_out=2):
                     self.record_liberation_use()
@@ -62,7 +62,7 @@ class Augusta(BaseChar):
         self.switch_next_char()
 
     def perform_prowess(self):
-        self.logger.debug('Augusta performs prowess')
+        self.logger.debug('奥古斯塔施放强化重击')
         if not self.heavy_click_forte(self.check_prowess):
             return False
         self.continues_normal_attack(0.3)
@@ -78,12 +78,12 @@ class Augusta(BaseChar):
         start = time.time()
         self.task.send_key_up(self.get_liberation_key())
         if self.task.in_team()[0]:
-            self.logger.debug('Augusta performs majesty failed: not in animation')
+            self.logger.debug('奥古斯塔施放强化共鸣解放失败，未进入技能动画')
             self.task.in_liberation = False
             return False
         self.task.wait_until(lambda: self.task.in_team()[0], post_action=self.click, time_out=10)
         self.add_freeze_duration(start, time.time() - start)
-        self.logger.info(f'click_liberation end {time.time() - start}')
+        self.logger.info(f'共鸣解放操作结束，耗时 {time.time() - start} 秒')
 
         return True
 
@@ -112,5 +112,5 @@ class Augusta(BaseChar):
 
     def on_combat_end(self, chars):
         next_char = str((self.index + 1) % len(chars) + 1)
-        self.logger.debug(f'Augusta on_combat_end {self.index} switch next char: {next_char}')
+        self.logger.debug(f'战斗结束，奥古斯塔（槽位 {self.index}）切换至 {next_char}')
         self.task.send_key(next_char)

@@ -103,10 +103,10 @@ class DailyTask(WWOneTimeTask, BaseCombatTask):
                 self.get_task_by_class(NightmareNestTask).ensure_main = lambda *args, **kwargs: None
 
                 if condition1:
-                    self.log_debug('Auto Farm all Nightmare Nest')
+                    self.log_debug('自动刷取所有梦魇巢穴')
                     self.run_task_by_class(NightmareNestTask)
                 elif condition2:
-                    self.log_debug('Farm Nightmare Nest for Daily Echo')
+                    self.log_debug('刷取梦魇巢穴以完成日常声骸目标')
                     self.get_task_by_class(NightmareNestTask).run_capture_mode()
             except TaskDisabledException:
                 raise

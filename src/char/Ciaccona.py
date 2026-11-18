@@ -71,7 +71,7 @@ class Ciaccona(BaseChar):
                 self.last_liberation) < 20:
             return SwitchPriority.NO
         if self.attribute == 3:
-            self.logger.debug(f'ciaccona cond: {self.cartethyia.is_cartethyia}')
+            self.logger.debug(f'夏空检测卡提希娅形态，结果 {self.cartethyia.is_cartethyia}')
         if self.attribute == 3 and self.in_liberation and (
                 self.time_elapsed_accounting_for_freeze(self.last_liberation) < 8 or not self.cartethyia.is_cartethyia):
             return SwitchPriority.NO
@@ -108,17 +108,17 @@ class Ciaccona(BaseChar):
         from src.char.Zani import Zani
         from src.char.Cartethyia import Cartethyia
         for i, char in enumerate(self.task.chars):
-            self.logger.debug(f'ciaccona teammate char: {char.char_name}')
+            self.logger.debug(f'夏空识别到队友 {char.char_name}')
             if isinstance(char, (Cartethyia)):
-                self.logger.debug('ciaccona set attribute: wind dot')
+                self.logger.debug('夏空设置为施加风蚀效应')
                 self.cartethyia = char
                 self.attribute = 3
                 return
             if isinstance(char, (Phoebe, Zani)):
-                self.logger.debug('ciaccona set attribute: light dot')
+                self.logger.debug('夏空设置为施加光噪效应')
                 self.attribute = 2
                 return
-        self.logger.debug('ciaccona set attribute: wind dot')
+        self.logger.debug('夏空设置为施加风蚀效应')
         self.attribute = 1
         return
 
@@ -137,7 +137,7 @@ class Ciaccona(BaseChar):
                 amplitude = n[i]
                 frequncy = i
             i += 1
-        self.logger.debug(f'forte with freq {frequncy} & amp {amplitude}')
+        self.logger.debug(f'计算共鸣回路能量，频率 {frequncy}，振幅 {amplitude}')
         return (min_freq <= frequncy <= max_freq) or amplitude >= min_amp
 
     def calculate_forte_num(self, forte_color, box, num=1, min_freq=39, max_freq=41, min_amp=50):
@@ -158,7 +158,7 @@ class Ciaccona(BaseChar):
                 break
             left -= step
             forte -= 1
-        self.logger.info(f'Frequncy analysis with forte {forte}')
+        self.logger.info(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
     def switch_next_char(self, *args, **kwargs):
@@ -178,7 +178,7 @@ class Ciaccona(BaseChar):
     def on_combat_end(self, chars):
         # 大招击杀 boss 时战斗在切人前结束, 夏空留场演奏没有锁定 UI, 后续进战锁不上目标, 这里补切一次
         if self.recital_on_field:
-            self.logger.info('ciaccona: combat ended while still on field after liberation, switch out')
+            self.logger.info('共鸣解放后战斗结束，夏空仍在场，执行切换')
             self.recital_on_field = False
             self.switch_other_char()
 

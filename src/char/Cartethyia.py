@@ -36,7 +36,7 @@ class Cartethyia(BaseChar):
     def on_combat_end(self, chars):
         if not self.is_cartethyia:
             next_char = str((self.index + 1) % len(chars) + 1)
-            self.logger.debug(f'on_combat_end {self.index} switch next char: {next_char}')
+            self.logger.debug(f'战斗结束，槽位 {self.index} 切换至 {next_char}')
             start = time.time()
             while time.time() - start < 6:
                 self.task.load_chars()
@@ -46,7 +46,7 @@ class Cartethyia(BaseChar):
                 else:
                     self.task.send_key(next_char)
                 self.sleep(0.2, False)
-            self.logger.debug(f'on_combat_end {self.index} switch end')
+            self.logger.debug(f'战斗结束后的角色切换完成，原角色槽位 {self.index}')
 
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
         if not self.is_cartethyia:
@@ -60,7 +60,7 @@ class Cartethyia(BaseChar):
         else:
             self.click_echo(time_out=0)
         if self.is_small():
-            self.logger.info(f'is cartethyia')
+            self.logger.info('当前为卡提希娅形态')
             self.wait_down()
             if self.acquire_missing_buffs():
                 return self.switch_next_char()
@@ -74,7 +74,7 @@ class Cartethyia(BaseChar):
             elif not self.is_small():
                 self.transform = True
         else:
-            self.logger.info(f'is fleurdelys')
+            self.logger.info('当前为芙露德莉斯形态')
         if self.click_resonance_with_lib_big():
             pass
         else:
@@ -102,29 +102,29 @@ class Cartethyia(BaseChar):
             duration = 1.9 - (time.time() - self.last_perform)
         self.n4_time = -1
         self.res_time = -1
-        self.logger.debug(f'fleurdelys_n4_duration {duration}')
+        self.logger.debug(f'芙露德莉斯第四段普攻耗时 {duration} 秒')
         return duration
 
     def click_resonance_with_lib_big(self):
         if self.has_cd('resonance'):
             return False
         clicked = False
-        self.logger.debug(f'click_resonance start')
+        self.logger.debug('开始施放共鸣技能')
         last_click = 0
         resonance_click_time = 0
         while True:
             if resonance_click_time != 0 and time.time() - resonance_click_time > 8:
                 self.task.in_liberation = False
-                self.logger.error(f'click_resonance too long, breaking {time.time() - resonance_click_time}')
+                self.logger.error(f'共鸣技能按键操作超时，已耗时 {time.time() - resonance_click_time} 秒')
                 self.task.screenshot('click_resonance too long, breaking')
                 break
             self.check_combat()
             now = time.time()
             current_resonance = self.current_resonance()
             if not self.resonance_available():
-                self.logger.debug(f'click_resonance not available break')
+                self.logger.debug('共鸣技能不可用，停止按键')
                 break
-            self.logger.debug(f'click_resonance resonance_available click {current_resonance}')
+            self.logger.debug(f'共鸣技能可用，发送按键，当前能量 {current_resonance}')
 
             if now - last_click > 0.1:
                 if current_resonance > 0 and self.resonance_available():
@@ -154,7 +154,7 @@ class Cartethyia(BaseChar):
                 gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
                 mean_val = np.mean(gray)
                 contrast_val = np.std(gray)
-                self.logger.debug(f'cartethyia_space mean {mean_val} contrast {contrast_val}')
+                self.logger.debug(f'卡提希娅空格键图标的亮度均值 {mean_val}，对比度 {contrast_val}')
                 return mean_val > 190 and contrast_val < 45
 
     def try_mid_air_attack(self, timeout=2):
@@ -164,7 +164,7 @@ class Cartethyia(BaseChar):
         else:
             return
         if self.is_mid_air_attack_available():
-            self.logger.info('perform mid-air attack')
+            self.logger.info('执行空中攻击')
             start = time.time()
             while True:
                 self.task.jump(after_sleep=0.1)
@@ -202,7 +202,7 @@ class Cartethyia(BaseChar):
 
     def is_lib_big_available(self):
         if big := self.task.find_one('lib_cartethyia_big'):
-            self.logger.debug('lib cartethyia big available {}'.format(big.confidence))
+            self.logger.debug('芙露德莉斯共鸣解放可用，匹配结果 {}'.format(big.confidence))
             self._liberation_available = True
             return True
 
@@ -212,7 +212,7 @@ class Cartethyia(BaseChar):
             'sword2': bool(self.task.find_one('forte_cartethyia_sword2', threshold=0.9)),
             'sword3': bool(self.task.find_one('forte_cartethyia_sword3', threshold=0.9)),
         }
-        self.logger.debug(f"buffs {self.buffs}")
+        self.logger.debug(f"当前增益 {self.buffs}")
         return self.buffs
 
     def acquire_missing_buffs(self):
@@ -220,7 +220,7 @@ class Cartethyia(BaseChar):
         if all(self.buffs.values()):
             return False
         if has_perform_action := not all(self.buffs[k] for k in ['sword2', 'sword3']):
-            self.logger.info('acquire missing buffs')
+            self.logger.info('补齐缺失的增益')
         if not self.buffs.get('sword2'):
             template = self.task.get_feature_by_name('forte_cartethyia_sword2')
             h = template.mat.shape[0]
@@ -243,7 +243,7 @@ class Cartethyia(BaseChar):
                 self.click(interval=0.1, after_sleep=0.01)
                 self.check_combat()
                 self.task.next_frame()
-            self.logger.debug(f'sword2: click duration {time.time() - start}')
+            self.logger.debug(f'二号剑按键耗时 {time.time() - start} 秒')
         res = False
         if not self.buffs.get('sword3'):
             res = self.click_resonance()[0]
@@ -254,7 +254,7 @@ class Cartethyia(BaseChar):
             return True
         if not self.buffs.get('sword1'):
             if not has_perform_action:
-                self.logger.info('acquire missing buffs')
+                self.logger.info('补齐缺失的增益')
             self.task.mouse_down()
             start = time.time()
             while time.time() - start < 1.5:
@@ -263,7 +263,7 @@ class Cartethyia(BaseChar):
                 self.task.next_frame()
             self.task.mouse_up()
             self.check_combat()
-            self.logger.debug(f'sword1: heavy_att duration {time.time() - start}')
+            self.logger.debug(f'一号剑重击耗时 {time.time() - start} 秒')
         if not any(self.buffs.values()):
             self.try_mid_air_attack_once = True
         return not self.liberation_available()

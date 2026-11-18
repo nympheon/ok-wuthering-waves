@@ -480,7 +480,7 @@ def workshop_team_url(team):
 
 def fetch_all_workshop_teams():
     url = index_url()
-    logger.info(f"char code workshop all teams request: {url}")
+    logger.info(f"向角色代码工坊请求所有队伍：{url}")
     try:
         with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=15) as response:
             content = response.read(5_000_001)
@@ -520,7 +520,7 @@ def fetch_all_workshop_teams():
 def fetch_workshop_codes(team):
     expected_members = sorted((get_english_char_name(name) for name in normalize_team(team)), key=str.casefold)
     url = workshop_team_url(team)
-    logger.info(f"char code workshop request: {url}")
+    logger.info(f"向角色代码工坊请求队伍：{url}")
     try:
         with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=15) as response:
             content = response.read(2_000_001)
@@ -1262,9 +1262,9 @@ class CharacterCodeTab(CustomTab):
             if state == TEAM_CODE_STATE_NONE:
                 message += " " + translate_ui("The whole team's current code is now its imported code.")
             show_info_bar(self.window(), message, title=self.tr("Success"))
-            self.logger.info(f"saved team char code {self.current_char_cls.__name__} as imported code: {team}")
+            self.logger.info(f"已将角色 {self.current_char_cls.__name__} 的代码保存为队伍 {team} 的导入代码")
         except Exception as e:
-            self.logger.error(f"save team char code failed: {e}")
+            self.logger.error(f"保存队伍角色代码失败：{e}")
             show_info_bar(self.window(), str(e), title=self.tr("Error"), error=True)
             return False
         self._update_code_mode_button()
@@ -1373,7 +1373,7 @@ class CharacterCodeTab(CustomTab):
         try:
             summary = switch_all_teams_code_mode(target)
         except Exception as e:
-            self.logger.error(f"switch all teams code mode failed: {e}")
+            self.logger.error(f"批量切换队伍代码模式失败：{e}")
             show_info_bar(self.window(), str(e), title=self.tr("Error"), error=True)
             return
         target_text = translate_ui("built in code") if target == TEAM_CODE_MODE_BUILTIN else translate_ui("imported code")
@@ -1382,8 +1382,8 @@ class CharacterCodeTab(CustomTab):
         self._refresh_team_list()
         if self.current_team is not None and self.current_char_cls is not None:
             self._load_editor_code()
-        self.logger.info(f"switched all teams char code to {target}: {len(summary['switched'])} switched, "
-                         f"{len(summary['drifted'])} drifted, {len(summary['failed'])} failed")
+        self.logger.info(f"已批量将队伍代码模式切换为 {target}，成功 {len(summary['switched'])} 队，"
+                         f"有本地修改 {len(summary['drifted'])} 队，失败 {len(summary['failed'])} 队")
         parts = [translate_ui("Switched {count} teams to {target}.").format(
             count=len(summary["switched"]), target=target_text)]
         skipped = len(states) - len(switchable)
@@ -1447,9 +1447,9 @@ class CharacterCodeTab(CustomTab):
             if reloaded:
                 message = translate_ui("Switched to {target} and reloaded for the matching team.").format(target=target_text)
             show_info_bar(self.window(), message, title=self.tr("Success"))
-            self.logger.info(f"switched team char code to {target}: {team}")
+            self.logger.info(f"已将角色代码切换为 {target} 模式，队伍 {team}")
         except Exception as e:
-            self.logger.error(f"switch team char code failed: {e}")
+            self.logger.error(f"切换队伍角色代码模式失败：{e}")
             show_info_bar(self.window(), str(e), title=self.tr("Error"), error=True)
         self._load_editor_code()
         self._update_code_mode_button()
@@ -1703,7 +1703,7 @@ class CharacterCodeTab(CustomTab):
                 if name and image_name and len(bbox) == 4:
                     feature_index[name] = (coco_path.parent / image_name, tuple(round(value) for value in bbox))
         except Exception as e:
-            self.logger.error(f"load char feature image index failed: {e}")
+            self.logger.error(f"加载角色特征图片索引失败：{e}")
         return feature_index
 
     def _get_char_feature_image(self, label_name):

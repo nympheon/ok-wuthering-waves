@@ -22,7 +22,7 @@ class Sanhua(BaseChar):
             self.task.mouse_down()
             self.sleep(0.1, False)
         sleep_time -= self.time_elapsed_accounting_for_freeze(start)
-        self.logger.info('Sanhua to_sleep {}'.format(sleep_time))
+        self.logger.info('散华等待 {} 秒'.format(sleep_time))
         if sleep_time > 0:
             self.sleep(sleep_time, False)
         self.task.mouse_up()

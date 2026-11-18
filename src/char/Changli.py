@@ -29,7 +29,7 @@ class Changli(BaseChar):
             self.enhanced_normal = True
         forte = self.judge_forte()
         if self.enhanced_normal:
-            self.logger.debug('Changli has enhanced')
+            self.logger.debug('长离已获得强化')
             self.continues_normal_attack(0.2)
             self.sleep(0.2)
             if self.check_outro() in {'char_brant'}:
@@ -104,18 +104,18 @@ class Changli(BaseChar):
         if con_less_than > 0:
             if self.get_current_con() > con_less_than:
                 return False
-        self.logger.debug('click_liberation start')
+        self.logger.debug('开始施放共鸣解放')
         start = time.time()
         last_click = 0
         clicked = False
         while time.time() - start < wait_if_cd_ready and not self.liberation_available() and not self.has_cd(
                 'liberation'):
-            self.logger.debug(f'click_liberation wait ready {wait_if_cd_ready}')
+            self.logger.debug(f'等待共鸣解放就绪，等待条件 {wait_if_cd_ready}')
             if send_click:
                 self.click(interval=0.1)
             self.task.next_frame()
         while self.liberation_available() and self.task.in_team()[0]:  # clicked and still in team wait for animation
-            self.logger.debug('click_liberation liberation_available click')
+            self.logger.debug('共鸣解放可用，发送按键')
             now = time.time()
             if now - last_click > 0.1:
                 self.send_liberation_key()
@@ -124,15 +124,15 @@ class Changli(BaseChar):
                     self.record_liberation_use()
                 last_click = now
             if time.time() - start > timeout:
-                self.task.raise_not_in_combat('too long clicking a liberation')
+                self.task.raise_not_in_combat('共鸣解放按键操作超时')
             self.task.next_frame()
         if clicked:
             if self.task.wait_until(lambda: not self.task.in_team()[0], time_out=0.4):
                 self.task.in_liberation = True
-                self.logger.debug('not in_team successfully casted liberation')
+                self.logger.debug('角色界面已隐藏，共鸣解放施放成功')
             else:
                 self.task.in_liberation = False
-                self.logger.error('clicked liberation but no effect')
+                self.logger.error('已按共鸣解放键，但未检测到技能响应')
                 return False
         start = time.time()
         hold = False
@@ -148,13 +148,13 @@ class Changli(BaseChar):
                 hold = True
             if time.time() - start > 7:
                 self.task.in_liberation = False
-                self.task.raise_not_in_combat('too long a liberation, the boss was killed by the liberation')
+                self.task.raise_not_in_combat('共鸣解放动画超时，首领可能已被击败')
             self.task.next_frame()
         duration = time.time() - start
         self.add_freeze_duration(start, duration)
         self.task.in_liberation = False
         if clicked:
-            self.logger.info(f'click_liberation end {duration}')
+            self.logger.info(f'共鸣解放操作结束，耗时 {duration} 秒')
             self.task.wait_until(lambda: self.task.in_team()[0] and self.is_mouse_forte_full(), time_out=0.6)
             self.task.wait_until(lambda: self.task.in_team()[0] and not self.is_mouse_forte_full(), time_out=0.6)
         self.task.mouse_up()
@@ -187,7 +187,7 @@ class Changli(BaseChar):
                 amplitude = n[i]
                 frequncy = i
             i += 1
-        self.logger.debug(f'forte with freq {frequncy} & amp {amplitude}')
+        self.logger.debug(f'计算共鸣回路能量，频率 {frequncy}，振幅 {amplitude}')
         return (min_freq <= frequncy <= max_freq) or amplitude >= min_amp
 
     def calculate_forte_num(self, forte_color, box, num=1, min_freq=39, max_freq=41, min_amp=50):
@@ -208,7 +208,7 @@ class Changli(BaseChar):
                 break
             left -= step
             forte -= 1
-        self.logger.info(f'Frequncy analysis with forte {forte}')
+        self.logger.info(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
 

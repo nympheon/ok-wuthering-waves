@@ -14,7 +14,7 @@ class Mornye(BaseChar):
         self.check_f_on_switch = True
         if not self.on_air():
             if self.combo_limit():
-                self.logger.debug("perform quick actions")
+                self.logger.debug("执行快速连招")
                 if self.click_echo():
                     return self.switch_next_char()
                 elif self.click_resonance()[0]:
@@ -34,19 +34,19 @@ class Mornye(BaseChar):
 
     def on_air_actions(self):
         self.echo_lit_on_air = False
-        self.logger.debug("on_air start attacking")
+        self.logger.debug("在空中开始攻击")
         start = time.time()
         while (
                 time.time() - start < 10
                 and self.on_air()
         ):
             if self.detect_elbow_strike():
-                self.logger.debug("Detected an elbow strike, attempting to reset.")
+                self.logger.debug("检测到肘击，尝试重置动作")
                 self.task.wait_until(lambda: not self.detect_elbow_strike(),
                                      post_action=lambda: self.continues_right_click(0.05), time_out=1.5)
             self.click_liberation()
             if self.on_air() and self.is_mouse_forte_full():
-                self.logger.debug("mouse forte full, heavy attack")
+                self.logger.debug("鼠标旁的共鸣回路能量已满，执行重击")
                 if self.heavy_click_forte(
                         check_fun=lambda: self.is_mouse_forte_full() and not self.detect_elbow_strike()):
                     if self.detect_elbow_strike():
@@ -66,10 +66,10 @@ class Mornye(BaseChar):
             self.click_resonance()
             self.click()
             self.sleep(0.01)
-        self.logger.debug("finished attacking on_air")
+        self.logger.debug("空中攻击结束")
 
     def not_on_air_actions(self):
-        self.logger.debug("not on_air start attacking")
+        self.logger.debug("在地面开始攻击")
         start = time.time()
         try_douge = True
         while time.time() - start < 10 and not self.on_air():

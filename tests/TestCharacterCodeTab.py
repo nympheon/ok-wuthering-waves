@@ -280,7 +280,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(request.get_header("User-agent"), "EchoDesk")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
         log_info.assert_called_once_with(
-            "char code workshop request: "
+            "向角色代码工坊请求队伍："
             "https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json"
         )
 

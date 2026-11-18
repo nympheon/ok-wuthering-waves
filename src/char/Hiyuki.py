@@ -67,7 +67,7 @@ class Hiyuki(BaseChar):
 
             if self.liberation_available():
                 if self.click_liberation():
-                    self.logger.debug('hiyuki perform lib1')
+                    self.logger.debug('绯雪施放第一段共鸣解放')
                     return
 
             if self.is_mouse_forte_full():
@@ -75,7 +75,7 @@ class Hiyuki(BaseChar):
                 self.heavy_click_forte(check_fun=self.is_mouse_forte_full)
                 self.task.wait_until(self.liberation_available, post_action=self.click_with_interval, time_out=self.FIELD_TIME_OUT)
                 if self.click_liberation():
-                    self.logger.debug('hiyuki perform lib1')
+                    self.logger.debug('绯雪施放第一段共鸣解放')
                     return
             else:
                 self.click(interval=0.1)
@@ -95,12 +95,12 @@ class Hiyuki(BaseChar):
             
             # 优化图像识别日志和复用
             lib_heavy_avail = self.lib_heavy_available()
-            self.logger.debug(f"hiyuki find mouse_forte: {lib_heavy_avail}")
+            self.logger.debug(f"绯雪检测共鸣解放期间的重击是否可用：{lib_heavy_avail}")
 
             is_timeout = self.time_elapsed_accounting_for_freeze(start) >= timeout - 0.5
             if self.lib_permission and self.liberation_available() and (self.lib2_count >= self.LIB2_KENDO_COUNT or is_timeout):
                 if self.hold_liberation():
-                    self.logger.info(f'hiyuki perform lib2 after heavy (count: {self.lib2_count}, timeout: {is_timeout})')
+                    self.logger.info(f'绯雪重击后施放第二段共鸣解放，重击次数 {self.lib2_count}，是否超时 {is_timeout}')
                     self.lib2_count = 0
                     return True
 
@@ -117,12 +117,12 @@ class Hiyuki(BaseChar):
                     self.heavy_click_forte(check_fun=self.lib_heavy_available)
                 if self.task.wait_until(self.liberation_available, post_action=self.click, time_out=0.5):
                     if self.wait_locked(self.WAIT_LOCK_TIME_OUT) and self.hold_liberation():
-                        self.logger.debug('hiyuki perform lib2 (after heavy)')
+                        self.logger.debug('绯雪重击后施放第二段共鸣解放')
                         self.lib2_count = 0
                         return True
                 self.lib2_count += 1
                 self.sleep(0.1)
-                self.logger.debug(f"hiyuki heavy  count: {self.lib2_count}")
+                self.logger.debug(f"绯雪已执行 {self.lib2_count} 次重击")
             elif bool(self.task.find_one('hiyuki_left', threshold=0.5)):
                 self.task.wait_until(lambda: not bool(self.task.find_one('hiyuki_left', threshold=0.5)),
                                      post_action=self.click, time_out=3.0)
@@ -140,7 +140,7 @@ class Hiyuki(BaseChar):
         # 循环外的兜底判定
         if self.lib_permission and self.liberation_available():
             if self.hold_liberation():
-                self.logger.warning('hiyuki perform lib2 (final fallback)')
+                self.logger.warning('绯雪执行兜底操作，施放第二段共鸣解放')
                 self.lib2_count = 0
                 return True
 
@@ -161,7 +161,7 @@ class Hiyuki(BaseChar):
         if not self.task.use_liberation:
             return False
         last_click = 0
-        self.logger.debug('hold_liberation start')
+        self.logger.debug('开始长按共鸣解放键')
         start = time.time()
         while self.task.in_team()[0] and (self.liberation_available() or self.task.get_cd('liberation') <= self.HOLD_LIB_CD_WAIT) and time.time() - start < self.HOLD_LIB_TIME_OUT:
             if time.time() - start > last_click:
@@ -173,7 +173,7 @@ class Hiyuki(BaseChar):
         self.task.wait_until(lambda: self.task.in_team()[0], time_out=3)
         self.task.in_liberation = False
         self.add_freeze_duration(start, time.time() - start)
-        self.logger.info(f'hold_liberation end {time.time() - start}')
+        self.logger.info(f'长按共鸣解放键结束，耗时 {time.time() - start} 秒')
         return True
 
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):

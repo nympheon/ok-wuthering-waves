@@ -32,8 +32,8 @@ class Jinhsi(BaseChar):
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
         if has_intro or self.incarnation or self.incarnation_cd:
             self.logger.info(
-                f'switch priority max because has_intro {has_intro} incarnation {self.incarnation} incarnation_cd '
-                f'{self.incarnation_cd}')
+                f'将切换优先级设为最高，触发变奏技能 {has_intro}，乘岁凌霄状态 {self.incarnation}，'
+                f'乘岁凌霄技能处于冷却 {self.incarnation_cd}')
             return SwitchPriority.MUST
         return SwitchPriority.NO
 
@@ -43,14 +43,14 @@ class Jinhsi(BaseChar):
 
     def handle_incarnation(self):
         self.incarnation = False
-        self.logger.info(f'handle_incarnation click_resonance start')
+        self.logger.info('乘岁凌霄状态下开始施放共鸣技能')
         start = time.time()
         animation_start = 0
         last_op = 'resonance'
         self.task.in_liberation = True
         while True:
             if time.time() - start > 6:
-                self.logger.info(f'handle incarnation too long')
+                self.logger.info('处理乘岁凌霄状态超时')
                 break
             if self.task.in_team()[0]:
                 if last_op == 'resonance':
@@ -60,11 +60,11 @@ class Jinhsi(BaseChar):
                     self.send_resonance_key()
                     last_op = 'resonance'
                 if animation_start != 0:
-                    self.logger.info(f'Jinhsi handle_incarnation done')
+                    self.logger.info('今汐处理乘岁凌霄状态完成')
                     break
             else:
                 if animation_start == 0:
-                    self.logger.info(f'Jinhsi handle_incarnation start animation')
+                    self.logger.info('今汐在乘岁凌霄状态下进入技能动画')
                     animation_start = time.time()
                 self.task.in_liberation = True
             self.check_combat()
@@ -77,10 +77,10 @@ class Jinhsi(BaseChar):
         self.add_freeze_duration(animation_start)
         # if self.task.debug:
         #     self.task.screenshot(f'handle_incarnation click_resonance end {time.time() - start}')
-        self.logger.info(f'handle_incarnation  click_resonance end {time.time() - start}')
+        self.logger.info(f'乘岁凌霄状态下的共鸣技能操作结束，耗时 {time.time() - start} 秒')
 
     def handle_intro(self):
-        self.logger.info(f'handle_intro start')
+        self.logger.info('开始处理变奏技能')
         start = time.time()
         while True:
             elapsed = time.time() - start
@@ -105,7 +105,7 @@ class Jinhsi(BaseChar):
         else:
             self.continues_normal_attack(1.4)
         # self.task.screenshot(f'handle_intro end {time.time() - start}')
-        self.logger.info(f'handle_intro end {time.time() - start}')
+        self.logger.info(f'变奏技能处理结束，耗时 {time.time() - start} 秒')
         self.incarnation = True
         self.incarnation_cd = False
 

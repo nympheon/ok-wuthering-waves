@@ -40,7 +40,7 @@ class Linnai(BaseChar):
             
     def perform_under_intro(self):
         if not self.wait_for_accelerate_ready():
-            self.logger.debug(f'Linnai fails entering accelerate mode!')
+            self.logger.debug('琳奈进入加速模式失败')
             return False
         self.task.wait_until(lambda: self.is_color_full() or self.is_con_full(), post_action=self.click,
                                      time_out=1)
@@ -90,7 +90,7 @@ class Linnai(BaseChar):
             return self.task.find_best_match_in_box(box, list(self.get_target_names()),
                                                     threshold=self.RES_CHECK_THRESHOLD)
         except Exception as e:
-            self.logger.debug(f'Linnai check res skipped {box_name}: {e}')
+            self.logger.debug(f'琳奈跳过共鸣技能图标 {box_name} 的检测：{e}')
             return None
 
     def check_res(self):
@@ -104,15 +104,15 @@ class Linnai(BaseChar):
             try:
                 best = self.task.find_one('target_box_short', threshold=self.RES_CHECK_THRESHOLD)
             except Exception as e:
-                self.logger.debug(f'Linnai check res skipped target_box_short: {e}')
+                self.logger.debug(f'琳奈跳过共鸣技能短图标的检测：{e}')
                 best = None
-        self.logger.debug(f'check res {best}')
+        self.logger.debug(f'共鸣技能图标匹配结果 {best}')
         return best
 
     def is_color_full(self):
         box = self.task.box_of_screen_scaled(5120, 2880, 2846, 2602, 2889, 2690, name='color_full', hcenter=True)
         white_percent = self.task.calculate_color_percentage(forte_white_color, box)
-        self.logger.debug(f'forte_color_percent {white_percent}')
+        self.logger.debug(f'共鸣回路条颜色占比 {white_percent}')
         return white_percent > 0.06
 
     def on_combat_end(self, chars):

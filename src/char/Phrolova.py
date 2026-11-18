@@ -80,7 +80,7 @@ class Phrolova(BaseChar):
             self.last_liberation) > 14 and has_intro and current_char and current_char.char_name in {'char_cantarella'}
 
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
-        self.logger.debug(f'Phrolova last_liberation {self.time_elapsed_accounting_for_freeze(self.last_liberation)}')
+        self.logger.debug(f'弗洛洛上次共鸣解放距今 {self.time_elapsed_accounting_for_freeze(self.last_liberation)} 秒')
         if self._cantarella_outro_ready(current_char, has_intro):
             return SwitchPriority.MUST
         if self.time_elapsed_accounting_for_freeze(self.last_liberation) < 24:
@@ -94,7 +94,7 @@ class Phrolova(BaseChar):
 
     def heavy_and_liber(self):
         if self.heavy_click_forte(check_fun=self.is_mouse_forte_full):
-            self.logger.debug('Phrolova heavy_click_forte')
+            self.logger.debug('弗洛洛长按重击消耗共鸣回路能量')
             self.task.wait_until(lambda: self.click_liberation(wait_if_cd_ready=0), time_out=3)
             return True
 

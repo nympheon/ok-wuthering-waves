@@ -51,7 +51,7 @@ class Zani(BaseChar):
 
         # 大招状态（branch 0）：保留基线 nightfall/liber2 逻辑
         if self.in_liberation:
-            self.logger.info('in liberation')
+            self.logger.info('处于共鸣解放状态')
             self.state = 1
             if self.should_end_liberation():
                 self.click_liber2()
@@ -75,15 +75,15 @@ class Zani(BaseChar):
         predicted = float(self.blazes) + 0.1
 
         self.logger.info(
-            f'Zani entry: blazes={self.blazes} threshold={self.blazes_threshold} '
-            f'forte_full={forte_full} e_avail={e_available} predicted={predicted:.2f} '
-            f'liber_avail={liber_avail} has_intro={self.has_intro}'
+            f'赞妮入场，烈焰 {self.blazes}，阈值 {self.blazes_threshold}，'
+            f'共鸣回路已满 {forte_full}，共鸣技能可用 {e_available}，预计烈焰 {predicted:.2f}，'
+            f'共鸣解放可用 {liber_avail}，触发变奏技能 {self.has_intro}'
         )
 
         # 场景3：焰光拉满（1.0）且大招可用 → 直接开大
         # 0.96 can appear for both full and not-full bars; only 1.00 is safe for direct liberation.
         if self.blazes >= 1 and liber_avail:
-            self.logger.info('scene3: blazes full, liberation available, direct liberation')
+            self.logger.info('第 3 种情况：烈焰已满，共鸣解放可用，直接施放')
             if not self._try_liberation():
                 self.sleep(0.1)
                 self._try_liberation()
@@ -91,30 +91,30 @@ class Zani(BaseChar):
 
         # scene4: enhanced E ready; cast once, then liberate if needed.
         if forte_full:
-            self.logger.info(f'scene4: enhanced E ready, predicted={predicted:.2f}')
+            self.logger.info(f'第 4 种情况：强化共鸣技能就绪，预计烈焰 {predicted:.2f}')
             should_liberate = predicted >= self.blazes_threshold
             success = self.crisis_response_protocol_combo()
             if success and should_liberate and self.liberation_available():
-                self.logger.info('scene4: enhanced E -> liberate')
+                self.logger.info('第 4 种情况：施放强化共鸣技能后施放共鸣解放')
                 self._try_liberation(wait_crisis=True)
             else:
-                self.logger.info('scene4: enhanced E -> switch')
+                self.logger.info('第 4 种情况：施放强化共鸣技能后切换角色')
             return self.switch_next_char()
 
         # 场景1：普通E 可用，焰光未满 → 完全沿用基线 crisis_response_protocol_combo
         # 内部已包含：E → 持续普攻/蓄力攒 forte → 强化E命中，不再需要自定义 E+一次普攻的写死序列
         if e_available:
-            self.logger.info(f'scene1: normal E available, predicted={predicted:.2f}')
+            self.logger.info(f'第 1 种情况：普通共鸣技能可用，预计烈焰 {predicted:.2f}')
             success = self.crisis_response_protocol_combo()
             # combo 结束后即时检查一次大招。
             if success and self.blazes >= self.blazes_threshold:
                 if self.liberation_available():
-                    self.logger.info('scene1: liberate after enhanced E')
+                    self.logger.info('第 1 种情况：施放强化共鸣技能后施放共鸣解放')
                     self._try_liberation(wait_crisis=True)
             return self.switch_next_char()
 
         # 场景2：E 在 CD → 普攻直到可切人
-        self.logger.info('scene2: E on CD, normal attack until can switch')
+        self.logger.info('第 2 种情况：共鸣技能冷却中，普攻至可以切换角色')
         self.normal_attack_until_can_switch()
         return self.switch_next_char()
 
@@ -149,7 +149,7 @@ class Zani(BaseChar):
     def basic_attack_breakthrough_combo(self):
         if self.is_e_forte_full():
             return State.FORTE_FULL
-        self.logger.info('basic attack - breakthrough')
+        self.logger.info('执行普攻·突破')
         if (result := self.basic_attack_breakthrough()) != State.DONE:
             return result
         self.attack_breakthrough_time = time.time()
@@ -179,7 +179,7 @@ class Zani(BaseChar):
         if current - start >= duration:
             self.last_liber2 = current
             self.add_freeze_duration(current - duration, duration, 0)
-            self.logger.info('clicked liber2')
+            self.logger.info('已按下第二段共鸣解放键')
         self.in_liberation = False
         self.blazes = -1
         self.liberation_time = -1
@@ -187,15 +187,15 @@ class Zani(BaseChar):
 
     def should_end_liberation(self, time_only=False):
         if self.liberation_time_left() < 1.7:
-            self.logger.info('Liberation is about to end, perform liberation2')
+            self.logger.info('共鸣解放即将结束，施放第二段共鸣解放')
             return True
         if time_only or self.is_nightfall_ready():
             return False
         if self.wait_resonance_not_gray(send_click=True, liber_time_check=True) == State.INTERRUPTED:
-            self.logger.info('Nightfall interrupted, perform liberation2')
+            self.logger.info('夜幕连招被打断，施放第二段共鸣解放')
             return True
         if not self.is_mouse_forte_full():
-            self.logger.info('Cannot perform another nightfall, perform liberation2')
+            self.logger.info('无法再执行一套夜幕连招，施放第二段共鸣解放')
             return True
         return False
 
@@ -203,11 +203,11 @@ class Zani(BaseChar):
         if not self.in_liberation or self.liberation_time <= 0:
             return 0
         result = 20 - self.time_elapsed_accounting_for_freeze(self.liberation_time)
-        self.logger.debug(f'liberation_lasted: {result}')
+        self.logger.debug(f'共鸣解放已持续 {result} 秒')
         return result
 
     def nightfall_combo(self, cancel_last_smash=False):
-        self.logger.info('perform nightfall_combo')
+        self.logger.info('执行夜幕连招')
         start = time.time()
         if not self.is_nightfall_ready():
             while not self.is_nightfall_ready() or time.time() - start < 1.6:
@@ -220,7 +220,7 @@ class Zani(BaseChar):
                 self.task.next_frame()
         self.continues_normal_attack(0.5)
         if cancel_last_smash:
-            self.logger.info('cancel nightfall last smash')
+            self.logger.info('取消夜幕连招的最后一击')
             start = time.time()
             while self.is_nightfall_ready(threshold=0.035):
                 if time.time() - start > 2.5:
@@ -236,7 +236,7 @@ class Zani(BaseChar):
         box = self.task.box_of_screen_scaled(2560, 1440, 1853, 1233, 1964, 1344, name='zani_attack', hcenter=True)
         self.task.draw_boxes(box.name, box)
         light_percent = self.calculate_color_percentage_in_masked(zani_light_color, box, 0.425, 0.490)
-        self.logger.debug(f'nightfall_percent {light_percent}')
+        self.logger.debug(f'夜幕能量占比 {light_percent}')
         if light_percent > threshold:
             return True
         return False
@@ -276,14 +276,14 @@ class Zani(BaseChar):
         if self.nightfall_time <= 0:
             self.nightfall_time = -1
             return 0
-        self.logger.debug(f'nightfall_time_left: {result}')
+        self.logger.debug(f'夜幕剩余时间 {result} 秒')
         return result
 
     def standard_defense_protocol_combo(self):
         if self.is_e_forte_full():
             return State.FORTE_FULL
         if self.resonance_available():
-            self.logger.info('perform standard_defense_protocol')
+            self.logger.info('执行标准防御协议')
             self.click_resonance(send_click=False)
             self.sleep(0.2)
             self.continues_normal_attack(0.2)
@@ -316,7 +316,7 @@ class Zani(BaseChar):
         return result
 
     def crisis_response_protocol_combo(self):
-        self.logger.info('perform crisis_response_protocol')
+        self.logger.info('执行危机应对协议')
         self.check_combat()
         if not self.is_e_forte_full():
             for _ in range(1):
@@ -328,14 +328,14 @@ class Zani(BaseChar):
                     self.continues_right_click(0.05)
                     self.dodge_time = time.time()
             if result != State.FORTE_FULL and not self.is_e_forte_full():
-                self.logger.info('crisis_response_protocol not FORTE_FULL')
+                self.logger.info('共鸣回路能量未满，无法执行危机应对协议')
                 return False
         start = time.time()
         self.wait_until(lambda: not self.is_e_forte_full(), post_action=self.send_resonance_key, time_out=1)
         current = time.time()
-        self.logger.debug(f'cast resonance duration {current - start}')
+        self.logger.debug(f'共鸣技能施放耗时 {current - start} 秒')
         if current - start < 0.35:
-            self.logger.info(f'failed casting crisis_response_protocol, duration {current - start}')
+            self.logger.info(f'危机应对协议施放失败，耗时 {current - start} 秒')
             return False
         self.crisis_time = current
         return True
@@ -345,7 +345,7 @@ class Zani(BaseChar):
         self.task.draw_boxes(box.name, box)
         forte_percent = self.task.calculate_color_percentage(zani_forte_color, box)
         forte_percent = Decimal(str(forte_percent)).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-        self.logger.debug(f'forte_percent {forte_percent}')
+        self.logger.debug(f'共鸣回路能量占比 {forte_percent}')
         return forte_percent
 
     def check_forte_action(self):
@@ -364,7 +364,7 @@ class Zani(BaseChar):
                 current_value = self.get_forte()
                 if last_value[0] > 0:
                     gap = current_value - last_value[0]
-                    self.logger.info(f"check_forte gap: {gap} current_value: {current_value}")
+                    self.logger.info(f"检查共鸣回路，能量差值 {gap}，当前值 {current_value}")
                     if gap < 0.01 and not self.is_e_forte_full():
                         self.continues_right_click(0.05)
                         self.dodge_time = time.time()
@@ -429,7 +429,7 @@ class Zani(BaseChar):
         if self.crisis_time <= 0:
             return 0
         result = 1.6 - self.time_elapsed_accounting_for_freeze(self.crisis_time, intro_motion_freeze=True)
-        self.logger.debug(f'crisis_time_left: {result}')
+        self.logger.debug(f'危机应对状态剩余时间 {result} 秒')
         return result
 
     def wait_crisis_protocol_end(self):
@@ -453,7 +453,7 @@ class Zani(BaseChar):
         blazes_percent = self.task.calculate_color_percentage(zani_blazes_color, box)
         blazes_percent = Decimal(str(blazes_percent)).quantize(Decimal('0.01'), rounding=ROUND_UP)
         self.blazes = blazes_percent
-        self.logger.debug(f'blazes_percent {blazes_percent}')
+        self.logger.debug(f'烈焰能量占比 {blazes_percent}')
 
     def is_prepared(self):
         if self.is_current_char:
@@ -488,7 +488,7 @@ class Zani(BaseChar):
 
     def wait_switch(self):
         if self.has_intro and self.nightfall_time_left() > 0:
-            self.logger.debug(f'has_intro {self.has_intro}, wait nightfall end')
+            self.logger.debug(f'触发变奏技能 {self.has_intro}，等待夜幕连招结束')
             if self.nightfall_time_left() > 0 and self.liberation_time_left() >= 2:
                 return True
         return False

@@ -35,14 +35,14 @@ class Luhesi(BaseChar):
             self.last_intro = time.time()
         if not self.flying():
             self.task.wait_until(self.flying, post_action=self.task.jump, time_out=0.2)
-        self.logger.debug(f"detect {self.available('echo', check_color=True)}")
+        self.logger.debug(f"检测声骸技能是否可用：{self.available('echo', check_color=True)}")
         detect_ready = self.echo_available()
         start = time.time()
         res_count = 0
         try_jump = False
         while self.time_elapsed_accounting_for_freeze(start) < 12:
             if self.detect_elbow_strike(detect_ready):
-                self.logger.debug("Detected an elbow strike, attempting to reset.")
+                self.logger.debug("检测到肘击，尝试重置动作")
                 self.task.wait_until(lambda: not self.detect_elbow_strike(detect_ready), 
                                      post_action=lambda: self.continues_right_click(0.05), time_out=1.5)
             elif self.handle_heavy(res_count) and res_count > 2:
@@ -74,7 +74,7 @@ class Luhesi(BaseChar):
         have_kick = False
         while self.task.find_one('luhesi_kick', threshold=0.7) and time.time() - start < 3:
             if not have_kick:
-                self.logger.debug('handle special attack')
+                self.logger.debug('执行特殊攻击')
             have_kick = True           
             if res_count < 3:
                 self.f_break()
@@ -87,7 +87,7 @@ class Luhesi(BaseChar):
         best = self.task.find_best_match_in_box(self.task.get_box_by_name('target_box_long2'),
                                                ['has_target', 'no_target'],
                                                threshold=0.6)
-        self.logger.debug(f'check res {best}')
+        self.logger.debug(f'共鸣技能图标匹配结果 {best}')
         return best
         
     def detect_elbow_strike(self, ready):

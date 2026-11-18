@@ -226,7 +226,7 @@ class BaseChar:
         """
         self.last_perform = time.time()
         self.do_perform()
-        self.logger.debug(f'set current char false {self.index}')
+        self.logger.debug(f'清除当前角色标记，槽位 {self.index}')
 
     def wait_down(self, click=True):
         """等待角色从空中落下到地面。"""
@@ -327,7 +327,7 @@ class BaseChar:
         if switched_with_full_con:
             if self.buff_time > 0:
                 self.last_buff_time = self.last_switch_time
-            self.logger.info(f'switch_out at full con set current_con to 0')
+            self.logger.info('满协奏能量切出，协奏能量重置为 0')
             self.current_con = 0
 
     def __repr__(self):
@@ -385,7 +385,7 @@ class BaseChar:
             tuple: (是否成功点击 (bool), 技能持续时间 (float), 是否检测到动画 (bool))。
         """
         clicked = False
-        self.logger.debug(f'click_resonance start')
+        self.logger.debug('开始施放共鸣技能')
         last_click = 0
         last_op = 'click'
         resonance_click_time = 0
@@ -414,7 +414,7 @@ class BaseChar:
                     the_time_out = SKILL_TIME_OUT
                     if now - resonance_click_time > 6:
                         self.task.in_liberation = False
-                        self.logger.error(f'resonance animation too long, breaking')
+                        self.logger.error('共鸣技能动画超时，结束等待')
                     if (click_f and now - animation_start >= animation_min_duration
                             and now - last_f_click >= 0.1):
                         self.task.send_key('f')
@@ -424,16 +424,16 @@ class BaseChar:
                     continue
                 elif self.task.in_liberation:
                     self.task.in_liberation = False
-                    self.logger.debug(f'click_resonance animated break')
+                    self.logger.debug('检测到共鸣技能动画，停止按键')
                     break
 
             self.check_combat()
             now = time.time()
             if not self.resonance_available() and (
                     not has_animation or now - start > animation_min_duration):
-                self.logger.debug(f'click_resonance not available break')
+                self.logger.debug('共鸣技能不可用，停止按键')
                 break
-            self.logger.debug(f'click_resonance resonance_available click')
+            self.logger.debug('共鸣技能可用，发送按键')
 
             if now - last_click > 0.1:
                 if send_click and last_op == 'resonance':
@@ -457,7 +457,7 @@ class BaseChar:
         duration = time.time() - resonance_click_time if resonance_click_time != 0 else 0
         if animation_start > 0:
             self.add_freeze_duration(resonance_click_time, time.time() - animation_start)
-        self.logger.debug(f'click_resonance end clicked {clicked} duration {duration} animated {animation_start > 0}')
+        self.logger.debug(f'共鸣技能操作结束，已按键 {clicked}，耗时 {duration} 秒，触发动画 {animation_start > 0}')
         return clicked, duration, animation_start > 0
 
     def send_resonance_key(self, post_sleep=0, interval=-1, down_time=0.01):
@@ -531,14 +531,14 @@ class BaseChar:
         if time_out == 0 and self.echo_available():
             self.send_echo_key()
             self.record_echo_use()
-            self.logger.debug('click echo')
+            self.logger.debug('施放声骸技能')
             return True
         if self.task.is_open_world_auto_combat() and self.ring_index == Elements.FIRE:
-            self.logger.debug(f'open world do not use motorcycle echo')
+            self.logger.debug('大世界中跳过摩托车声骸技能')
             return False
-        self.logger.debug(f'click_echo start duration: {duration}')
+        self.logger.debug(f'开始施放声骸技能，时长 {duration} 秒')
         if self.has_cd('echo'):
-            self.logger.debug('click_echo has cd return ')
+            self.logger.debug('声骸技能冷却中，跳过施放')
             return False
         clicked = False
         start = time.time()
@@ -546,7 +546,7 @@ class BaseChar:
         time_out += duration
         while True:
             if time.time() - start > time_out:
-                self.logger.info("click_echo time out")
+                self.logger.info("声骸技能施放超时")
                 return False
             if not self.echo_available() and (duration == 0 or not clicked):
                 break
@@ -561,11 +561,11 @@ class BaseChar:
                 self.send_echo_key()
                 last_click = now
             if now - start > SKILL_TIME_OUT:
-                self.logger.error(f'click_echo too long {clicked}')
+                self.logger.error(f'等待声骸技能施放过久，已按键 {clicked}')
                 self.alert_skill_failed()
                 break
             self.task.next_frame()
-        self.logger.debug(f'click_echo end {clicked}')
+        self.logger.debug(f'声骸技能操作结束，已按键 {clicked}')
         return clicked
 
     def is_open_world_auto_combat(self):
@@ -610,13 +610,13 @@ class BaseChar:
         if con_less_than > 0:
             if self.get_current_con() > con_less_than:
                 return False
-        self.logger.debug(f'click_liberation start')
+        self.logger.debug('开始施放共鸣解放')
         start = time.time()
         last_click = 0
         clicked = False
         if not self.task.in_liberation:
             while self.liberation_available():  # clicked and still in team wait for animation
-                self.logger.debug(f'click_liberation liberation_available click')
+                self.logger.debug('共鸣解放可用，发送按键')
                 if send_click:
                     self.click(interval=0.1)
                 now = time.time()
@@ -627,16 +627,16 @@ class BaseChar:
                     last_click = now
                 if time.time() - start > SKILL_TIME_OUT:
                     self.alert_skill_failed()
-                    self.task.raise_not_in_combat('too long clicking a liberation')
+                    self.task.raise_not_in_combat('共鸣解放按键操作超时')
                 self.task.next_frame()
             if clicked:
                 if self.task.wait_until(lambda: not self.task.in_team()[0], time_out=0.4,
                                         post_action=self.click_with_interval if send_click else None):
                     self.task.in_liberation = True
-                    self.logger.debug(f'not in_team successfully casted liberation')
+                    self.logger.debug('角色界面已隐藏，共鸣解放施放成功')
                 else:
                     self.task.in_liberation = False
-                    self.logger.error(f'clicked liberation but no effect')
+                    self.logger.error('已按共鸣解放键，但未检测到技能响应')
                     return False
             else:
                 start = time.time()
@@ -644,7 +644,7 @@ class BaseChar:
                     self.send_liberation_key(after_sleep=0.05)
                     if self.task.wait_until(lambda: not self.task.in_team()[0], time_out=0.1):
                         self.task.in_liberation = True
-                        self.logger.debug(f'not in_team successfully casted liberation')
+                        self.logger.debug('角色界面已隐藏，共鸣解放施放成功')
                 if not self.task.in_liberation:
                     return False
         start = time.time()
@@ -662,7 +662,7 @@ class BaseChar:
                 last_f_click = now
             if now - start > 7:
                 self.task.in_liberation = False
-                self.task.raise_not_in_combat('too long a liberation, the boss was killed by the liberation')
+                self.task.raise_not_in_combat('共鸣解放动画超时，首领可能已被击败')
             self.task.next_frame()
         duration = time.time() - start
         self.add_freeze_duration(start, duration)
@@ -670,7 +670,7 @@ class BaseChar:
         self.task.in_liberation = False
         self._liberation_available = False
         if clicked:
-            self.logger.info(f'click_liberation end {duration}')
+            self.logger.info(f'共鸣解放操作结束，耗时 {duration} 秒')
         return clicked
 
     def on_combat_end(self, chars):
@@ -833,14 +833,14 @@ class BaseChar:
                 continue
             if char.get_switch_priority(current_char=current_char, has_intro=False,
                                         target_low_con=False) >= SwitchPriority.MUST:
-                self.logger.info(f'In lock with {char}')
+                self.logger.info(f'与 {char} 处于切换锁定状态')
                 return True
         return False
 
     def wait_switch_cd(self):
         since_last_switch = self.time_elapsed_accounting_for_freeze(self.last_perform)
         if since_last_switch <= 1:
-            self.logger.debug(f'wait_switch_cd {since_last_switch}')
+            self.logger.debug(f'等待角色切换冷却，上次切换距今 {since_last_switch} 秒')
             self.continues_normal_attack(1 - since_last_switch)
 
     def continues_normal_attack(self, duration, interval=0.1, after_sleep=0, click_resonance_if_ready_and_return=False,
@@ -909,7 +909,7 @@ class BaseChar:
 
     def normal_attack(self):
         """执行一次普通攻击。"""
-        self.logger.debug('normal attack')
+        self.logger.debug('执行普攻')
         self.check_combat()
         self.task.click()
 
@@ -920,12 +920,12 @@ class BaseChar:
             duration (float, optional): 重攻击按键按下的持续时间。默认为 0.6。
         """
         self.check_combat()
-        self.logger.debug('heavy attack start')
+        self.logger.debug('开始重击')
         self.task.mouse_down()
         self.sleep(duration)
         self.task.mouse_up()
         self.sleep(0.01)
-        self.logger.debug('heavy attack end')
+        self.logger.debug('重击结束')
 
     def current_resonance(self):
         """获取当前共鸣技能UI白色像素百分比。"""
@@ -964,14 +964,14 @@ class BaseChar:
             elif char.last_switch_time > time:
                 time = char.last_switch_time
                 outro = char.char_name
-        self.logger.info(f'erned outro from {outro}')
+        self.logger.info(f'获得 {outro} 的延奏效果')
         return outro
 
     def is_first_engage(self):
         """判断角色是否为触发战斗时的登场角色。"""
         result = (0 <= self.last_perform - self.task.combat_start < 0.4)
         if result:
-            self.logger.info('first engage')
+            self.logger.info('首次入场')
         return result
 
     def wait_switch(self):
@@ -988,9 +988,9 @@ class BaseChar:
 
         from src.task.AutoCombatTask import AutoCombatTask
         if isinstance(self.task, AutoCombatTask) and not allow_auto_combat:
-            self.logger.debug('AutoCombatTask, skip switch_other_char')
+            self.logger.debug('自动战斗任务跳过战斗结束后的角色切换')
             return
-        self.logger.debug(f'{self.char_name} on_combat_end {self.index} switch next char: {next_char}')
+        self.logger.debug(f'战斗结束，{self.char_name}（槽位 {self.index}）切换至 {next_char}')
         start = time.time()
         while time.time() - start < 6:
             in_team, current_index, count = self.task.in_team()
@@ -1002,7 +1002,7 @@ class BaseChar:
             else:
                 self.task.send_key(next_char)
             self.sleep(0.2, False)
-        self.logger.debug(f'switch_other_char on_combat_end {self.index} switch end')
+        self.logger.debug(f'战斗结束后的角色切换完成，原角色槽位 {self.index}')
 
     def has_long_action(self):
         """是否有长动作条"""

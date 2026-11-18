@@ -18,15 +18,15 @@ def pip_install(arguments, attempts=10, retry_delay=30):
             return 0
         if attempt == attempts:
             return result.returncode
-        print(f'Dependency installation failed (attempt {attempt}/{attempts}); '
-              f'retrying in {retry_delay}s without the pip cache.', flush=True)
+        print(f'依赖安装失败（第 {attempt}/{attempts} 次尝试），'
+              f'将在 {retry_delay} 秒后禁用 pip 缓存重试。', flush=True)
         time.sleep(retry_delay)
 
 
 def main():
     expected_python = (ROOT / '.python-version').read_text(encoding='utf-8').strip()
     if '.'.join(map(str, sys.version_info[:3])) != expected_python:
-        print(f'Expected Python {expected_python}; dependency installation was not started.')
+        print(f'依赖安装需要 Python {expected_python}。')
         return 1
     project = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))['project']
     uv_requirement = next(value for value in project['optional-dependencies']['dev'] if value.startswith('uv=='))

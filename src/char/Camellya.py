@@ -31,7 +31,7 @@ class Camellya(BaseChar):
             self.click()
             self.sleep(0.1)
             if time.time() - start > timeout:
-                self.logger.error('wait wait_resonance_not_gray timed out')
+                self.logger.error('等待共鸣技能图标脱离灰色状态超时')
 
     def on_combat_end(self, chars):
         self.switch_other_char()
@@ -71,7 +71,7 @@ class Camellya(BaseChar):
                         elif loop_time < 3.1:
                             loop_time += 1
                 if budding:
-                    self.logger.info(f'start budding')
+                    self.logger.info('椿开始进入含苞状态')
                     self.check_target()
                     budding_start_time = time.time()
                     loop_time = 5.1
@@ -81,7 +81,7 @@ class Camellya(BaseChar):
                     self.task.mouse_down()
                 if time.time() - budding_start_time < 1.5 and self.liberation_available():
                     if self.click_liberation() and heavy_att:
-                        self.logger.info(f'liberation retry heavy att')
+                        self.logger.info('共鸣解放过程中重试重击')
                         self.task.mouse_up()
                         self.sleep(0.2, False)
                         self.task.mouse_down()
@@ -112,7 +112,7 @@ class Camellya(BaseChar):
         box = self.task.box_of_screen_scaled(2560, 1440, 2110, 1236, 2217, 1343, name='camellya_resonance',
                                              hcenter=True)
         red_percent = self.calculate_color_percentage_in_masked(camellya_red_color, box, 0.395, 0.496)
-        self.logger.debug(f'red_percent {red_percent}')
+        self.logger.debug(f'红色占比 {red_percent}')
         return red_percent > 0.1
 
     def calculate_color_percentage_in_masked(self, target_color, box, mask_r1_ratio=0.0, mask_r2_ratio=0.0):
@@ -165,7 +165,7 @@ class Camellya(BaseChar):
             forte_percent = self.calculate_forte_percent(camellya_budding_forte_color, box)
         forte_percent = Decimal(str(forte_percent)).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
         if forte_percent >= 0:
-            self.logger.debug(f'forte_percent {forte_percent * 100:.2f}% budding {budding}')
+            self.logger.debug(f'共鸣回路能量 {forte_percent * 100:.2f}%，含苞状态 {budding}')
         return forte_percent
 
     def detect_stripe_region(self, gray: np.ndarray, white_ratio_range=(0.05, 0.75),
@@ -267,7 +267,7 @@ class Camellya(BaseChar):
         gray = cv2.inRange(cropped, lower_bound, upper_bound)
         start_x, end_x = self.detect_stripe_region(gray)
         if start_x == -2:
-            self.logger.debug(f'calculate_forte_percent failed due to interference')
+            self.logger.debug('画面干扰导致共鸣回路能量计算失败')
             return -1
         if start_x != -1:
             stripe_area = gray[:, start_x:end_x]
@@ -275,13 +275,13 @@ class Camellya(BaseChar):
             total_pixels = gray.size
             ratio = white_pixels / total_pixels if total_pixels > 0 else 0
         else:
-            self.logger.debug(f'using calculate_color_percentage')
+            self.logger.debug('改用颜色占比计算共鸣回路能量')
             ratio = self.task.calculate_color_percentage(forte_color, box) * 2
             ratio = ratio if ratio <= 1 else 1
         return ratio
 
     def heavy_attack(self, duration, check_combat=True, until_con_full=False):
-        self.logger.info(f'start heavy_attack')
+        self.logger.info('开始重击')
         self.last_forte = 0
         freeze_forte_check = False
         freeze_forte_time = 0
@@ -308,7 +308,7 @@ class Camellya(BaseChar):
         if current_forte < 0:
             return -1
         diff = self.last_forte - current_forte
-        self.logger.debug(f'diff {diff}')
+        self.logger.debug(f'差值 {diff}')
         if not self.waiting_for_forte_drop and 0 <= diff <= 0.01:
             self.waiting_for_forte_drop = True
             self.forte_drop_timestamp = time.time()
@@ -317,10 +317,10 @@ class Camellya(BaseChar):
             self.forte_diff_buffer.append(diff)
             if np.array(self.forte_diff_buffer).sum() > 0.01:
                 self.waiting_for_forte_drop = False
-                self.logger.debug(f'diff {diff}')
+                self.logger.debug(f'差值 {diff}')
         if self.waiting_for_forte_drop and self.time_elapsed_accounting_for_freeze(self.forte_drop_timestamp) > 0.6:
             self.waiting_for_forte_drop = False
-            self.logger.info(f'retry heavy attack')
+            self.logger.info('重试重击')
             self.task.mouse_up()
             self.sleep(0.1, False)
             self.task.mouse_down()
@@ -331,13 +331,13 @@ class Camellya(BaseChar):
     def check_target(self, is_heavy_att=False):
         if not self.task.has_target():
             if is_heavy_att:
-                self.logger.info(f'check_target Release')
+                self.logger.info('检查目标，松开鼠标按键')
                 self.task.mouse_up()
-            self.logger.info(f'check_combat')
+            self.logger.info('检查战斗状态')
             self.check_combat()
             self.task.next_frame()
             if is_heavy_att:
-                self.logger.info(f'check_target Retry')
+                self.logger.info('检查目标，重试攻击')
                 self.task.mouse_down()
 
 

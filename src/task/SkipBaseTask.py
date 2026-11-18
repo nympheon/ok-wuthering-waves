@@ -43,7 +43,7 @@ class SkipBaseTask(BaseWWTask):
     def try_click_skip(self):
         skipped = False
         while skip := self.find_skip():
-            logger.info('Click Skip Dialog')
+            logger.info('点击跳过对话')
             self.click_box(skip, after_sleep=0.2)
             skipped = True
         return skipped

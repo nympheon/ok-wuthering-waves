@@ -54,7 +54,7 @@ class Iuno(BaseChar):
                     start = time.time()
                     time_out = 5
                     # 6命多打一轮
-                    self.logger.debug('iuno c6 continue')
+                    self.logger.debug('尤诺继续执行六链连招')
                 else:
                     return True
             if not jumped and self.task.find_feature("iuno_jump", box="box_extra_action", threshold=0.6):

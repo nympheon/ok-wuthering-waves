@@ -27,14 +27,14 @@ class Lucy(BaseChar):
     def perform_standard(self):
         """标准攒能量流程"""
         if self.is_forte_full():
-            self.logger.info("Lucy forte is already full, skip standard build-up.")
+            self.logger.info("露西的共鸣回路能量已满，跳过常规积攒流程")
             return False
 
         start_time = time.time()
         while not self.is_forte_full():
             # 防卡死超时机制
             if time.time() - start_time > self.FORTE_TIMEOUT:
-                self.logger.warning("Lucy failed to fill forte, timeout reached.")
+                self.logger.warning("露西未在时限内攒满共鸣回路能量")
                 break
 
             if self.resonance_available():
@@ -100,13 +100,13 @@ class Lucy(BaseChar):
         if self.liberation_available():
             self.click_liberation(send_click=True, wait_if_cd_ready=self.LIB_CD_WAIT)
             self.record_liberation_use()
-            self.logger.info('Lucy perform lib: Started')
+            self.logger.info('露西开始施放共鸣解放')
             for _ in range(self.LIB_CLICK_COUNT):
                 self.click()
                 self.sleep(self.CLICK_INTERVAL, check_combat=False)
-            self.logger.info('Lucy perform lib: Ended')
+            self.logger.info('露西的共鸣解放操作结束')
         else:
-            self.logger.debug("Liberation not available, skipping.")
+            self.logger.debug("共鸣解放不可用，跳过施放")
 
         return True
 
@@ -114,11 +114,11 @@ class Lucy(BaseChar):
         """强化重击执行逻辑"""
         if self.is_mouse_forte_full():
             self.heavy_attack(self.HEAVY_ATTACK_DURATION)
-            self.logger.info('Lucy perform enhanced heavy attack 1')
+            self.logger.info('露西执行第一段强化重击')
             self.sleep(self.ENHANCED_HEAVY_INTERVAL, check_combat=False)
 
             self.heavy_attack(self.HEAVY_ATTACK_DURATION)
-            self.logger.info('Lucy perform enhanced heavy attack 2')
+            self.logger.info('露西执行第二段强化重击')
 
     def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
         if has_intro and current_char and current_char.char_name in {'char_rebecca'}:

@@ -104,7 +104,7 @@ class BaseWWTask(BaseTask):
             next_monthly_card_start_date_time = next_four_am - timedelta(seconds=30)
             # Subtract 1 minute from the next 4 o'clock in the morning
             self.next_monthly_card_start = next_monthly_card_start_date_time.timestamp()
-            logger.info('set next monthly card start time to {}'.format(next_monthly_card_start_date_time))
+            logger.info('下次月卡奖励的检测时间已设置为 {}'.format(next_monthly_card_start_date_time))
         else:
             self.next_monthly_card_start = 0
 
@@ -135,7 +135,7 @@ class BaseWWTask(BaseTask):
             if percent > 0.5:
                 break
             self.next_frame()
-            self.log_debug(f'f white color percent: {percent} wait')
+            self.log_debug(f'F 键提示的白色占比为 {percent}，继续等待')
         if percent < 0.5:
             return None
 
@@ -143,10 +143,10 @@ class BaseWWTask(BaseTask):
             search_text_box = f.copy(x_offset=f.width * 5.2, width_offset=f.width * 6, height_offset=4.5 * f.height,
                                      y_offset=-0.8 * f.height, name='search_text_box')
             text = self.ocr(box=search_text_box, match=target_text)
-            logger.debug(f'found f with text {text}, target_text {target_text}')
+            logger.debug(f'检测到 F 键提示“{text}”，目标文本“{target_text}”')
             if text:
                 if text[0].y > search_text_box.y + f.height * 1:
-                    logger.debug(f'found f with text {text} below, target_text {target_text}')
+                    logger.debug(f'在下方检测到 F 键提示“{text}”，目标文本“{target_text}”')
                     self.scroll_relative(0.5, 0.5, 1)
                 return f
         else:
@@ -162,11 +162,11 @@ class BaseWWTask(BaseTask):
         while time.time() - start < time_out:
             self.next_frame()
             if self.pick_f():
-                self.log_debug('pick echo success')
+                self.log_debug('成功拾取声骸')
                 self._stop_last_direction(last_direction)
                 return True
             if self.in_combat():
-                self.log_debug('pick echo has_target return fail')
+                self.log_debug('拾取声骸时检测到战斗目标，停止拾取')
                 self._stop_last_direction(last_direction)
                 return False
             echos = self.find_echos(threshold=echo_threshold)
@@ -174,7 +174,7 @@ class BaseWWTask(BaseTask):
                 if no_echo_start == 0:
                     no_echo_start = time.time()
                 elif time.time() - no_echo_start > 3:
-                    self.log_debug(f'walk front to_echo, no echos found, break')
+                    self.log_debug('向前寻找声骸时未检测到声骸，停止寻找')
                     break
                 next_direction = 'w'
             else:
@@ -234,7 +234,7 @@ class BaseWWTask(BaseTask):
             if end_condition:
                 ended = end_condition()
                 if ended:
-                    logger.info(f'do_walk_to_box ended {ended}')
+                    logger.info(f'向目标位置移动结束，结束条件结果 {ended}')
                     break
             treasure_icon = find_function()
             if isinstance(treasure_icon, list):
@@ -362,14 +362,14 @@ class BaseWWTask(BaseTask):
     def check_for_monthly_card(self):
         if self.should_check_monthly_card():
             start = time.time()
-            logger.info(f'check_for_monthly_card start check')
+            logger.info('开始检查月卡奖励')
             if self.in_combat():
-                logger.info(f'check_for_monthly_card in combat return')
+                logger.info('当前处于战斗，暂缓检查月卡奖励')
                 return time.time() - start
             if self.in_team_and_world():
-                logger.info(f'check_for_monthly_card in team send sleep until monthly card popup')
+                logger.info('当前在队伍界面，等待月卡奖励弹出')
                 monthly_card = self.wait_until(self.handle_monthly_card, time_out=120, raise_if_not_found=False)
-                logger.info(f'wait monthly card end {monthly_card}')
+                logger.info(f'月卡奖励等待结束，检测结果 {monthly_card}')
                 cost = time.time() - start
                 return cost
         return 0
@@ -392,18 +392,18 @@ class BaseWWTask(BaseTask):
 
     def walk_until_f(self, direction='w', time_out=1, raise_if_not_found=True, backward_time=0, target_text=None,
                      check_combat=False, running=False):
-        logger.info(f'walk_until_f direction {direction} target_text: {target_text}')
+        logger.info(f'向 {direction} 移动以寻找 F 键提示，目标文本“{target_text}”')
         if not self.find_f_with_text(target_text=target_text):
             # 视角朝前
             self.middle_click(after_sleep=0.2)
             if backward_time > 0:
                 if self.send_key_and_wait_f('s', raise_if_not_found, backward_time, target_text=target_text,
                                             running=running, check_combat=check_combat):
-                    logger.info('walk backward found f')
+                    logger.info('向后移动时检测到 F 键提示')
                     return True
             if self.send_key_and_wait_f(direction, raise_if_not_found, time_out, target_text=target_text,
                                         running=running, check_combat=check_combat):
-                logger.info('walk forward found f')
+                logger.info('向前移动时检测到 F 键提示')
                 return True
             return False
         else:
@@ -436,7 +436,7 @@ class BaseWWTask(BaseTask):
         elif must_use > once and total >= once * 2:
             used = once * 2
             use_double = True
-            logger.info(f"当前加备用大于日常剩余所需, 使用双倍, {must_use} >= {once} and {total} >= {once * 2}")
+            logger.info(f"当前体力加备用体力超过日常剩余需求，使用双倍体力，{must_use} ≥ {once} 且 {total} ≥ {once * 2}")
         else:
             used = once
             use_double = False
@@ -456,11 +456,11 @@ class BaseWWTask(BaseTask):
         must_use -= used
         total -= used
         if total < once:
-            logger.info(f"current stamina: {current} not enough to continue")
+            logger.info(f"当前体力 {current} 不足，无法继续")
             can_continue = False
         elif must_use <= 0 and current < once:
             can_continue = False
-            logger.info(f"current stamina: {current} must_use completed, no need to use back_up")
+            logger.info(f"当前体力 {current}，已满足必耗体力要求，无需使用备用体力")
         else:
             can_continue = True
         return can_continue, used
@@ -485,7 +485,7 @@ class BaseWWTask(BaseTask):
             if raise_if_not_found:
                 raise CannotFindException(self.tr('cant find the f to enter'))
             else:
-                logger.warning(f"can't find the f to enter")
+                logger.warning("未找到用于进入的 F 键交互提示")
                 return False
         return f_found
 
@@ -496,7 +496,7 @@ class BaseWWTask(BaseTask):
         self.send_key_down(direction)
         if running:
             self.sleep(0.1)
-            logger.debug(f'run_until condiction {condiction} direction {direction}')
+            logger.debug(f'奔跑直到满足条件 {condiction}，移动方向 {direction}')
             self.mouse_down(key='right')
         start = time.time()
         result = None
@@ -525,7 +525,7 @@ class BaseWWTask(BaseTask):
             self.sleep(0.5)
             self.send_key('esc')
             self.sleep(0.5)
-            logger.info(f"handle_claim_button found a claim reward")
+            logger.info("检测到领取奖励按钮")
             return True
 
     def has_claim_stamina(self):
@@ -539,7 +539,7 @@ class BaseWWTask(BaseTask):
         # self.set_image('tests/images/absorb.png')
         image = cv2.imread('tests/images/absorb.png')
         result = self.executor.ocr_lib(image, use_det=True, use_cls=False, use_rec=True)
-        self.logger.info(f'ocr_result {result}')
+        self.logger.info(f'OCR 识别结果：{result}')
 
     def find_echos(self, threshold=0.3):
         """
@@ -581,7 +581,7 @@ class BaseWWTask(BaseTask):
         if self.find_f_with_text(target_text=self.absorb_echo_text()):
             self.send_key('f')
             if not self.handle_claim_button():
-                self.log_debug('found a echo picked')
+                self.log_debug('检测到已拾取一个声骸')
                 return True
 
     def pick_f(self, handle_claim=True):
@@ -590,7 +590,7 @@ class BaseWWTask(BaseTask):
             if not handle_claim:
                 return True
             if not self.handle_claim_button():
-                self.log_debug('found a echo picked')
+                self.log_debug('检测到已拾取一个声骸')
                 return True
 
     def is_pick_f(self):
@@ -626,18 +626,18 @@ class BaseWWTask(BaseTask):
                 self.center_camera()
             echos = self.find_echos(threshold=threshold)
             max_echo_count = max(max_echo_count, len(echos))
-            self.log_debug(f'max_echo_count {max_echo_count}')
+            self.log_debug(f'声骸拾取上限 {max_echo_count}')
             if echos:
                 self.log_info(self.tr('yolo found echo {echos}').format(echos=echos))
                 # return self.walk_to_box(self.find_echos, time_out=15, end_condition=self.pick_echo), max_echo_count > 1
                 return self.walk_to_yolo_echo(update_function=update_function, time_out=time_out), max_echo_count > 1
             if use_color:
                 color_percent = self.calculate_color_percentage(echo_color, front_box)
-                self.log_debug(f'pick_echo color_percent:{color_percent}')
+                self.log_debug(f'拾取声骸检测的颜色占比 {color_percent}')
                 if color_percent > color_threshold:
                     # if self.debug:
                     #     self.screenshot('echo_color_picked')
-                    self.log_debug(f'found color_percent {color_percent} > {color_threshold}, walk now')
+                    self.log_debug(f'颜色占比 {color_percent} 超过阈值 {color_threshold}，开始移动')
                     # return self.walk_to_box(self.find_echos, time_out=15, end_condition=self.pick_echo), max_echo_count > 1
                     return self.walk_to_yolo_echo(update_function=update_function), max_echo_count > 1
             if not turn and i == 0:
@@ -660,7 +660,7 @@ class BaseWWTask(BaseTask):
     def walk_find_echo(self, backward_time=1, time_out=3):
         if self.walk_until_f(time_out=time_out, backward_time=backward_time, target_text=self.absorb_echo_text(),
                              raise_if_not_found=False, check_combat=True):  # find and pick echo
-            logger.debug(f'farm echo found echo move forward walk_until_f to find echo')
+            logger.debug('检测到声骸，向前寻找拾取提示')
             return self.pick_f()
 
     def incr_drop(self, dropped):
@@ -737,7 +737,7 @@ class BaseWWTask(BaseTask):
         if self.handle_monthly_card():
             return False
         if esc:
-            self.log_debug('main esc')
+            self.log_debug('返回主界面时发送 Esc 键')
             self.back(after_sleep=2)
             return False
 
@@ -770,7 +770,7 @@ class BaseWWTask(BaseTask):
                         self.log_info(self.tr('Click the Login button!'))
                 return False
             if agree := self.find_boxes(texts, boundary=login_box, match="同意"):
-                self.log_debug(f'found agree {agree}')
+                self.log_debug(f'检测到同意按钮 {agree}')
                 if self.find_boxes(texts, boundary=login_box, match=re.compile("隐私")):
                     self.click(agree, after_sleep=1)
                     self.log_info(self.tr('Click the Agree button!'))
@@ -856,7 +856,7 @@ class BaseWWTask(BaseTask):
             self.log_info(self.tr('Can not find {feature} on minimap').format(feature=feature))
             return None
         else:
-            self.log_debug(f'found {box} on minimap')
+            self.log_debug(f'在小地图上检测到 {box}')
         target.x += target.width * x_offset
         target.y += target.height * y_offset
         direction_angle = calculate_angle_clockwise(box, target)
@@ -1100,7 +1100,7 @@ class BaseWWTask(BaseTask):
         if not skip_dialog_check:
             return False
 
-        logger.info('confirm dialog exists, click confirm')
+        logger.info('检测到确认对话框，点击确认')
         self.sleep(0.5)
         self.click(skip_dialog_check)
         self.sleep(0.5)
@@ -1127,7 +1127,7 @@ class BaseWWTask(BaseTask):
             lambda: self.find_one(feature, box='box_gray_book',
                                   threshold=0.3),
             time_out=time_out, settle_time=1)
-        logger.info(f'found gray_book_boss {gray_book_boss}')
+        logger.info(f'检测到残象探寻入口 {gray_book_boss}')
         # if self.debug:
         #     self.screenshot(feature)
         return gray_book_boss
@@ -1223,7 +1223,7 @@ class BaseWWTask(BaseTask):
         return feature.name in TEAM_SCREEN_FEATURES
 
     def change_time_to_night(self):
-        logger.info('change time to night')
+        logger.info('将游戏时间调整至夜晚')
         self.send_key("esc")
         self.sleep(1)
         self.click_relative(0.71, 0.96)

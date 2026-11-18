@@ -24,7 +24,7 @@ class MouseResetTask(TriggerTask):
     def run(self):
         if not self.enabled or self.is_browser():
             return
-        logger.debug('schedule mouse reset')
+        logger.debug('已安排鼠标位置复原')
         self.post_mouse_reset(0.01)
 
     def post_mouse_reset(self, delay):
@@ -50,7 +50,7 @@ class MouseResetTask(TriggerTask):
                     + (current_position[1] - self.mouse_pos[1]) ** 2
                 )
                 if distance > 200 and close_to_center:
-                    logger.info(f'move mouse back {self.mouse_pos}')
+                    logger.info(f'将鼠标移回 {self.mouse_pos}')
                     win32api.SetCursorPos(self.mouse_pos)
                     self.mouse_pos = self.mouse_pos
                     self.post_mouse_reset(1)
@@ -58,4 +58,4 @@ class MouseResetTask(TriggerTask):
             self.mouse_pos = current_position
             self.post_mouse_reset(0.002)
         except Exception as e:
-            logger.error('mouse_reset exception', e)
+            logger.error('复原鼠标位置时出错', e)

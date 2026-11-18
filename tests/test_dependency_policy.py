@@ -26,19 +26,19 @@ class TestDependencyPolicy(unittest.TestCase):
         installed = [distribution('framework', '1', ['numpy<2']), distribution('numpy', '2.5.5')]
         errors = policy.check_dependencies(installed, [], [Requirement('pycaw==20260927')])
         self.assertEqual(len(errors), 1)
-        self.assertIn('requires numpy<2', errors[0])
+        self.assertIn('需要 numpy<2', errors[0])
 
     def test_override_does_not_hide_lockfile_mismatch(self):
         errors = policy.check_dependencies(
             [distribution('pycaw', '20240210')],
             [Requirement('pycaw==20260927')], [Requirement('pycaw==20260927')])
-        self.assertTrue(any('lockfile' in error for error in errors))
+        self.assertTrue(any('依赖锁定文件' in error for error in errors))
 
     def test_transitive_extra_requires_its_optional_dependency(self):
         installed = [distribution('app', '1', ['lib[crypto]>=1']),
                      distribution('lib', '1', ['cryptography>=50; extra == "crypto"'])]
         errors = policy.check_dependencies(installed, [Requirement('app==1')], [])
-        self.assertEqual(errors, ['lib: missing cryptography>=50; extra == "crypto"'])
+        self.assertEqual(errors, ['lib：缺少 cryptography>=50; extra == "crypto"'])
 
     def test_optional_and_platform_requirements(self):
         installed = [distribution('framework', '1', [
@@ -46,7 +46,7 @@ class TestDependencyPolicy(unittest.TestCase):
         ])]
         self.assertEqual([], policy.check_dependencies(installed, [Requirement('framework==1')], []))
         errors = policy.check_dependencies(installed, [Requirement('framework[ocr]==1')], [])
-        self.assertEqual(errors, ['framework: missing missing; extra == "ocr"'])
+        self.assertEqual(errors, ['framework：缺少 missing; extra == "ocr"'])
 
 
 if __name__ == '__main__':

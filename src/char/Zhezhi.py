@@ -110,7 +110,7 @@ class Zhezhi(BaseChar):
         box = self.task.box_of_screen_scaled(5120, 2880, 2242, 2664, 2300, 2690, name='zhezhi_kagane', hcenter=True)
         self.task.draw_boxes(box.name, box)
         blue_percent = self.task.calculate_color_percentage(text_white_color, box)
-        self.logger.debug(f'zhezhi_kagane percent: {blue_percent}')
+        self.logger.debug(f'折枝墨晶颜色占比 {blue_percent}')
         return blue_percent > 0.3
 
     def judge_frequncy_and_amplitude(self, gray, min_freq, max_freq, min_amp):
@@ -129,7 +129,7 @@ class Zhezhi(BaseChar):
                 amplitude = n[i]
                 frequncy = i
             i += 1
-        self.logger.info(f'forte with freq {frequncy} & amp {amplitude}')
+        self.logger.info(f'计算共鸣回路能量，频率 {frequncy}，振幅 {amplitude}')
         return (min_freq <= frequncy <= max_freq) or amplitude >= min_amp
 
     def calculate_forte_num(self, forte_color, box, num=1, min_freq=39, max_freq=41, min_amp=50):
@@ -150,7 +150,7 @@ class Zhezhi(BaseChar):
                 break
             left -= step
             forte -= 1
-        self.logger.info(f'Frequncy analysis with forte {forte}')
+        self.logger.info(f'根据频率分析得出的共鸣回路能量为 {forte}')
         return forte
 
     def resonance_available(self, current=None, check_ready=False, check_cd=False):

@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet('main_debug.py', 'main.py')]
     [string]$EntryPoint = 'main_debug.py',
     [string]$LogPath
@@ -10,7 +10,7 @@ $projectPath = Split-Path -Parent $PSScriptRoot
 $pythonPath = Join-Path $projectPath '.venv\Scripts\python.exe'
 Set-Location -LiteralPath $projectPath
 if (-not (Test-Path -LiteralPath $pythonPath)) {
-    throw "Project Python was not found: $pythonPath"
+    throw "未找到项目使用的 Python：$pythonPath"
 }
 
 # The elevated launcher merges stdout and stderr into a file the terminal can read.
@@ -60,7 +60,7 @@ try {
     $quotedOutput = $outputPath.Replace("'", "''")
     $command = "& '$quotedScript' -EntryPoint '$EntryPoint' -LogPath '$quotedOutput'; exit `$LASTEXITCODE"
     $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
-    Write-Host 'Requesting administrator access; app logs will appear here.'
+    Write-Host '正在请求管理员权限，应用日志将显示在此处。'
     $powershellPath = (Get-Command powershell.exe -CommandType Application).Source
     $elevatedProcess = Start-Process -FilePath $powershellPath `
         -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $encodedCommand `

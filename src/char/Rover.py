@@ -62,22 +62,22 @@ class Rover(BaseChar):
             self.sleep(0.01)
         if self.ring_index == Elements.HAVOC:
             self.intro_motion_freeze_duration = 0.64
-            self.logger.info('rover: form-dispatch ring=HAVOC routine=havoc')
+            self.logger.info('漂泊者识别为湮灭属性，执行湮灭连招')
             if self.perform_havoc_routine():
                 return
         elif self.ring_index == Elements.SPECTRO:
             self.intro_motion_freeze_duration = 0.92
-            self.logger.info('rover: form-dispatch ring=SPECTRO routine=spectro')
+            self.logger.info('漂泊者识别为衍射属性，执行衍射连招')
             self.perform_spectro_routine()
         elif self.ring_index == Elements.WIND:
             self.intro_motion_freeze_duration = 0.52
-            self.logger.info('rover: form-dispatch ring=WIND routine=wind')
+            self.logger.info('漂泊者识别为气动属性，执行气动连招')
             self.perform_wind_routine()
         elif self.ring_index == Elements.ELECTRIC:
-            self.logger.info('rover: form-dispatch ring=ELECTRIC routine=electric')
+            self.logger.info('漂泊者识别为导电属性，执行导电连招')
             self.perform_electric_routine()
         else:
-            self.logger.info('rover: form-dispatch ring=UNKNOWN routine=basic')
+            self.logger.info('漂泊者属性未知，执行基础连招')
             self.perform_basic_routine()
         self.switch_next_char()
 
@@ -88,7 +88,7 @@ class Rover(BaseChar):
         if self.ring_index != previous_form:
             self._bind_form_logger()
             self.logger.info(
-                f'rover: form-corrected previous={previous_form} current={self.ring_index}'
+                f'漂泊者属性识别结果已修正，{previous_form} → {self.ring_index}'
             )
             names = []
             for char in self.task.chars:
@@ -118,10 +118,10 @@ class Rover(BaseChar):
             self.click()
             self.sleep(0.1)
         if not self.electric_skill_ready():
-            self.logger.info('rover: electric forte not ready before rotation timeout')
+            self.logger.info('导电漂泊者本轮连招超时，共鸣回路仍未就绪')
             return
         if not self.short_electric_skill():
-            self.logger.info('rover: electric enhanced resonance not confirmed, switch out')
+            self.logger.info('导电漂泊者未确认强化共鸣技能施放成功，切换角色')
             return
         if not self.is_con_full():
             self.click_liberation(click_f=False)
@@ -143,7 +143,7 @@ class Rover(BaseChar):
             if consumed:
                 self.record_resonance_use()
                 return True
-            self.logger.info(f'rover: electric enhanced resonance attempt {attempt + 1} not confirmed')
+            self.logger.info(f'导电漂泊者第 {attempt + 1} 次尝试施放强化共鸣技能，未确认成功')
         return False
 
     def perform_spectro_routine(self):

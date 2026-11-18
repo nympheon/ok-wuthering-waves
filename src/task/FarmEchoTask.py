@@ -127,7 +127,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
         except TaskDisabledException as e:
             pass
         except Exception as e:
-            logger.error('farm 4c error, try handle monthly card', e)
+            logger.error('刷取四费声骸出错，尝试处理月卡奖励', e)
             # 有上限: 认不出的双按钮弹窗会被当成领奖弹窗关掉, 重进后又弹, 无限循环 (#1649)
             if retries > 0 and (self.handle_claim_button() or self.handle_monthly_card()):
                 self.run(retries - 1)
@@ -151,7 +151,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
             round_start_count = count
             try:
                 self.in_realm_check(60)
-                self.log_debug(f'start farming {count} {self._in_realm}')
+                self.log_debug(f'开始刷取声骸，目标次数 {count}，处于异界 {self._in_realm}')
                 if not self.is_revived:
                     self.manage_boss_interactions()
                 else:
@@ -195,7 +195,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                     continue
 
                 if self.pick_echo():
-                    logger.info(f'farm echo on the face')
+                    logger.info('声骸就在角色面前')
                     dropped = True
                 else:
                     self.middle_click(after_sleep=0.2)
@@ -203,13 +203,13 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                         dropped = \
                             self.yolo_find_echo(turn=self._in_realm, use_color=False, time_out=self.yolo_time_out,
                                                 threshold=self.yolo_threshold)[0]
-                        logger.info(f'farm echo yolo find {dropped}')
+                        logger.info(f'声骸识别模型检测掉落结果 {dropped}')
                     elif self.config.get('Echo Pickup Method', "Yolo") == "Run in Circle":
                         dropped = self.run_in_circle_to_find_echo(circle_count=2)
-                        logger.info(f'farm echo walk_circle_find_echo {dropped}')
+                        logger.info(f'绕圈搜索声骸的结果 {dropped}')
                     else:
                         dropped = self.walk_find_echo()
-                        logger.info(f'farm echo walk_find_echo {dropped}')
+                        logger.info(f'移动搜索声骸的结果 {dropped}')
                 self.incr_drop(dropped)
                 if not self.bypass_end_wait:
                     if dropped and not self._has_treasure:
@@ -406,7 +406,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
         else:
             self.combat_wait_time = self.config.get("Combat Wait Time", 0)
         if boss in ('Lady of the Sea'):
-            self.log_debug('manage_boss_parameters Lady of the Sea')
+            self.log_debug('设置海之女首领参数')
             self._in_realm = True
         self.bypass_end_wait = boss in ('Fenrico', 'Fallacy of No Return', 'Lady of the Sea',
                                         'Nameless Explorer')
@@ -449,10 +449,10 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                 self.execute_treasure_hunt()
                 self.wait_until(self.in_combat, raise_if_not_found=False, time_out=300)
             if boss in ('Lady of the Sea'):
-                self.log_debug('manage_boss_interactions Lady of the Sea')
+                self.log_debug('处理海之女首领交互')
                 self._in_realm = True
                 if not self.in_world():
-                    self.log_debug('manage_boss_interactions Lady of the Sea not self.in_world()')
+                    self.log_debug('处理海之女首领交互时未检测到大世界界面')
                     self.send_key('esc', after_sleep=0.5)
                     self.wait_click_feature(
                         ['confirm_btn_hcenter_vcenter', 'confirm_btn_highlight_hcenter_vcenter'],
@@ -463,7 +463,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                     self.wait_in_team_and_world(time_out=120)
                     self.sleep(2)
                 if self.in_world():
-                    self.log_debug('manage_boss_interactions Lady of the Sea self.in_world()')
+                    self.log_debug('处理海之女首领交互时已检测到大世界界面')
                     self.pick_f()
                     self.sleep(2)
                     self.wait_in_team_and_world(time_out=120)
@@ -473,7 +473,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                 # 无铭探索者无主动攻击欲望，重新挑战后需主动靠近触发战斗
                 self._handle_unnamed_explorer()
             if boss not in self.boss_list:
-                logger.warning(f'unknown boss profile {boss}, run as Other')
+                logger.warning(f'未知首领配置 {boss}，按通用流程执行')
 
     def _handle_unnamed_explorer(self):
         """处理无铭探索者：重新挑战后主动靠近boss触发战斗。"""
@@ -695,7 +695,7 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
         x = 0.15
         distance = 0.08
 
-        logger.info(f'choose level {start}')
+        logger.info(f'选择关卡 {start}')
         self.click_relative(x, y + (start - 1) * distance)
         self.sleep(0.5)
 
@@ -724,9 +724,9 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                 #     self.set_night = True
                 break
         if self.aim_boss is not None:
-            logger.info(f'combat with {self.aim_boss}')
+            logger.info(f'开始与 {self.aim_boss} 战斗')
         else:
-            logger.info(f"boss_string is {find_boxes_by_name(texts, [re.compile(r'(?i)^L[Vv].*')])}")
+            logger.info(f"首领等级文字的识别结果 {find_boxes_by_name(texts, [re.compile(r'(?i)^L[Vv].*')])}")
 
 
 from ok import run_task

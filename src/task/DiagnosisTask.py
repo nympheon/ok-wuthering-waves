@@ -58,7 +58,7 @@ class DiagnosisTask(WWOneTimeTask, BaseCombatTask):
         x = 0.15
         distance = 0.08
 
-        logger.info(f'choose level {start}')
+        logger.info(f'选择关卡 {start}')
         self.click_relative(x, y + (start - 1) * distance)
         self.sleep(0.5)
 

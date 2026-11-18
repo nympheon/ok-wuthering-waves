@@ -106,10 +106,10 @@ class TestOCRBackend(unittest.TestCase):
         self.assertIsNone(engine.text_recognizer.force_shape)
         self.assertTrue(engine.text_detector.session.inputs[0].partial_shape.is_dynamic)
         self.assertTrue(engine.text_recognizer.session.inputs[0].partial_shape.is_dynamic)
-        summaries = [str(call) for call in logger.info.call_args_list if 'OCR backend ready' in str(call)]
+        summaries = [str(call) for call in logger.info.call_args_list if 'OCR 后端已就绪' in str(call)]
         self.assertEqual(len(summaries), 1)
-        self.assertIn('discrete_gpu=FORBIDDEN', summaries[0])
-        self.assertIn('input=dynamic', summaries[0])
+        self.assertIn('独立显卡=禁止', summaries[0])
+        self.assertIn('输入=动态', summaries[0])
 
     def test_discrete_or_non_intel_integrated_adapter_is_never_compiled(self):
         for adapters in ({'0': ('NVIDIA GeForce RTX 5080', DISCRETE)},
@@ -121,9 +121,9 @@ class TestOCRBackend(unittest.TestCase):
                     engine = ocr.IntelGpuOCR(logger=logger)
                 self.assertEqual(engine.device, 'CPU')
                 self.assertEqual([device for device, _ in core.compiled], ['CPU', 'CPU'])
-                self.assertIn('No Intel integrated GPU', engine.fallback_reason)
+                self.assertIn('未找到可用的 Intel 核显', engine.fallback_reason)
                 self.assertEqual(core.compiled[0][1]['CPU_RUNTIME_CACHE_CAPACITY'], '16')
-                self.assertEqual(sum('OCR backend ready' in str(c) for c in logger.warning.call_args_list), 1)
+                self.assertEqual(sum('OCR 后端已就绪' in str(c) for c in logger.warning.call_args_list), 1)
 
     def test_unreadable_adapter_identity_is_skipped(self):
         core = FakeCore({'0': ('Unknown', None), '3': ('Intel Graphics updated name', INTEGRATED)})
@@ -145,7 +145,7 @@ class TestOCRBackend(unittest.TestCase):
         with fake_backend(core) as smoke:
             engine = ocr.IntelGpuOCR(logger=Mock())
         self.assertEqual(engine.device, 'CPU')
-        self.assertIn('execution device mismatch', engine.fallback_reason)
+        self.assertIn('OCR 执行设备不匹配', engine.fallback_reason)
         smoke.assert_called_once_with()  # Only CPU reached the inference test.
 
     def test_gpu_self_test_failure_rebuilds_both_models_on_cpu(self):
@@ -166,8 +166,8 @@ class TestOCRBackend(unittest.TestCase):
                 self.assertEqual(engine.ocr('image'), expected)
         self.assertEqual(engine.device, 'CPU')
         self.assertEqual([device for device, _ in core.compiled], ['GPU.1', 'GPU.1', 'CPU', 'CPU'])
-        self.assertEqual(sum('OCR backend ready' in str(c) for c in logger.info.call_args_list), 1)
-        self.assertEqual(sum('OCR backend switched to CPU' in str(c) for c in logger.warning.call_args_list), 1)
+        self.assertEqual(sum('OCR 后端已就绪' in str(c) for c in logger.info.call_args_list), 1)
+        self.assertEqual(sum('OCR 后端已切换至 CPU' in str(c) for c in logger.warning.call_args_list), 1)
 
     def test_cpu_runtime_error_propagates_without_repeated_fallback(self):
         core = FakeCore({})

@@ -78,7 +78,7 @@ class TestMouseResetImport(unittest.TestCase):
         api = SimpleNamespace(GetCursorPos=Mock(side_effect=error))
         with patch.dict('sys.modules', {'win32api': api}):
             task.mouse_reset()
-        logger.error.assert_called_once_with('mouse_reset exception', error)
+        logger.error.assert_called_once_with('复原鼠标位置时出错', error)
         task.handler.post.assert_not_called()
 
     def test_missing_native_dependency_uses_existing_error_handler(self):

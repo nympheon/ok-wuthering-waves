@@ -39,12 +39,12 @@ class Lucilla(BaseChar):
         while time.time() - start < self.CHARGE_TIME_OUT:
             # 能量满但放不出(短CD / 切回UI未渲染读假 / 任何原因) -> 别溢出空攒, 直接切人
             if self.energy_full() and not self.liberation_available():
-                self.logger.info('Lucilla energy full but liberation not castable, switch')
+                self.logger.info('洛瑟菈共鸣能量已满，但无法施放共鸣解放，切换角色')
                 break
 
             # 能量没满且大招在较长 CD -> 没必要攒, 切人省时间
             if not self.liberation_available() and self.task.get_cd('liberation') > self.LIBERATION_CD_SKIP:
-                self.logger.info('Lucilla liberation on long cd, switch to save time')
+                self.logger.info('洛瑟菈共鸣解放冷却时间较长，提前切换角色')
                 break    
 
             if self.try_liberation():
@@ -103,13 +103,13 @@ class Lucilla(BaseChar):
             self.send_liberation_key()
             self.sleep(0.1, check_combat=False)
         self.record_liberation_use()
-        self.logger.info('Lucilla perform lib')
+        self.logger.info('洛瑟菈施放共鸣解放')
 
         self.sleep(self.LIBERATION_ANIMATION_TIME, check_combat=False)
         
         # 恢复调用脉冲重击, con 归零会在内部自动提前 break
         self.pulse_heavy_attack(self.LIBERATION_HEAVY_TIME)
-        self.logger.info('Lucilla perform lib end')
+        self.logger.info('洛瑟菈的共鸣解放操作结束')
 
     def pulse_heavy_attack(self, total_time):
         """变身后脉冲式重击 total_time 秒: 反复 mouse_down/sleep/mouse_up.
@@ -133,7 +133,7 @@ class Lucilla(BaseChar):
             if con > 0.1:
                 seen_active = True
             elif seen_active and con < 0.05:
-                self.logger.info('Lucilla transform ended, stop pulse heavy early')
+                self.logger.info('洛瑟菈的变身已结束，提前停止脉冲重击')
                 break
                 
             self.sleep(0.02, check_combat=False) 
