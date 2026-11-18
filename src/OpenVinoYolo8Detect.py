@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Tuple
 
 from openvino import Core
@@ -21,12 +22,11 @@ class OpenVinoYolo8Detect:
         self.core = Core()
 
         try:
-            model = self.core.read_model(model=self.openfile_name_model)
-
+            model = None
             device_used = "CPU"
-            is_compiled = False
 
             if "NPU" in self.core.available_devices:
+                model = self.core.read_model(model=self.openfile_name_model)
                 try:
                     self.compiled_model = self.core.compile_model(
                         model=model,
@@ -34,16 +34,11 @@ class OpenVinoYolo8Detect:
                         config={"PERFORMANCE_HINT": "LATENCY"}
                     )
                     device_used = "NPU"
-                    is_compiled = True
                 except Exception:
                     pass
 
-            if not is_compiled:
-                self.compiled_model = self.core.compile_model(
-                    model=model,
-                    device_name="CPU",
-                    config={"PERFORMANCE_HINT": "LATENCY"}
-                )
+            if device_used == "CPU":
+                self.compiled_model = self._compile_cpu(model)
 
             self.input_layer = self.compiled_model.input(0)
             self.output_layer = self.compiled_model.output(0)
@@ -55,6 +50,23 @@ class OpenVinoYolo8Detect:
         except Exception as e:
             logger.error(f"初始化 OpenVINO 失败：{e}")
             raise RuntimeError("无法初始化 OpenVINO 模型") from e
+
+    def _compile_cpu(self, model):
+        config = {"PERFORMANCE_HINT": "LATENCY"}
+        cache_dir = Path("cache/openvino/echo-yolo")
+        try:
+            return self.core.compile_model(
+                model=str(self.openfile_name_model),
+                device_name="CPU",
+                config={**config, "CACHE_DIR": str(cache_dir)},
+            )
+        except (RuntimeError, UnicodeDecodeError) as error:
+            # On localized Windows, a native cache error can surface during decoding.
+            logger.warning(f"声骸模型缓存编译失败，改为直接编译：{error}")
+
+        if model is None:
+            model = self.core.read_model(model=self.openfile_name_model)
+        return self.core.compile_model(model=model, device_name="CPU", config=config)
 
     def letterbox(self, img: np.ndarray, new_shape: Tuple[int, int] = (640, 640)) -> Tuple[np.ndarray, Tuple[int, int]]:
         shape = img.shape[:2]
@@ -77,7 +89,8 @@ class OpenVinoYolo8Detect:
 
         img, pad = self.letterbox(img, (self.input_width, self.input_height))
 
-        image_data = np.array(img, dtype=np.float32) / 255.0
+        image_data = np.array(img, dtype=np.float32)
+        image_data /= 255.0
         image_data = np.transpose(image_data, (2, 0, 1))
         image_data = np.expand_dims(image_data, axis=0)
 
