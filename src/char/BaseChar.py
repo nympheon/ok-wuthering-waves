@@ -9,6 +9,7 @@ from ok import Config, Logger  # noqa
 from src import text_white_color  # noqa
 
 SKILL_TIME_OUT = 15
+RESONANCE_STILL_READY_TIME_OUT = 2  # stop pressing E once it has stayed ready this long after the first press
 
 
 class CharType(StrEnum):
@@ -432,6 +433,14 @@ class BaseChar:
             if not self.resonance_available() and (
                     not has_animation or now - start > animation_min_duration):
                 self.logger.debug('共鸣技能不可用，停止按键')
+                break
+            if (time_out == 0 and not has_animation and resonance_click_time != 0
+                    and now - resonance_click_time > RESONANCE_STILL_READY_TIME_OUT):
+                # The icon still reads as ready after pressing (a skill with charges, a
+                # follow-up form, or a press the game ignored). Waiting out
+                # SKILL_TIME_OUT here kept characters on field for 15s+.
+                self.logger.info(
+                    f'首次按下共鸣技能后 {now - resonance_click_time:.1f} 秒仍显示可用，停止连按')
                 break
             self.logger.debug('共鸣技能可用，发送按键')
 
