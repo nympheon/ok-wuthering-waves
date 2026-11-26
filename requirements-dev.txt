@@ -68,12 +68,14 @@ ok-pyside-minimal==6.12.0.post2
     # via
     #   echodesk (pyproject.toml)
     #   ok-script
-ok-script==3.0.13
+ok-script==3.0.14
     # via echodesk (pyproject.toml)
 onnxocr-ppocrv6==0.0.1
     # via
     #   echodesk (pyproject.toml)
     #   ok-script
+opencc==1.4.2
+    # via echodesk (pyproject.toml)
 opencv-python==5.1.0.95
     # via echodesk (pyproject.toml)
 opentelemetry-api==1.45.2
