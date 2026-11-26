@@ -10,7 +10,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 from ok.util.config import Config
 
 logger = logging.getLogger(__name__)
-DEFAULT_BASE_URL = 'https://eeeeeeeedison.github.io/wwlibrary'
+DEFAULT_BASE_URL = 'https://raw.githubusercontent.com/wk321425/coco-ww-char-code/main'
 SETTINGS_FILE = 'code_fetch.json'
 DEFAULT_ARCHIVE_HOSTS = {'github.com', 'raw.githubusercontent.com'}
 LEGACY_HOSTS = {'okwwcharcode.ok-script.com', 'cfokwwchar.ok-script.com'}
@@ -97,6 +97,11 @@ def archive_url(value, settings=None):
 def repository_url():
     base = load_settings()['base_url']
     parsed = urlparse(base)
+    if parsed.hostname == 'raw.githubusercontent.com':
+        parts = parsed.path.strip('/').split('/', 2)
+        if len(parts) == 3:
+            owner, project, _ = parts
+            return f'https://github.com/{owner}/{project}'
     if parsed.hostname.endswith('.github.io') and parsed.path.strip('/'):
         owner = parsed.hostname.removesuffix('.github.io')
         project = parsed.path.strip('/').split('/')[0]

@@ -37,6 +37,7 @@ from src.char.CustomCharLoader import (
 from src.char.Mortefi import Mortefi
 from src.char.Suisui import Suisui
 from src.char.Verina import Verina
+from src.char.WorkshopSource import DEFAULT_BASE_URL
 from src.char.YangYangSp import YangYangSp
 from src.gui.CharacterCodeTab import (
     STATE_DOT_SIZE, CharacterCodeTab, ExportTeamDialog, ImportTeamDialog, TeamInfoDialog,
@@ -99,7 +100,7 @@ class TestCharacterCodeTab(unittest.TestCase):
             dialog.source_edit.setText('https://example.org/unsaved')
             dialog.reject()
             self.assertEqual(workshop_team_url((Baizhi, Augusta, Aemeath)),
-                             'https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json')
+                             f'{DEFAULT_BASE_URL}/teams/Aemeath_Augusta_Baizhi.json')
         finally:
             dialog.deleteLater()
             window.deleteLater()
@@ -244,13 +245,13 @@ class TestCharacterCodeTab(unittest.TestCase):
     def test_workshop_url_uses_sorted_team_slug(self):
         self.assertEqual(
             workshop_team_url((Baizhi, Augusta, Aemeath)),
-            "https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json",
+            f"{DEFAULT_BASE_URL}/teams/Aemeath_Augusta_Baizhi.json",
         )
 
     def test_workshop_url_sanitizes_character_name_punctuation(self):
         self.assertEqual(
             workshop_team_url((YangYangSp, Chisa, Suisui)),
-            "https://eeeeeeeedison.github.io/wwlibrary/teams/Chisa_Suisui_Yangyang_Xuanling.json",
+            f"{DEFAULT_BASE_URL}/teams/Chisa_Suisui_Yangyang_Xuanling.json",
         )
 
     def test_workshop_codes_are_sorted_by_timestamp_descending(self):
@@ -280,8 +281,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(request.get_header("User-agent"), "EchoDesk")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
         log_info.assert_called_once_with(
-            "向角色代码工坊请求队伍："
-            "https://eeeeeeeedison.github.io/wwlibrary/teams/Aemeath_Augusta_Baizhi.json"
+            f"向角色代码工坊请求队伍：{DEFAULT_BASE_URL}/teams/Aemeath_Augusta_Baizhi.json"
         )
 
     def test_workshop_404_is_an_empty_list(self):
@@ -299,7 +299,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(codes[0]["name"], "Test code")
         self.assertEqual(codes[0]["team"], "Test team")
         request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://eeeeeeeedison.github.io/wwlibrary/teams.json")
+        self.assertEqual(request.full_url, f"{DEFAULT_BASE_URL}/teams.json")
         self.assertEqual(request.get_header("User-agent"), "EchoDesk")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
 
@@ -307,12 +307,11 @@ class TestCharacterCodeTab(unittest.TestCase):
         tab = CharacterCodeTab()
         try:
             for field, url, expected_url in (
-                ("downloadUrl", "https://eeeeeeeedison.github.io/wwlibrary/team.zip",
-                 "https://eeeeeeeedison.github.io/wwlibrary/team.zip"),
+                ("downloadUrl", f"{DEFAULT_BASE_URL}/team.zip", f"{DEFAULT_BASE_URL}/team.zip"),
                 ("rawUrl", "https://raw.githubusercontent.com/example/team.zip",
                  "https://raw.githubusercontent.com/example/team.zip"),
                 ("downloadUrl", "https://okwwcharcode.ok-script.com/codes/team%20name.zip",
-                 "https://eeeeeeeedison.github.io/wwlibrary/codes/team%20name.zip"),
+                 f"{DEFAULT_BASE_URL}/codes/team%20name.zip"),
             ):
                 with (
                     self.subTest(url=url),
