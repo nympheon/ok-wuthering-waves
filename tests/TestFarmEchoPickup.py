@@ -1,6 +1,8 @@
 import unittest
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, patch
 
+from src.combat.CombatCheck import CombatCheck
+from src.scene.WWScene import WWScene
 from src.task.FarmEchoTask import FarmEchoTask
 
 
@@ -59,6 +61,31 @@ class TestFarmEchoPickup(unittest.TestCase):
             steps.mock_calls
         )
         task.incr_drop.assert_called_once_with(True)
+
+    def test_dead_lock_does_not_reenter_combat_during_pickup(self):
+        task = FarmEchoTask.__new__(FarmEchoTask)
+        task._collecting_echo = True
+        task.is_boss = Mock(return_value=True)
+        task.has_health_bar = Mock(return_value=False)
+
+        with patch.object(CombatCheck, 'has_target', return_value=True), \
+                patch('src.task.FarmEchoTask.boss_bar_has_health', return_value=False) as has_sliver:
+            self.assertFalse(task.has_target())
+            has_sliver.return_value = True
+            self.assertTrue(task.has_target())
+
+    def test_echo_end_needs_confirmation_and_live_health_cancels_it(self):
+        task = FarmEchoTask.__new__(FarmEchoTask)
+        task.combat_end_condition = Mock(return_value=True)
+        task.scene = WWScene()
+        task.reset_to_false = Mock(return_value=False)
+        with patch('src.task.FarmEchoTask.time.monotonic', side_effect=[1.0, 2.0, 2.5]):
+            self.assertTrue(task.check_combat_end(False))
+            self.assertIsNone(task.check_combat_end(True))
+            self.assertTrue(task.check_combat_end(False))
+            self.assertFalse(task.check_combat_end(False))
+
+        task.reset_to_false.assert_called_once_with(reason='end condition reached')
 
     def test_pick_echo_failure_triggers_middle_click_before_yolo(self):
         task = make_task({"Repeat Farm Count": 1, "Echo Pickup Method": "Yolo"})

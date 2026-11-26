@@ -2388,3 +2388,375 @@ msgstr "{name} 이미 정리됨 ({defeated}/{total})"
 
 msgid "Timed out on the game login screen."
 msgstr "게임 로그인 화면에서 대기 시간이 초과되었습니다."
+
+msgid "Default Character Code"
+msgstr "캐릭터 기본 코드"
+
+msgid ""
+"A matched team uses its own code. These defaults apply to other lineups."
+msgstr "일치하는 팀은 팀 코드를 사용합니다. 나머지 편성은 여기서 선택한 기본값을 사용합니다."
+
+msgid "EchoDesk Native"
+msgstr "EchoDesk 기본 버전"
+
+msgid "coco Enhanced"
+msgstr "coco 강화 버전"
+
+msgid "Search characters"
+msgstr "캐릭터 검색"
+
+msgid "Show characters with a coco version"
+msgstr "coco 버전이 있는 캐릭터만 보기"
+
+msgid "Selected default: {source}"
+msgstr "선택한 기본값 {source}"
+
+msgid "No matching characters"
+msgstr "일치하는 캐릭터가 없습니다"
+
+msgid "Code updated on {date}"
+msgstr "코드 업데이트 {date}"
+
+msgid "Update date unavailable"
+msgstr "업데이트 날짜 없음"
+
+msgid "coco version unavailable"
+msgstr "coco 버전 없음"
+
+msgid "Use as default"
+msgstr "기본값으로 설정"
+
+msgid "Selected"
+msgstr "선택됨"
+
+msgid "SendInput"
+msgstr "포그라운드 입력 (SendInput)"
+
+msgid "Start Combat with F"
+msgstr "F 키로 전투 시작"
+
+msgid "F Start Delay (seconds)"
+msgstr "F 입력 후 대기 시간(초)"
+
+msgid "F Start Target Grace (seconds)"
+msgstr "F 입력 후 대상 포착 유예 시간(초)"
+
+msgid ""
+"Press F in a focused challenge or dungeon to start combat before an enemy is"
+" visible."
+msgstr "도전 또는 던전에서 게임 창에 포커스가 있을 때 F를 눌러 적이 보이기 전에 전투를 시작합니다."
+
+msgid ""
+"Wait this many seconds after pressing F. Set to 0 to start immediately."
+msgstr "F를 누른 후 지정한 시간만큼 기다립니다. 0으로 설정하면 즉시 시작합니다."
+
+msgid ""
+"Keep fighting for this many seconds while waiting to lock onto an enemy. Set"
+" to 0 to wait until a target is found."
+msgstr "적을 조준할 때까지 이 시간 동안 전투를 유지합니다. 0은 대상을 찾을 때까지 기다립니다."
+
+msgid "Weekly Boss Name"
+msgstr "주간 보스 이름"
+
+msgid "Boss Challenge Name"
+msgstr "강적 도전 보스 이름"
+
+msgid "Special Nightmare Name"
+msgstr "특수 악몽 보스 이름"
+
+msgid "Select by List Position"
+msgstr "목록 위치로 선택"
+
+msgid ""
+"Select a boss by name in the Simplified Chinese game client, or by list "
+"position."
+msgstr "중국어 간체 클라이언트에서는 보스 이름 또는 목록 위치로 선택할 수 있습니다."
+
+msgid ""
+"Select by list position when the game language is not Simplified Chinese."
+msgstr "중국어 간체 이외의 언어에서는 목록 위치로 선택하세요."
+
+msgid "Combat Axis Recorder"
+msgstr "전투 로테이션 기록"
+
+msgid ""
+"Record local combat inputs, switching, recognition, logs and game frames for"
+" replay. Manual recording uses the native PC game window with Auto Combat "
+"turned off."
+msgstr "입력, 교대, 인식, 로그, 화면을 로컬에 기록합니다. 수동 기록은 PC 게임 창에서 자동 전투를 끈 상태로 사용합니다."
+
+msgid "Recording mode"
+msgstr "기록 모드"
+
+msgid "Automatic"
+msgstr "자동"
+
+msgid "Manual"
+msgstr "수동"
+
+msgid "Record other combat tasks"
+msgstr "다른 전투 작업도 기록"
+
+msgid "Record combat recognition"
+msgstr "전투 인식 결과 기록"
+
+msgid "Record combat logs"
+msgstr "전투 로그 기록"
+
+msgid "Combat recording media"
+msgstr "전투 화면 기록 방식"
+
+msgid "Combat recording quality"
+msgstr "전투 기록 화질"
+
+msgid "Save recognition crops"
+msgstr "인식 영역 원본 저장"
+
+msgid "Keep combat recordings"
+msgstr "보관할 전투 기록 수"
+
+msgid "Keep combat media"
+msgstr "보관할 전투 화면 수"
+
+msgid "Manual recording hotkey"
+msgstr "수동 기록 단축키"
+
+msgid "Start manual recording on enemy"
+msgstr "적을 감지하면 수동 기록 시작"
+
+msgid "Manual idle seconds"
+msgstr "수동 기록 유휴 종료 시간(초)"
+
+msgid ""
+"Automatic follows game automation. Manual follows your own combat inputs."
+msgstr "자동은 자동화 동작을, 수동은 직접 입력한 전투 조작을 기록합니다."
+
+msgid "Include battles from on-demand tasks such as farming Echoes."
+msgstr "에코 파밍처럼 직접 시작한 작업의 전투를 포함합니다."
+
+msgid ""
+"Save feature matches, OCR, color ratios, cooldowns and Concerto readings."
+msgstr "특징 일치, OCR, 색상 비율, 재사용 대기 시간 및 협주 판독값을 저장합니다."
+
+msgid "Save the automation thread’s logs during each recorded battle."
+msgstr "기록한 각 전투의 자동화 로그를 저장합니다."
+
+msgid "Images save about four frames per second. Video saves up to twelve."
+msgstr "이미지는 초당 약 4프레임, 동영상은 최대 12프레임을 저장합니다."
+
+msgid ""
+"Standard uses up to 960 px wide, High uses up to 1600 px, and Original uses "
+"the full resolution."
+msgstr "표준은 최대 너비 960px, 높음은 최대 1600px이며 원본은 전체 해상도를 사용합니다."
+
+msgid "Save full-resolution crops for recorded recognition results."
+msgstr "기록한 인식 결과의 영역을 원본 해상도로 저장합니다."
+
+msgid "Keep this many recent timelines under logs/axis_runs."
+msgstr "logs/axis_runs에 보관할 최근 타임라인 수입니다."
+
+msgid "Keep images, video and crops for this many recent recordings."
+msgstr "최근 이 수만큼의 이미지, 동영상 및 인식 영역을 보관합니다."
+
+msgid "Start or stop recording while the native PC game has focus."
+msgstr "PC 게임 창에 포커스가 있을 때 기록을 시작하거나 중지합니다."
+
+msgid ""
+"Start when an enemy is detected. The manual hotkey can still start or stop "
+"recording."
+msgstr "적을 감지하면 기록을 시작합니다. 단축키로 시작하거나 중지할 수도 있습니다."
+
+msgid ""
+"Finish enemy-started recordings after this long without an enemy or attack."
+msgstr "이 시간 동안 적이나 공격이 없으면 자동으로 시작한 기록을 종료합니다."
+
+msgid "Off"
+msgstr "꺼짐"
+
+msgid "Images"
+msgstr "이미지"
+
+msgid "Video"
+msgstr "동영상"
+
+msgid "Standard"
+msgstr "표준"
+
+msgid "High"
+msgstr "높음"
+
+msgid "Original"
+msgstr "원본"
+
+msgid "Combat Replay"
+msgstr "전투 다시 보기"
+
+msgid "Combat Dashboard"
+msgstr "전투 대시보드"
+
+msgid "Home"
+msgstr "홈"
+
+msgid "Recorder settings"
+msgstr "기록 설정"
+
+msgid "Party"
+msgstr "파티"
+
+msgid "Party not recognized yet"
+msgstr "아직 파티를 인식하지 못했습니다"
+
+msgid "Waiting for combat"
+msgstr "전투 대기 중"
+
+msgid "Recording"
+msgstr "기록 중"
+
+msgid "Recorder disabled"
+msgstr "기록 꺼짐"
+
+msgid "Last recording"
+msgstr "최근 기록"
+
+msgid "Elapsed"
+msgstr "경과 시간"
+
+msgid "Latest rotation"
+msgstr "최근 로테이션"
+
+msgid "Switches"
+msgstr "교대"
+
+msgid "On field"
+msgstr "출전 중"
+
+msgid "Inputs"
+msgstr "입력"
+
+msgid "Combat logs"
+msgstr "전투 로그"
+
+msgid "Last 30 seconds"
+msgstr "최근 30초"
+
+msgid "Executor paused"
+msgstr "실행기 일시 중지됨"
+
+msgid "No game selected"
+msgstr "선택한 게임 없음"
+
+msgid "Game connection"
+msgstr "게임 연결"
+
+msgid "Farm 4C Echo"
+msgstr "4코스트 에코 파밍"
+
+msgid "{count} Echoes"
+msgstr "에코 {count}개"
+
+msgid "{rate} per hour"
+msgstr "시간당 {rate}개"
+
+msgid ""
+"No local recordings. Enable Combat Axis Recorder in Tasks to record a "
+"battle."
+msgstr "로컬 기록이 없습니다. 작업에서 전투 로테이션 기록을 켜세요."
+
+msgid "No recorded image at this time"
+msgstr "이 시점의 기록 이미지가 없습니다"
+
+msgid "Video will be available after recording ends"
+msgstr "기록 종료 후 동영상을 볼 수 있습니다"
+
+msgid "The selected recording could not be read."
+msgstr "선택한 기록을 읽을 수 없습니다."
+
+msgid "Recording or interrupted"
+msgstr "기록 중이거나 중단됨"
+
+msgid "Playback speed"
+msgstr "재생 속도"
+
+msgid "Seek recording"
+msgstr "재생 위치"
+
+msgid "All events"
+msgstr "모든 이벤트"
+
+msgid "Event type"
+msgstr "이벤트 유형"
+
+msgid "Local folder"
+msgstr "로컬 폴더"
+
+msgid "Play"
+msgstr "재생"
+
+msgid "Previous frame"
+msgstr "이전 프레임"
+
+msgid "Next frame"
+msgstr "다음 프레임"
+
+msgid "Previous event"
+msgstr "이전 이벤트"
+
+msgid "Next event"
+msgstr "다음 이벤트"
+
+msgid "Combat timeline"
+msgstr "전투 타임라인"
+
+msgid "No match"
+msgstr "일치 없음"
+
+msgid "Slot {slot}"
+msgstr "{slot}번 슬롯"
+
+msgid "Recognition"
+msgstr "인식"
+
+msgid "Actions"
+msgstr "동작"
+
+msgid "Events"
+msgstr "이벤트"
+
+msgid "Event"
+msgstr "이벤트"
+
+msgid "Farm target"
+msgstr "파밍 대상"
+
+msgid "Switch delay"
+msgstr "교대 지연"
+
+msgid "Image zoom"
+msgstr "이미지 확대"
+
+msgid "Fit to view"
+msgstr "창에 맞추기"
+
+msgid "{count} dropped frames"
+msgstr "{count}개 프레임 누락"
+
+msgid "Manual recording started"
+msgstr "수동 기록을 시작했습니다"
+
+msgid "Manual recording finished"
+msgstr "수동 기록이 종료되었습니다"
+
+msgid "Manual combat"
+msgstr "수동 전투"
+
+msgid "Turn off Auto Combat for manual recording"
+msgstr "수동 기록을 사용하려면 자동 전투를 끄세요"
+
+msgid "Waiting for manual recording hotkey"
+msgstr "수동 기록 단축키 대기 중"
+
+msgid "Set All to Native"
+msgstr "모두 기본 버전으로"
+
+msgid "Set All to Coco"
+msgstr "모두 Coco 버전으로"

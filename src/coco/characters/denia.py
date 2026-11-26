@@ -1,0 +1,64 @@
+"""Selected coco-ww rotation changes based on the current native character."""
+
+
+import time
+from src.Labels import Labels
+from src.char.BaseChar import SwitchPriority
+from src.char.Denia import Denia as NativeDenia
+from src.coco.characters.base import CocoCharacter
+
+
+class Denia(CocoCharacter, NativeDenia):
+    AFTER_LIB1_DURATION = 6.0
+
+    def do_perform(self):
+        if self.has_intro:
+            self.continues_normal_attack(2)
+        elif self.lib_1_casted:
+            self.continues_normal_attack(1.3)
+        duration = 1.2
+        if self.lib_1_casted:
+            duration = 4.4
+        start = time.time()
+        while self.time_elapsed_accounting_for_freeze(start) < duration:
+            self.cycle_start()
+            if self.time_elapsed_accounting_for_freeze(self.lib_2) < 10 and self.is_con_full():
+                return self.switch_next_char()
+            if self.click_resonance()[0]:
+                pass
+            elif self.liberation_available():
+                is_lib2 = self.task.find_one(Labels.denia_end_lib)
+                if self.click_liberation(wait_if_cd_ready=0):
+                    if is_lib2:
+                        self.lib_2 = time.time()
+                        self.lib_1_casted = False
+                        self.click_echo(time_out=0)
+                        return self.switch_next_char()
+                    else:
+                        # 一段大招进紫妮后留在场上: 强化E(第二段点普攻也能出) -> 四段普攻攒满共形能量 -> 二段大招
+                        self.lib_1_casted = True
+                        start = time.time()
+                        duration = self.AFTER_LIB1_DURATION
+                pass
+            else:
+                self.click()
+            self.cycle_sleep()
+
+        self.switch_next_char()
+
+    def get_switch_priority(self, current_char=None, has_intro=False, target_low_con=False):
+        if has_intro:
+            from src.char.Aemeath import Aemeath
+            from src.char.Chisa import Chisa
+            from src.char.Qingxiao import Qingxiao
+
+            if isinstance(current_char, Chisa) and not self.has_buff():
+                # 爱达千标准轴: 千咲变奏 -> 达妮娅 -> 变奏爱弥斯(吃两人延奏) -> 千咲
+                return SwitchPriority.HIGH
+            if isinstance(current_char, (Aemeath, Qingxiao)) and not self.has_buff():
+                return SwitchPriority.NORMAL
+            return SwitchPriority.NO + 1
+        elif self.has_buff():
+            return SwitchPriority.LOW
+        else:
+            return super().get_switch_priority(current_char, has_intro, target_low_con)

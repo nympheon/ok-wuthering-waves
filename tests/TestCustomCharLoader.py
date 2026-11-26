@@ -24,6 +24,9 @@ from src.char.CustomCharLoader import (
 )
 from src.char.Mortefi import Mortefi
 from src.char.Verina import Verina
+from src.coco.characters.defaults import COCO, NATIVE, set_source
+from src.coco.characters.mortefi import Mortefi as CocoMortefi
+from src.coco.macro_export import inline_macrokit
 
 
 class TestCustomCharLoader(unittest.TestCase):
@@ -39,6 +42,50 @@ class TestCustomCharLoader(unittest.TestCase):
         clear_team_char_cache()
         Config.config_folder = self.old_config_folder
         self.temp_dir.cleanup()
+
+    def test_default_source_is_per_character_and_saved_team_still_wins(self):
+        class Task:
+            pass
+
+        task = Task()
+        team = (Mortefi, Chixia, Verina)
+        chars = [Mortefi(task, 0, char_name=Labels.char_mortefi),
+                 Chixia(task, 1, char_name=Labels.char_chixia),
+                 Verina(task, 2, char_name=Labels.char_verina)]
+        set_source('Mortefi', COCO)
+        apply_team_char_classes(task, chars)
+        self.assertIs(type(chars[0]), CocoMortefi)
+        self.assertIs(type(chars[2]), Verina)
+
+        create_custom_team(team)
+        apply_team_char_classes(task, chars)
+        self.assertIs(type(chars[0]), Mortefi)
+        save_team_char_code(team, Mortefi, '''from src.char.Mortefi import Mortefi as Native
+class Mortefi(Native):
+    team_marker = 42
+''')
+        apply_team_char_classes(task, chars)
+        self.assertEqual(chars[0].team_marker, 42)
+
+        chars.pop()
+        apply_team_char_classes(task, chars)
+        self.assertIs(type(chars[0]), CocoMortefi)
+        set_source('Mortefi', NATIVE)
+        apply_team_char_classes(task, chars)
+        self.assertIs(type(chars[0]), Mortefi)
+
+    def test_shared_macro_export_retains_inline_statements_and_aliases(self):
+        code = '''lead = 4; from src.combat.MacroKit import MacroKit as Kit; rotation = 1
+import src.coco.macrokit as macros; second = 2
+class Mortefi(Kit):
+    marker = (lead, rotation, second)
+    exception = macros.MacroBroken
+'''
+        exported = inline_macrokit(code)
+        namespace = {}
+        exec(compile(exported, '<exported rotation>', 'exec'), namespace)
+        self.assertEqual(namespace['Mortefi'].marker, (4, 1, 2))
+        self.assertIs(namespace['Mortefi'].exception, namespace['macros'].MacroBroken)
 
     def test_loads_enabled_custom_char_class(self):
         code = """

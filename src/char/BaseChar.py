@@ -7,6 +7,7 @@ import numpy as np  # noqa
 
 from ok import Config, Logger  # noqa
 from src import text_white_color  # noqa
+from src.coco.combat_timing import monitor_rotation, precise_wait
 
 SKILL_TIME_OUT = 15
 RESONANCE_STILL_READY_TIME_OUT = 2  # stop pressing E once it has stayed ready this long after the first press
@@ -226,8 +227,13 @@ class BaseChar:
         intact so timing/logging behavior remains consistent.
         """
         self.last_perform = time.time()
-        self.do_perform()
+        with monitor_rotation(self):
+            self.do_perform()
         self.logger.debug(f'清除当前角色标记，槽位 {self.index}')
+
+    def precise_wait(self, seconds):
+        """Wait between macro inputs while still responding to pauses and stops."""
+        precise_wait(self.task, seconds)
 
     def wait_down(self, click=True):
         """等待角色从空中落下到地面。"""

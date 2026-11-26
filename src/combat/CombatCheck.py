@@ -152,6 +152,11 @@ class CombatCheck(BaseWWTask):
     def is_boss(self):
         return self.find_one('boss_break_shield') or self.find_one('boss_break_lock')
 
+    def check_combat_end(self, has_health):
+        if self.combat_end_condition is not None and self.combat_end_condition():
+            return self.reset_to_false(reason='end condition reached')
+        return None
+
     def do_check_in_combat(self, target):
         if self.in_liberation:
             return True
@@ -174,8 +179,9 @@ class CombatCheck(BaseWWTask):
                 # 且要先于结束条件判断, 避免技能特效/血条闪烁让声骸识别误判战斗结束
                 self.last_in_realm_not_combat = 0
                 return self.scene.set_in_combat()
-            if self.combat_end_condition is not None and self.combat_end_condition():
-                return self.reset_to_false(reason='end condition reached')
+            end_status = self.check_combat_end(has_health)
+            if end_status is not None:
+                return end_status
             retarget_timeout = 30 if has_health else self.target_enemy_time_out
             if self.target_enemy(wait=True, time_out=retarget_timeout, check_health=has_health):
                 logger.debug('重新锁定敌人成功')

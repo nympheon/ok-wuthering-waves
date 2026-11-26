@@ -1,0 +1,438 @@
+{
+  "native": {
+    "Aalto": {
+      "date": "2026-10-24",
+      "commit": "5bc5aeb775c70bd870b1ca20a7c473bab1cbf090"
+    },
+    "Aemeath": {
+      "date": "2026-10-08",
+      "commit": "36b4b28e77a7b5c8fe015c9a5f89e02c1ca9858c"
+    },
+    "Augusta": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Baizhi": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Brant": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Calcharo": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Camellya": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Cantarella": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Carlotta": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Cartethyia": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Changli": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Chisa": {
+      "date": "2026-08-05",
+      "commit": "80fba6831dacbd84852d845bb3b8e30d7424aae4"
+    },
+    "Chixia": {
+      "date": "2025-03-02",
+      "commit": "1094bd3e26ce35ff8344aa40abaa16d2b1f8dd4d"
+    },
+    "Ciaccona": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Danjin": {
+      "date": "2026-05-21",
+      "commit": "c5d6b3cbeba0738d51ece67f9d5a7e125c7b86b4"
+    },
+    "Denia": {
+      "date": "2026-08-20",
+      "commit": "6d158a1d5c31cdd154c94288a9841503d4b4e4cd"
+    },
+    "Douling": {
+      "date": "2026-10-21",
+      "commit": "6c060a3ae56b6b643bb6b57294f43fe2e8bb9c0e"
+    },
+    "Encore": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Galbrena": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Hiyuki": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Hsin": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Iuno": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Jianxin": {
+      "date": "2025-10-02",
+      "commit": "c92b3679149a2bd97802345e6555885120983c6f"
+    },
+    "JingRan": {
+      "date": "2026-09-11",
+      "commit": "530c69c910f28342ebc79642a56b96f1bef5d8bc"
+    },
+    "Jinhsi": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Jiyan": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Lily": {
+      "date": "2026-11-26",
+      "commit": "f5675d05e2260bf1b355065384d35be81f7adaed"
+    },
+    "Lingyang": {
+      "date": "2026-10-24",
+      "commit": "5bc5aeb775c70bd870b1ca20a7c473bab1cbf090"
+    },
+    "Linnai": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Lucilla": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Lucy": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Luhesi": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Lumi": {
+      "date": "2026-10-24",
+      "commit": "5bc5aeb775c70bd870b1ca20a7c473bab1cbf090"
+    },
+    "Lupa": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Mornye": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Mortefi": {
+      "date": "2025-06-18",
+      "commit": "8b96a29fa8197762d9a1bb1bbad6563e37aff93a"
+    },
+    "Phoebe": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Phrolova": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Qingxiao": {
+      "date": "2026-08-22",
+      "commit": "35c22d7396670d63d852736b37544772f5ddc947"
+    },
+    "Qiuyuan": {
+      "date": "2026-05-21",
+      "commit": "c5d6b3cbeba0738d51ece67f9d5a7e125c7b86b4"
+    },
+    "Rebecca": {
+      "date": "2026-08-29",
+      "commit": "30eda70de946018f3d9cd634e743ee1c8b8afbef"
+    },
+    "Roccia": {
+      "date": "2026-10-27",
+      "commit": "e2ae7811e53d5a2adecdb4387fb39a517e0febfe"
+    },
+    "Rover": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Sanhua": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "ShoreKeeper": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Suisui": {
+      "date": "2026-11-25",
+      "commit": "14b4b473c39f0a029d751f08261f175657485f24"
+    },
+    "Suoming": {
+      "date": "2026-10-22",
+      "commit": "1d0ddb5cf81f023ba0b2d03eb0fc6b099397bfd0"
+    },
+    "Taoqi": {
+      "date": "2024-06-28",
+      "commit": "466b1942efa913ec0a505791f232a55e0d65949e"
+    },
+    "Verina": {
+      "date": "2026-07-01",
+      "commit": "c3d0009300f067b27dafd92644d330150bf02e3d"
+    },
+    "Xiangliyao": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Xigelika": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Yangyang": {
+      "date": "2026-10-24",
+      "commit": "5bc5aeb775c70bd870b1ca20a7c473bab1cbf090"
+    },
+    "YangYangSp": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Yinlin": {
+      "date": "2026-05-21",
+      "commit": "c5d6b3cbeba0738d51ece67f9d5a7e125c7b86b4"
+    },
+    "Youhu": {
+      "date": "2026-05-21",
+      "commit": "c5d6b3cbeba0738d51ece67f9d5a7e125c7b86b4"
+    },
+    "Yuanwu": {
+      "date": "2026-05-21",
+      "commit": "c5d6b3cbeba0738d51ece67f9d5a7e125c7b86b4"
+    },
+    "Zani": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    },
+    "Zhezhi": {
+      "date": "2026-11-18",
+      "commit": "673a5fa50e3074048e3fab1bc6cd1a0ab8a5798e"
+    }
+  },
+  "coco": {
+    "Aemeath": {
+      "module": "aemeath",
+      "date": "2026-11-18",
+      "commit": "4794842e24dee855e647d05f29885ca55cab4c69"
+    },
+    "Baizhi": {
+      "module": "baizhi",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Calcharo": {
+      "module": "calcharo",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Camellya": {
+      "module": "camellya",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Cantarella": {
+      "module": "cantarella",
+      "date": "2026-11-18",
+      "commit": "5514f4205145c0d15208e5f8dadd66b33632679e"
+    },
+    "Carlotta": {
+      "module": "carlotta",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Cartethyia": {
+      "module": "cartethyia",
+      "date": "2026-11-18",
+      "commit": "9f2e51adac83a787371981e86950d130c4e17193"
+    },
+    "Changli": {
+      "module": "changli",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Ciaccona": {
+      "module": "ciaccona",
+      "date": "2026-11-18",
+      "commit": "891dcbb1366dabba63ab2051025cf6481e6fb084"
+    },
+    "Danjin": {
+      "module": "danjin",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Denia": {
+      "module": "denia",
+      "date": "2026-11-18",
+      "commit": "5d0fc75cac8ee0082075d8eadd6432861fa80ceb"
+    },
+    "Douling": {
+      "module": "douling",
+      "date": "2026-11-18",
+      "commit": "08ebcdd1a16e6a3c2af89b6fd624ae54d2669b9d"
+    },
+    "Encore": {
+      "module": "encore",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Galbrena": {
+      "module": "galbrena",
+      "date": "2026-11-18",
+      "commit": "5909e9bc2c312f16f1c860c807c5038e6c699faa"
+    },
+    "Hiyuki": {
+      "module": "hiyuki",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Iuno": {
+      "module": "iuno",
+      "date": "2026-11-18",
+      "commit": "5514f4205145c0d15208e5f8dadd66b33632679e"
+    },
+    "Jianxin": {
+      "module": "jianxin",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Jinhsi": {
+      "module": "jinhsi",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Jiyan": {
+      "module": "jiyan",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Lucilla": {
+      "module": "lucilla",
+      "date": "2026-11-18",
+      "commit": "a6d54845d6176fe977cdf39d8a7b247a870265fd"
+    },
+    "Lucy": {
+      "module": "lucy",
+      "date": "2026-11-18",
+      "commit": "20227a5461636b205e2f1f346fe7e768648ff0c1"
+    },
+    "Luhesi": {
+      "module": "luhesi",
+      "date": "2026-11-18",
+      "commit": "bfd63df62214f2155b340f63622729a0092a5cd6"
+    },
+    "Mortefi": {
+      "module": "mortefi",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Qingxiao": {
+      "module": "qingxiao",
+      "date": "2026-11-18",
+      "commit": "019a8dd84090b4554828ed1f1193886cfdc410da"
+    },
+    "Qiuyuan": {
+      "module": "qiuyuan",
+      "date": "2026-11-18",
+      "commit": "e7e56b74cdfcd3971fbe836db70b23f16717951f"
+    },
+    "Rebecca": {
+      "module": "rebecca",
+      "date": "2026-11-18",
+      "commit": "20227a5461636b205e2f1f346fe7e768648ff0c1"
+    },
+    "Roccia": {
+      "module": "roccia",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Rover": {
+      "module": "rover",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Sanhua": {
+      "module": "sanhua",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "ShoreKeeper": {
+      "module": "shorekeeper",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Suisui": {
+      "module": "suisui",
+      "date": "2026-11-18",
+      "commit": "20227a5461636b205e2f1f346fe7e768648ff0c1"
+    },
+    "Taoqi": {
+      "module": "taoqi",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Verina": {
+      "module": "verina",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Xiangliyao": {
+      "module": "xiangliyao",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Xigelika": {
+      "module": "xigelika",
+      "date": "2026-11-18",
+      "commit": "bfd63df62214f2155b340f63622729a0092a5cd6"
+    },
+    "Yinlin": {
+      "module": "yinlin",
+      "date": "2026-11-18",
+      "commit": "28077f25b2ff450ce9c61c19a97b2a71a9771996"
+    },
+    "Youhu": {
+      "module": "youhu",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    },
+    "Yuanwu": {
+      "module": "yuanwu",
+      "date": "2026-11-18",
+      "commit": "efa83501ba96440ff12f65838f8072334a8886d0"
+    },
+    "Zani": {
+      "module": "zani",
+      "date": "2026-11-18",
+      "commit": "20227a5461636b205e2f1f346fe7e768648ff0c1"
+    },
+    "Zhezhi": {
+      "module": "zhezhi",
+      "date": "2026-11-18",
+      "commit": "f13f59671795a51c8ab7d09dff2b214e60eb02af"
+    }
+  }
+}

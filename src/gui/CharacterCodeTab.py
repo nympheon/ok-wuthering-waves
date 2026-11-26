@@ -2,19 +2,20 @@ import difflib
 import json
 import re
 import tempfile
+import threading
 from datetime import datetime
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from PySide6.QtCore import QPointF, Qt, QSize, QUrl, Signal
+from PySide6.QtCore import QPointF, QRectF, Qt, QSize, QUrl, Signal, Slot
 from PySide6.QtGui import (
-    QColor, QDesktopServices, QFontMetricsF, QPainter, QPixmap, QTextCursor, QTextFormat, QTextLayout,
+    QColor, QDesktopServices, QFontMetricsF, QPainter, QTextCursor, QTextFormat, QTextLayout,
 )
 from PySide6.QtWidgets import (
-    QApplication, QFileDialog, QAbstractItemView, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QListWidget, QListWidgetItem, QPlainTextEdit, QSplitter, QStyle,
+    QApplication, QFileDialog, QAbstractItemView, QCheckBox, QGridLayout, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QListWidget, QListWidgetItem, QPlainTextEdit, QSizePolicy, QSplitter, QStyle,
     QStyledItemDelegate, QStyleOptionViewItem, QTableWidget, QTableWidgetItem, QTextEdit,
     QVBoxLayout, QWidget,
 )
@@ -29,16 +30,21 @@ from ok import Logger, og
 from ok.ui.qt.tasks.EditTaskTab import CodeEditor
 from ok.ui.qt.tasks.PythonHighlighter import PythonHighlighter
 from ok.ui.qt.widget.CustomTab import CustomTab
+from src.char.BaseChar import CharType
 from src.char.CharFactory import apply_team_char_classes, char_dict
 from src.char.CustomCharLoader import (
     TEAM_CODE_MODE_BUILTIN, TEAM_CODE_MODE_IMPORT, TEAM_CODE_STATE_NONE,
     changed_import_members, create_custom_team, delete_custom_team, drifted_team_members,
     export_custom_team, get_english_char_name,
-    import_custom_team, inspect_team_archive, list_custom_teams, normalize_custom_teams,
+    inspect_team_archive, list_custom_teams, normalize_custom_teams,
     normalize_team, read_builtin_char_code, read_team_char_code, read_team_manifest,
     save_team_code_as_import, switch_all_teams_code_mode, switch_team_code_mode, team_code_state,
 )
+from src.coco.team_variants import (
+    activate_team_variant, delete_team_variant, import_active_team_variant, list_team_variants, store_team_variant,
+)
 from src.char.WorkshopSource import archive_url, index_url, load_settings, repository_url, save_settings
+from src.coco.characters.portraits import character_portrait
 
 BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/refs/heads/master/src/char/BaseChar.py"
 WORKSHOP_USER_AGENT = "EchoDesk"
@@ -57,6 +63,9 @@ STATE_DOT_SIZE = 14
 STATE_DOT_CORE_SIZE = 8
 STATE_DOT_HALO_ALPHA = 60
 TEAM_CODE_STATE_ROLE = Qt.UserRole + 1
+TEAM_PORTRAITS_ROLE = Qt.UserRole + 2
+TEAM_PORTRAIT_SIZE = 23
+TEAM_PORTRAIT_GAP = 3
 
 
 def _state_colors(state):
@@ -82,7 +91,7 @@ def _text_middle_y(option, text_rect):
 
 
 class TeamListDelegate(QStyledItemDelegate):
-    """Paints the code state dot of a team level with the middle of its name.
+    """Paint the portraits and align the code state dot with the team name.
 
     An icon would be centered on the row, while the text lands up to two pixels lower
     depending on the font and the scale factor, so the dot is painted here instead.
@@ -91,9 +100,10 @@ class TeamListDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         if index.data(TEAM_CODE_STATE_ROLE) is not None:
-            # keep the room of an icon in front of the name, paint() fills it
+            portraits = index.data(TEAM_PORTRAITS_ROLE) or []
+            width = len(portraits) * (TEAM_PORTRAIT_SIZE + TEAM_PORTRAIT_GAP) + STATE_DOT_SIZE
             option.features |= QStyleOptionViewItem.HasDecoration
-            option.decorationSize = QSize(STATE_DOT_SIZE, STATE_DOT_SIZE)
+            option.decorationSize = QSize(width, TEAM_PORTRAIT_SIZE if portraits else STATE_DOT_SIZE)
 
     def paint(self, painter, option, index):
         opt = QStyleOptionViewItem(option)
@@ -105,15 +115,27 @@ class TeamListDelegate(QStyledItemDelegate):
         style = opt.widget.style() if opt.widget else QApplication.style()
         icon_rect = style.subElementRect(QStyle.SE_ItemViewItemDecoration, opt, opt.widget)
         text_rect = style.subElementRect(QStyle.SE_ItemViewItemText, opt, opt.widget)
+        portraits = index.data(TEAM_PORTRAITS_ROLE) or []
+        painter.save()
+        painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        for slot, portrait in enumerate(portraits):
+            if portrait.isNull():
+                continue
+            scale = TEAM_PORTRAIT_SIZE / max(portrait.width(), portrait.height())
+            width, height = portrait.width() * scale, portrait.height() * scale
+            x = icon_rect.x() + slot * (TEAM_PORTRAIT_SIZE + TEAM_PORTRAIT_GAP)
+            rect = QRectF(x + (TEAM_PORTRAIT_SIZE - width) / 2,
+                          icon_rect.center().y() - height / 2, width, height)
+            painter.drawPixmap(rect, portrait, QRectF(portrait.rect()))
         # snap the core onto device pixels so it stays crisp at any scale factor
         ratio = painter.device().devicePixelRatioF()
         radius = STATE_DOT_CORE_SIZE / 2
-        x = round((icon_rect.x() + icon_rect.width() / 2 - radius) * ratio) / ratio + radius
+        dot_center = icon_rect.x() + icon_rect.width() - STATE_DOT_SIZE / 2
+        x = round((dot_center - radius) * ratio) / ratio + radius
         y = round((_text_middle_y(opt, text_rect) - radius) * ratio) / ratio + radius
         color = team_state_color(state)
         halo = QColor(color)
         halo.setAlpha(STATE_DOT_HALO_ALPHA)
-        painter.save()
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
         painter.setBrush(halo)
@@ -199,6 +221,23 @@ def translate_ui(message):
             "Keep as Imported Code and Switch": "保存为导入代码并切换",
             "Skipped {count} teams whose current code is not kept as imported code, switch them one by one.": "已跳过 {count} 个当前代码未保存为导入代码的队伍，请逐个切换。",
             "Partially Completed": "部分完成",
+            "Team versions": "队伍存档",
+            "Active: {version}": "生效中 · {version}",
+            "Download Team": "下载同队",
+            "Only selected team ({count})": "只看当前队伍（{count}）",
+            "Delete Saved Versions": "删除存档",
+            "Delete Selected": "删除勾选项",
+            "Select the saved versions to delete permanently.": "请选择要永久删除的存档。",
+            "Current code": "当前代码",
+            "Loading Workshop…": "正在连接工坊…",
+            "Downloading…": "正在下载…",
+            "The workshop has no code for this team.": "工坊暂无这支队伍的代码。",
+            "Added {added} versions. {existing} already saved.": "已新增 {added} 份存档，已有 {existing} 份。",
+            "{count} downloads failed: {names}": "{count} 份下载失败：{names}",
+            "{count} versions deleted.": "已删除 {count} 份存档。",
+            "Activated {version}. The previous version was saved.": "已切换至「{version}」，原版本已存档。",
+            "The previous version was saved.": "原版本已存档。",
+            "Saved versions will be available when you add this team again.": "重新添加此队伍后，可以使用已保存的存档。",
         },
         "zh_TW": {
             "Search by team, character, author or description...": "搜尋隊伍、角色、作者或說明...",
@@ -251,6 +290,23 @@ def translate_ui(message):
             "Keep as Imported Code and Switch": "儲存為匯入程式碼並切換",
             "Skipped {count} teams whose current code is not kept as imported code, switch them one by one.": "已跳過 {count} 個目前程式碼未儲存為匯入程式碼的隊伍，請逐一切換。",
             "Partially Completed": "部分完成",
+            "Team versions": "隊伍存檔",
+            "Active: {version}": "生效中 · {version}",
+            "Download Team": "下載同隊",
+            "Only selected team ({count})": "只看目前隊伍（{count}）",
+            "Delete Saved Versions": "刪除存檔",
+            "Delete Selected": "刪除勾選項目",
+            "Select the saved versions to delete permanently.": "請選擇要永久刪除的存檔。",
+            "Current code": "目前程式碼",
+            "Loading Workshop…": "正在連線至工作坊…",
+            "Downloading…": "正在下載…",
+            "The workshop has no code for this team.": "工作坊暫無這支隊伍的程式碼。",
+            "Added {added} versions. {existing} already saved.": "已新增 {added} 份存檔，已有 {existing} 份。",
+            "{count} downloads failed: {names}": "{count} 份下載失敗：{names}",
+            "{count} versions deleted.": "已刪除 {count} 份存檔。",
+            "Activated {version}. The previous version was saved.": "已切換至「{version}」，原版本已存檔。",
+            "The previous version was saved.": "原版本已存檔。",
+            "Saved versions will be available when you add this team again.": "重新新增這支隊伍後，可以使用已儲存的存檔。",
         },
         "ja_JP": {
             "Search by team, character, author or description...": "チーム、キャラクター、作者、説明を検索...",
@@ -466,6 +522,36 @@ class WorkshopSettingsDialog(Dialog):
         return True
 
 
+_ROLE_RANK = {CharType.MAIN_DPS: 0, CharType.SUB_DPS: 1, CharType.HEALER: 3}
+_ROLE_RANK_OVERRIDES = {
+    "Rover": 2,
+    **dict.fromkeys(("ShoreKeeper", "Verina", "Mornye", "Suisui", "Baizhi",
+                     "Youhu", "Lily", "Jianxin", "Taoqi"), 4),
+}
+_CHARACTER_ROLES = {
+    name.casefold(): _ROLE_RANK_OVERRIDES.get(info["cls"].__name__, _ROLE_RANK.get(info.get("char_type"), 5))
+    for info in char_dict.values()
+    for name in (info["cls"].__name__, get_english_char_name(info["cls"]))
+}
+
+
+def team_display_order(names):
+    return sorted(names, key=lambda name: (
+        _CHARACTER_ROLES.get(name.casefold(), 5), get_english_char_name(name).casefold(),
+    ))
+
+
+def team_variant_label(manifest):
+    name = str(manifest.get("name") or "").strip()
+    description = str(manifest.get("description") or "").splitlines()
+    title = name if any("\u2e80" <= char <= "\uffff" for char in name) else next(
+        (line.strip() for line in description if line.strip()), name,
+    )
+    version = str(manifest.get("version") or "").strip()
+    author = str(manifest.get("author") or "").strip()
+    return " · ".join(part for part in (title or translate_ui("Current code"), version, author) if part)
+
+
 def workshop_team_slug(team):
     names = sorted((
         re.sub(r"[^A-Za-z0-9-]+", "_", get_english_char_name(name)).strip("_")
@@ -503,7 +589,9 @@ def fetch_all_workshop_teams():
             continue
         team_str = team_entry.get("team", "")
         members = team_entry.get("members", [])
-        codes = team_entry.get("codes", [])
+        codes = team_entry.get("codes")
+        if not isinstance(codes, list):
+            continue
         for code in codes:
             if not isinstance(code, dict):
                 continue
@@ -541,6 +629,33 @@ def fetch_workshop_codes(team):
         raise ValueError(translate_ui("Workshop returned a different team."))
     codes = [code for code in payload["codes"] if isinstance(code, dict)]
     return sorted(codes, key=lambda code: int(code.get("timestamp") or 0), reverse=True)
+
+
+def workshop_code_members(code):
+    members = code.get("members")
+    if not isinstance(members, list) or not members:
+        members = str(code.get("team") or "").split(",")
+    return [member.strip() for member in members if isinstance(member, str) and member.strip()]
+
+
+def workshop_team_members(team):
+    return sorted(get_english_char_name(name).casefold() for name in normalize_team(team))
+
+
+def matches_workshop_team(code, members):
+    return sorted(name.casefold() for name in workshop_code_members(code)) == members
+
+
+def download_workshop_archive(code):
+    url = archive_url(code.get("downloadUrl") or code.get("rawUrl"))
+    with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=30) as response:
+        content = response.read(20_000_001)
+    if len(content) > 20_000_000:
+        raise ValueError(translate_ui("Workshop archive is too large."))
+    with tempfile.TemporaryDirectory() as temp_dir:
+        archive_path = Path(temp_dir) / "team.zip"
+        archive_path.write_bytes(content)
+        return inspect_team_archive(archive_path)
 
 
 def format_workshop_local_time(code, date_only=False):
@@ -675,11 +790,17 @@ class TeamInfoDialog(TranslatedDialog):
 
 class WorkshopDialog(TranslatedDialog):
     import_requested = Signal(object)
+    batch_requested = Signal()
 
-    def __init__(self, codes, team_name=None, parent=None):
+    def __init__(self, codes, team_name=None, parent=None, team=None):
         super().__init__(parent)
         self.all_codes = list(codes)
-        self.filtered_codes = list(codes)
+        self.filtered_codes = []
+        self.team_members = workshop_team_members(team) if team else []
+        self.same_team_codes = [
+            code for code in self.all_codes if self.team_members and matches_workshop_team(code, self.team_members)
+        ]
+        self.team_only_check = None
         self.panel.setFixedWidth(1100)
         self.panel.setMinimumHeight(560)
         if team_name:
@@ -702,9 +823,7 @@ class WorkshopDialog(TranslatedDialog):
 
         all_chars = set()
         for code in self.all_codes:
-            for member in code.get("members", []):
-                if member:
-                    all_chars.add(member)
+            all_chars.update(workshop_code_members(code))
 
         sorted_chars = sorted(
             all_chars,
@@ -718,9 +837,18 @@ class WorkshopDialog(TranslatedDialog):
         self.count_label = QLabel("", self.panel)
 
         filter_layout.addWidget(self.search_edit, 1)
+        if self.team_members:
+            count = len(self.same_team_codes)
+            self.team_only_check = QCheckBox(self.tr("Only selected team ({count})").format(count=count), self.panel)
+            self.team_only_check.setChecked(count > 0)
+            self.team_only_check.toggled.connect(self._apply_filter)
+            filter_layout.addWidget(self.team_only_check)
         filter_layout.addWidget(QLabel(self.tr("Character:"), self.panel))
         filter_layout.addWidget(self.char_filter_combo)
         filter_layout.addWidget(self.count_label)
+        self.download_status = QLabel(self.tr("Downloading…"), self.panel)
+        self.download_status.hide()
+        filter_layout.addWidget(self.download_status)
         self.body.addLayout(filter_layout)
 
         self.table = QTableWidget(self.panel)
@@ -758,29 +886,35 @@ class WorkshopDialog(TranslatedDialog):
 
         self.ok_button.setText(self.tr("Close"))
         self.set_cancel_visible(False)
+        if self.team_members:
+            self.download_team_button = Button(self.tr("Download Team"), icon="download", parent=self.panel)
+            self.download_team_button.setEnabled(bool(self.same_team_codes))
+            self.download_team_button.clicked.connect(self.batch_requested.emit)
+            self._buttons.insertWidget(0, self.download_team_button)
         self._apply_filter()
 
+    def set_download_pending(self, pending):
+        self.table.setEnabled(not pending)
+        self.download_status.setVisible(pending)
+        if self.team_members:
+            self.download_team_button.setEnabled(not pending and bool(self.same_team_codes))
+
     def _team_display_text(self, code):
-        members = code.get("members")
-        if members and isinstance(members, list):
-            names = [self.tr(get_english_char_name(m.strip())) for m in members if m.strip()]
-            return ", ".join(names)
-        raw_team = code.get("team", "")
-        if raw_team:
-            names = [self.tr(get_english_char_name(m.strip())) for m in raw_team.split(",") if m.strip()]
-            return ", ".join(names)
-        return ""
+        return ", ".join(self.tr(get_english_char_name(name))
+                         for name in team_display_order(workshop_code_members(code)))
 
     def _apply_filter(self):
         query = self.search_edit.text().strip().lower()
         selected_char = self.char_filter_combo.currentData()
+        team_only = self.team_only_check is not None and self.team_only_check.isChecked()
 
         matched = []
         for code in self.all_codes:
-            if selected_char:
-                members = [str(m).casefold() for m in code.get("members", [])]
-                if selected_char.casefold() not in members:
-                    continue
+            members = [name.casefold() for name in workshop_code_members(code)]
+            if team_only and sorted(members) != self.team_members:
+                continue
+            if selected_char and selected_char.casefold() not in members:
+                continue
 
             if query:
                 name = str(code.get("name", "")).lower()
@@ -788,7 +922,7 @@ class WorkshopDialog(TranslatedDialog):
                 description = str(code.get("description", "")).lower()
                 raw_team = str(code.get("team", "")).lower()
                 display_team = self._team_display_text(code).lower()
-                member_names = " ".join(str(m).lower() for m in code.get("members", []))
+                member_names = " ".join(members)
                 
                 search_target = f"{name} {author} {description} {raw_team} {display_team} {member_names}"
                 if query not in search_target:
@@ -871,12 +1005,40 @@ class WorkshopDialog(TranslatedDialog):
                 self.import_requested.emit(code)
 
 
+class VariantDeleteDialog(TranslatedDialog):
+    def __init__(self, variants, parent):
+        super().__init__(parent)
+        self.set_dialog_title(self.tr("Delete Saved Versions"))
+        self.body.addWidget(QLabel(self.tr("Select the saved versions to delete permanently."), self.panel))
+        self.version_list = QListWidget(self.panel)
+        self.version_list.setMinimumHeight(200)
+        for variant_id, manifest in variants:
+            item = QListWidgetItem(team_variant_label(manifest))
+            item.setData(Qt.UserRole, variant_id)
+            item.setCheckState(Qt.Unchecked)
+            item.setToolTip(str(manifest.get("description") or item.text()))
+            self.version_list.addItem(item)
+        self.body.addWidget(self.version_list)
+        self.ok_button.setText(self.tr("Delete Selected"))
+        self.ok_button.set_variant("danger")
+        self.ok_button.setEnabled(False)
+        self.version_list.itemChanged.connect(lambda: self.ok_button.setEnabled(bool(self.selected_ids())))
+
+    def selected_ids(self):
+        items = (self.version_list.item(row) for row in range(self.version_list.count()))
+        return [item.data(Qt.UserRole) for item in items if item.checkState() == Qt.Checked]
+
+
 class CharacterCodeTab(CustomTab):
     current_team_loaded = Signal(object)
+    workshop_job_done = Signal(object, object, object)
 
     def __init__(self):
         super().__init__()
         self.current_team_loaded.connect(self._on_current_team_loaded)
+        self.workshop_job_done.connect(self._finish_workshop_job, Qt.QueuedConnection)
+        self.workshop_busy = False
+        self.workshop_dialog = None
         self.characters = self._unique_characters()
         self.char_by_name = {char_cls.__name__: char_cls for char_cls in self.characters}
         self.current_team = None
@@ -887,10 +1049,6 @@ class CharacterCodeTab(CustomTab):
         self.loading_editor = False
         self.suppress_selection_guard = False
         self.current_code_state = TEAM_CODE_STATE_NONE
-        self.char_label_by_cls = self._char_labels()
-        self.char_feature_index = self._load_char_feature_index()
-        self.char_feature_images = {}
-        self.char_source_pixmaps = {}
         self.show_char_feature_image = False
 
         splitter = QSplitter(Qt.Horizontal, self.view)
@@ -900,8 +1058,6 @@ class CharacterCodeTab(CustomTab):
         left_layout.setContentsMargins(0, 0, 8, 0)
         left_layout.addWidget(QLabel(self.tr("Teams")))
         self.team_list = QListWidget(left)
-        self.team_list.setMinimumWidth(210)
-        self.team_list.setMaximumWidth(300)
         self.team_list.setItemDelegate(TeamListDelegate(self.team_list))
         self.team_list.currentRowChanged.connect(self._team_selected)
         left_layout.addWidget(self.team_list, 1)
@@ -909,41 +1065,46 @@ class CharacterCodeTab(CustomTab):
         self.switch_all_button.setToolTip(
             translate_ui("Switch every team between imported and built in code"))
         self.switch_all_button.clicked.connect(self._switch_all_code_mode)
+        self.switch_all_button.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
         left_layout.addWidget(self.switch_all_button)
-        team_buttons = QVBoxLayout()
-        first_team_button_row = QHBoxLayout()
+        team_buttons = QGridLayout()
+        team_buttons.setColumnStretch(0, 1)
+        team_buttons.setColumnStretch(1, 1)
         self.create_team_button = Button(self.tr("Create Team"), icon="plus", variant="primary")
         self.create_team_button.clicked.connect(self._create_team)
         self.delete_team_button = Button(self.tr("Delete Team"), icon="trash")
         self.delete_team_button.clicked.connect(self._delete_team)
         self.workshop_button = Button(self.tr("Workshop"), icon="layers")
         self.workshop_button.clicked.connect(self._open_workshop)
-        first_team_button_row.addWidget(self.create_team_button)
-        first_team_button_row.addWidget(self.delete_team_button)
-        second_team_button_row = QHBoxLayout()
+        self.fetch_variants_button = Button(translate_ui("Download Team"), icon="download")
+        self.fetch_variants_button.clicked.connect(lambda: self._fetch_team_variants())
         self.import_team_button = Button(self.tr("Import Team"), icon="download")
         self.import_team_button.clicked.connect(self._import_team)
         self.export_team_button = Button(self.tr("Export Selected"), icon="export")
         self.export_team_button.clicked.connect(self._export_team)
-        second_team_button_row.addWidget(self.workshop_button)
-        second_team_button_row.addWidget(self.import_team_button)
-        third_team_button_row = QHBoxLayout()
         self.upload_team_button = Button(self.tr("Upload Team"), icon="github")
         self.upload_team_button.clicked.connect(self._open_upload_team)
-        third_team_button_row.addWidget(self.export_team_button)
-        third_team_button_row.addWidget(self.upload_team_button)
+        self.workshop_settings_button = Button('工坊设置', icon='gear')
+        self.workshop_settings_button.clicked.connect(self._configure_workshop)
+        grid_buttons = (
+            self.create_team_button, self.delete_team_button,
+            self.workshop_button, self.fetch_variants_button,
+            self.import_team_button, self.export_team_button,
+            self.upload_team_button, self.workshop_settings_button,
+        )
+        for index, button in enumerate(grid_buttons):
+            button.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
+            team_buttons.addWidget(button, index // 2, index % 2)
+        button_width = max(button.sizeHint().width() for button in grid_buttons) + 12
+        sidebar_width = max(240, 2 * button_width + max(team_buttons.horizontalSpacing(), 6))
+        self.team_list.setMinimumWidth(sidebar_width)
+        self.team_list.setMaximumWidth(max(320, sidebar_width))
         self.export_current_button = None
         if (getattr(og, "app", None) and getattr(og.app, "config", {}).get("debug", False)
                 and (Path.cwd() / ".git").is_dir()):
             self.export_current_button = Button(self.tr("Export Current"), icon="export")
             self.export_current_button.clicked.connect(self._export_current_team)
-            team_buttons.addWidget(self.export_current_button)
-        team_buttons.addLayout(first_team_button_row)
-        team_buttons.addLayout(second_team_button_row)
-        team_buttons.addLayout(third_team_button_row)
-        self.workshop_settings_button = Button('工坊设置', icon='gear')
-        self.workshop_settings_button.clicked.connect(self._configure_workshop)
-        team_buttons.addWidget(self.workshop_settings_button)
+            team_buttons.addWidget(self.export_current_button, 4, 0, 1, 2)
         left_layout.addLayout(team_buttons)
 
         right = QWidget(splitter)
@@ -951,26 +1112,43 @@ class CharacterCodeTab(CustomTab):
         right_layout.setContentsMargins(8, 0, 0, 0)
         top = QHBoxLayout()
         self.char_image_label = QLabel()
-        self.char_image_label.setFixedSize(52, 52)
+        self.char_image_label.setFixedSize(40, 40)
         self.char_image_label.setAlignment(Qt.AlignCenter)
         self.member_combo = ComboBox(parent=right)
-        self.member_combo.setMinimumWidth(190)
+        self.member_combo.setAccessibleName(self.tr("Character Code"))
+        self.member_combo.setSizeAdjustPolicy(ComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.member_combo.setMinimumWidth(108)
+        self.member_combo.setMaximumWidth(180)
         self.member_combo.currentIndexChanged.connect(self._member_selected)
-        self.team_info_button = Button(self.tr("Team Info"), icon="info")
+        self.team_info_button = Button(icon="info", size="small")
+        self.team_info_button.setToolTip(self.tr("Team Info"))
+        self.team_info_button.setAccessibleName(self.tr("Team Info"))
         self.team_info_button.clicked.connect(self._show_team_info)
         self.team_info_button.hide()
-        self.ask_ai_button = Button(self.tr("Ask AI"), icon="chat")
+        self.ask_ai_button = Button(icon="chat", size="small")
+        self.ask_ai_button.setToolTip(self.tr("Ask AI"))
+        self.ask_ai_button.setAccessibleName(self.tr("Ask AI"))
         self.ask_ai_button.clicked.connect(self._copy_ask_ai_template)
+        self.variant_combo = ComboBox(parent=right)
+        self.variant_combo.setAccessibleName(translate_ui("Team versions"))
+        self.variant_combo.setPlaceholderText(translate_ui("Team versions"))
+        self.variant_combo.setSizeAdjustPolicy(ComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.variant_combo.setMinimumWidth(115)
+        self.variant_combo.currentIndexChanged.connect(self._variant_selected)
+        self.delete_variant_button = Button(icon="trash", size="small")
+        self.delete_variant_button.setToolTip(translate_ui("Delete Saved Versions"))
+        self.delete_variant_button.setAccessibleName(translate_ui("Delete Saved Versions"))
+        self.delete_variant_button.clicked.connect(self._delete_variants)
         top.addWidget(self.char_image_label)
-        top.addWidget(QLabel(self.tr("Character Code")))
         top.addWidget(self.member_combo)
-        top.addStretch(1)
+        top.addWidget(self.variant_combo, 1)
+        top.addWidget(self.delete_variant_button)
         top.addWidget(self.team_info_button)
         top.addWidget(self.ask_ai_button)
         right_layout.addLayout(top)
 
         self.editor = CodeEditor(right)
-        self.editor.setMinimumHeight(520)
+        self.editor.setMinimumHeight(360)
         self.editor.setLineWrapMode(QPlainTextEdit.NoWrap)
         font = self.editor.font()
         font.setFamily("Consolas")
@@ -982,6 +1160,7 @@ class CharacterCodeTab(CustomTab):
 
         bottom = QHBoxLayout()
         self.status_label = QLabel("")
+        self.status_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.reset_button = Button(self.tr("Reset to Built In"), icon="refresh")
         self.reset_button.clicked.connect(self._switch_code_mode)
         self.save_button = Button(self.tr("Save"), icon="check", variant="primary")
@@ -1018,12 +1197,6 @@ class CharacterCodeTab(CustomTab):
         return sorted({info["cls"] for info in char_dict.values()},
                       key=lambda cls: get_english_char_name(cls).casefold())
 
-    def _char_labels(self):
-        result = {}
-        for label, info in char_dict.items():
-            result.setdefault(info["cls"], self._label_name(label))
-        return result
-
     def _refresh_team_list(self, selected_team=None):
         selected_team = normalize_team(selected_team) if selected_team else self.current_team
         teams = list_custom_teams()
@@ -1032,10 +1205,12 @@ class CharacterCodeTab(CustomTab):
         self.team_list.clear()
         selected_row = -1
         for row, team in enumerate(teams):
-            display_team = sorted(team, key=lambda name: get_english_char_name(name).casefold())
+            display_team = team_display_order(team)
             label = ", ".join(self.tr(get_english_char_name(name)) for name in display_team)
             item = QListWidgetItem(label)
             item.setData(Qt.UserRole, list(team))
+            if self.show_char_feature_image:
+                item.setData(TEAM_PORTRAITS_ROLE, [character_portrait(name) for name in display_team])
             self._mark_team_state(item, states[team])
             self.team_list.addItem(item)
             if team == selected_team:
@@ -1048,17 +1223,20 @@ class CharacterCodeTab(CustomTab):
         else:
             self.current_team = None
             self.current_char_cls = None
+            self.current_team_row = -1
+            self.current_member_index = -1
             self.member_combo.clear()
             self._set_editor_enabled(False)
             self._update_team_info_button()
+            self._update_char_image()
+            self._refresh_variants()
         self._update_switch_all_button(states)
         self._update_code_mode_button()
 
     @staticmethod
     def _mark_team_state(item, state):
-        """TeamListDelegate paints the dot of the state in front of the team name."""
         item.setData(TEAM_CODE_STATE_ROLE, state)
-        item.setToolTip(team_state_tooltip(state))
+        item.setToolTip(f"{item.text()}\n{team_state_tooltip(state)}")
 
     def _refresh_team_state_marker(self):
         """Patch the marker of the current row after a single team switch.
@@ -1087,18 +1265,86 @@ class CharacterCodeTab(CustomTab):
         if item is None:
             return
         team = normalize_team(item.data(Qt.UserRole))
-        # A list rebuild re-selects the same team, which must not jump back to the first member.
-        member_index = max(self.current_member_index, 0) if team == self.current_team else 0
+        selected_member = self.current_char_cls.__name__ if team == self.current_team and self.current_char_cls else None
         self.current_team = team
         self.current_team_row = row
         self.member_combo.blockSignals(True)
         self.member_combo.clear()
-        for class_name in self.current_team:
+        for class_name in team_display_order(team):
             self.member_combo.addItem(self.tr(get_english_char_name(class_name)), userData=class_name)
+        member_index = max(self.member_combo.findData(selected_member), 0)
         self.member_combo.setCurrentIndex(member_index)
         self.member_combo.blockSignals(False)
         self._set_editor_enabled(True)
         self._member_selected(member_index)
+        self._refresh_variants()
+
+    def _refresh_variants(self):
+        team = self.current_team
+        variants = []
+        self.variant_combo.blockSignals(True)
+        self.variant_combo.clear()
+        if team is not None:
+            label = team_variant_label(read_team_manifest(team))
+            self.variant_combo.addItem(translate_ui("Active: {version}").format(version=label))
+            try:
+                variants = list_team_variants(team)
+            except OSError as error:
+                logger.warning(f"Cannot list saved versions for {team}: {error}")
+        for variant_id, manifest in variants:
+            label = team_variant_label(manifest)
+            self.variant_combo.addItem(label, userData=variant_id)
+            self.variant_combo.setItemData(self.variant_combo.count() - 1, label, Qt.ToolTipRole)
+        self.variant_combo.setCurrentIndex(0 if team is not None else -1)
+        self.variant_combo.blockSignals(False)
+        self.variant_combo.setToolTip(self.variant_combo.currentText() or translate_ui("Team versions"))
+        self.variant_combo.setEnabled(bool(variants))
+        self.delete_variant_button.setEnabled(bool(variants))
+        self.fetch_variants_button.setEnabled(team is not None and not self.workshop_busy)
+
+    def _variant_selected(self, index):
+        if index <= 0 or self.current_team is None:
+            return
+        team = self.current_team
+        variant_id = self.variant_combo.itemData(index)
+        label = self.variant_combo.itemText(index)
+        if not self._settle_unsaved_changes():
+            self._refresh_variants()
+            return
+        try:
+            activate_team_variant(team, variant_id)
+            self._refresh_team_list(team)
+            self._reload_live_team_code(team)
+        except Exception as error:
+            self._refresh_variants()
+            show_info_bar(self.window(), str(error), title=self.tr("Error"), error=True)
+            return
+        message = translate_ui("Activated {version}. The previous version was saved.").format(version=label)
+        show_info_bar(self.window(), message, title=self.tr("Success"))
+
+    def _delete_variants(self):
+        team = self.current_team
+        if team is None:
+            return
+        try:
+            variants = list_team_variants(team)
+            if not variants:
+                return
+            dialog = VariantDeleteDialog(variants, self.window())
+            try:
+                if not dialog.exec():
+                    return
+                selected = dialog.selected_ids()
+            finally:
+                dialog.deleteLater()
+            for variant_id in selected:
+                delete_team_variant(team, variant_id)
+        except OSError as error:
+            show_info_bar(self.window(), str(error), title=self.tr("Error"), error=True)
+        else:
+            show_info_bar(self.window(), translate_ui("{count} versions deleted.").format(count=len(selected)),
+                          title=self.tr("Success"))
+        self._refresh_variants()
 
     def _update_team_info_button(self):
         """The author's description belongs to the imported code, so it hides while built in code
@@ -1134,8 +1380,6 @@ class CharacterCodeTab(CustomTab):
         for widget in (self.member_combo, self.delete_team_button,
                        self.export_team_button, self.ask_ai_button, self.reset_button, self.save_button):
             widget.setEnabled(enabled)
-        # Workshop button should always remain enabled to allow browsing & importing any team
-        self.workshop_button.setEnabled(True)
         if not enabled:
             self.loading_editor = True
             self.editor.clear()
@@ -1200,13 +1444,12 @@ class CharacterCodeTab(CustomTab):
         if self.current_team is None:
             return
         team = self.current_team
-        display_team = sorted(team, key=lambda name: get_english_char_name(name).casefold())
+        display_team = team_display_order(team)
         team_name = ", ".join(self.tr(get_english_char_name(name)) for name in display_team)
-        box = confirmation_dialog(
-            self.tr("Delete Team"),
-            self.tr("Permanently delete the team {team}?").format(team=team_name),
-            self.window(),
-        )
+        message = self.tr("Permanently delete the team {team}?").format(team=team_name)
+        if self.variant_combo.count() > 1:
+            message += "\n\n" + translate_ui("Saved versions will be available when you add this team again.")
+        box = confirmation_dialog(self.tr("Delete Team"), message, self.window())
         if not box.exec():
             return
         try:
@@ -1569,32 +1812,136 @@ class CharacterCodeTab(CustomTab):
         finally:
             dialog.deleteLater()
 
-    def _open_workshop(self):
-        # An import selects the imported team, so ask before anything is downloaded.
-        if not self._guard_unsaved_changes():
-            return
-        try:
-            codes = fetch_all_workshop_teams()
-        except Exception as e:
-            show_info_bar(self.window(), str(e), title=self.tr("Workshop Error"), error=True)
-            return
-        dialog = WorkshopDialog(codes, parent=self.window())
-        dialog.import_requested.connect(lambda code: self._import_workshop_code(code, dialog))
-        dialog.exec()
+    def _set_workshop_busy(self, busy):
+        self.workshop_busy = busy
+        self.workshop_button.setEnabled(not busy)
+        self.workshop_settings_button.setEnabled(not busy)
+        self.workshop_button.setText(translate_ui("Loading Workshop…") if busy else self.tr("Workshop"))
+        self.fetch_variants_button.setEnabled(not busy and self.current_team is not None)
+        self.fetch_variants_button.setText(translate_ui("Downloading…" if busy else "Download Team"))
 
-    def _import_workshop_code(self, code, parent):
-        try:
-            url = archive_url(code.get('downloadUrl') or code.get('rawUrl'))
-            with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=30) as response:
-                content = response.read(20_000_001)
-            if len(content) > 20_000_000:
-                raise ValueError(self.tr("Workshop archive is too large."))
-            with tempfile.TemporaryDirectory() as temp_dir:
-                archive_path = Path(temp_dir) / Path(str(code.get("filename") or "team.zip")).name
-                archive_path.write_bytes(content)
-                self._preview_and_import_archive(archive_path, expected_team=None)
-        except Exception as e:
-            show_info_bar(parent, str(e), title=self.tr("Workshop Error"), error=True)
+    def _run_workshop_job(self, work, done):
+        self._set_workshop_busy(True)
+        complete = self.workshop_job_done
+
+        def runner():
+            try:
+                result, error = work(), None
+            except Exception as exc:
+                result, error = None, exc
+            try:
+                complete.emit(done, result, error)
+            except RuntimeError:
+                # The tab can be destroyed while a download is in flight.
+                pass
+
+        threading.Thread(target=runner, name="character-workshop", daemon=True).start()
+
+    @Slot(object, object, object)
+    def _finish_workshop_job(self, done, result, error):
+        self._set_workshop_busy(False)
+        done(result, error)
+
+    def _open_workshop(self):
+        if self.workshop_busy or not self._guard_unsaved_changes():
+            return
+
+        def done(codes, error):
+            if error is not None:
+                show_info_bar(self.window(), str(error), title=self.tr("Workshop Error"), error=True)
+                return
+            team = self.current_team
+            dialog = WorkshopDialog(codes, parent=self.window(), team=team)
+            dialog.import_requested.connect(lambda code: self._import_workshop_code(code, dialog))
+            dialog.batch_requested.connect(lambda: self._fetch_team_variants(team=team, dialog=dialog))
+            self.workshop_dialog = dialog
+            try:
+                dialog.exec()
+            finally:
+                self.workshop_dialog = None
+                dialog.deleteLater()
+
+        self._run_workshop_job(fetch_all_workshop_teams, done)
+
+    def _import_workshop_code(self, code, dialog):
+        if self.workshop_busy:
+            return
+        dialog.set_download_pending(True)
+
+        def done(info, error):
+            if dialog is not self.workshop_dialog:
+                return
+            dialog.set_download_pending(False)
+            if error is not None:
+                show_info_bar(dialog, str(error), title=self.tr("Workshop Error"), error=True)
+                return
+            self._confirm_and_import(info)
+
+        self._run_workshop_job(lambda: download_workshop_archive(code), done)
+
+    def _fetch_team_variants(self, *, team=None, dialog=None):
+        team = team or self.current_team
+        if self.workshop_busy or team is None:
+            return
+        team = normalize_team(team)
+        members = workshop_team_members(team)
+        codes = dialog.same_team_codes if dialog is not None else None
+        if dialog is not None:
+            dialog.set_download_pending(True)
+
+        def work():
+            candidates = codes
+            if candidates is None:
+                candidates = [code for code in fetch_all_workshop_teams() if matches_workshop_team(code, members)]
+            downloaded, failed = [], []
+            for code in candidates:
+                name = str(code.get("filename") or code.get("name") or "?")
+                try:
+                    info = download_workshop_archive(code)
+                    if normalize_team(info["team"]) != team:
+                        raise ValueError(translate_ui("The archive is for a different team."))
+                except Exception as error:
+                    logger.warning(f"Cannot download workshop version {name}: {error}")
+                    failed.append(name)
+                else:
+                    downloaded.append((name, info))
+            return downloaded, failed
+
+        def done(result, error):
+            parent = dialog if dialog is not None and dialog is self.workshop_dialog else self.window()
+            if parent is dialog:
+                dialog.set_download_pending(False)
+            if error is not None:
+                show_info_bar(parent, str(error), title=self.tr("Workshop Error"), error=True)
+                return
+            downloaded, failed = result
+            if not downloaded and not failed:
+                show_info_bar(parent, translate_ui("The workshop has no code for this team."),
+                              title=translate_ui("Team versions"))
+                return
+            added, existing = 0, 0
+            for name, info in downloaded:
+                try:
+                    if store_team_variant(info):
+                        added += 1
+                    else:
+                        existing += 1
+                except OSError as error:
+                    logger.warning(f"Cannot save workshop version {name}: {error}")
+                    failed.append(name)
+            if team == self.current_team:
+                self._refresh_variants()
+            message = translate_ui("Added {added} versions. {existing} already saved.").format(
+                added=added, existing=existing,
+            )
+            if failed:
+                message += " " + translate_ui("{count} downloads failed: {names}").format(
+                    count=len(failed), names=", ".join(failed[:3]),
+                )
+            show_info_bar(parent, message, title=translate_ui("Team versions"),
+                          error=bool(failed) and not (added or existing))
+
+        self._run_workshop_job(work, done)
 
     def _preview_and_import_archive(self, archive_path, expected_team=None):
         try:
@@ -1607,19 +1954,28 @@ class CharacterCodeTab(CustomTab):
             box.cancel_button.hide()
             box.exec()
             return False
+        return self._confirm_and_import(info)
+
+    def _confirm_and_import(self, info):
         translated_team = ", ".join(
-            self.tr(name.strip()) for name in info["manifest"]["team"].split(",")
+            self.tr(get_english_char_name(name)) for name in team_display_order(info["team"])
         )
         dialog = ImportTeamDialog(info["manifest"], translated_team, self.window())
-        if not dialog.exec():
+        try:
+            accepted = dialog.exec()
+        finally:
+            dialog.deleteLater()
+        if not accepted or not self._settle_unsaved_changes():
             return False
         try:
-            import_custom_team(info)
+            stashed = import_active_team_variant(info)
             self._refresh_team_list(info["team"])
             reloaded = self._reload_live_team_code(info["team"])
             message = self.tr("Team imported.")
             if reloaded:
                 message = self.tr("Team imported and reloaded for the matching team.")
+            if stashed:
+                message += " " + translate_ui("The previous version was saved.")
             show_info_bar(self.window(), message, title=self.tr("Success"))
             return True
         except Exception as e:
@@ -1681,60 +2037,24 @@ class CharacterCodeTab(CustomTab):
 
     def _update_char_image(self):
         self.char_image_label.clear()
-        if not self.show_char_feature_image:
+        if not self.show_char_feature_image or self.current_char_cls is None:
             return
-        pixmap = self._get_char_feature_image(self.char_label_by_cls.get(self.current_char_cls))
-        if pixmap is not None and not pixmap.isNull():
+        pixmap = character_portrait(self.current_char_cls.__name__)
+        if not pixmap.isNull():
+            ratio = self.devicePixelRatioF()
+            size = round(self.char_image_label.width() * ratio)
+            pixmap = pixmap.scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap.setDevicePixelRatio(ratio)
             self.char_image_label.setPixmap(pixmap)
-
-    def _load_char_feature_index(self):
-        feature_index = {}
-        coco_path = Path("assets") / "coco_annotations.json"
-        if not coco_path.exists():
-            return feature_index
-        try:
-            data = json.loads(coco_path.read_text(encoding="utf-8"))
-            image_by_id = {image["id"]: image["file_name"] for image in data.get("images", [])}
-            category_by_id = {category["id"]: category["name"] for category in data.get("categories", [])}
-            for annotation in data.get("annotations", []):
-                name = category_by_id.get(annotation.get("category_id"))
-                image_name = image_by_id.get(annotation.get("image_id"))
-                bbox = annotation.get("bbox", [])
-                if name and image_name and len(bbox) == 4:
-                    feature_index[name] = (coco_path.parent / image_name, tuple(round(value) for value in bbox))
-        except Exception as e:
-            self.logger.error(f"加载角色特征图片索引失败：{e}")
-        return feature_index
-
-    def _get_char_feature_image(self, label_name):
-        if not label_name:
-            return None
-        if label_name in self.char_feature_images:
-            return self.char_feature_images[label_name]
-        image_info = self.char_feature_index.get(label_name)
-        if not image_info:
-            return None
-        image_path, (x, y, width, height) = image_info
-        pixmap = self.char_source_pixmaps.get(image_path)
-        if pixmap is None:
-            pixmap = QPixmap(str(image_path))
-            self.char_source_pixmaps[image_path] = pixmap
-        if pixmap.isNull():
-            return None
-        image = pixmap.copy(x, y, width, height).scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.char_feature_images[label_name] = image
-        return image
-
-    @staticmethod
-    def _label_name(label):
-        if isinstance(label, tuple):
-            label = label[0]
-        return getattr(label, "value", label)
 
     def showEvent(self, event):
         super().showEvent(event)
         if not self.show_char_feature_image:
             self.show_char_feature_image = True
+            for row in range(self.team_list.count()):
+                item = self.team_list.item(row)
+                members = team_display_order(item.data(Qt.UserRole))
+                item.setData(TEAM_PORTRAITS_ROLE, [character_portrait(name) for name in members])
         self._update_char_image()
 
     def hideEvent(self, event):

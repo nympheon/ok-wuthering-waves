@@ -2383,3 +2383,375 @@ msgstr "{name} はクリア済み（{defeated}/{total}）"
 
 msgid "Timed out on the game login screen."
 msgstr "ゲームのログイン画面でタイムアウトしました。"
+
+msgid "Default Character Code"
+msgstr "キャラクターの既定コード"
+
+msgid ""
+"A matched team uses its own code. These defaults apply to other lineups."
+msgstr "一致する編成ではチームコードを使います。それ以外はここで選んだ既定コードを使います。"
+
+msgid "EchoDesk Native"
+msgstr "EchoDesk 標準版"
+
+msgid "coco Enhanced"
+msgstr "coco 強化版"
+
+msgid "Search characters"
+msgstr "キャラクターを検索"
+
+msgid "Show characters with a coco version"
+msgstr "coco 版があるキャラクターのみ"
+
+msgid "Selected default: {source}"
+msgstr "既定のソース：{source}"
+
+msgid "No matching characters"
+msgstr "該当するキャラクターがありません"
+
+msgid "Code updated on {date}"
+msgstr "コード更新日：{date}"
+
+msgid "Update date unavailable"
+msgstr "更新日不明"
+
+msgid "coco version unavailable"
+msgstr "coco 版はありません"
+
+msgid "Use as default"
+msgstr "既定に設定"
+
+msgid "Selected"
+msgstr "選択済み"
+
+msgid "SendInput"
+msgstr "フォアグラウンド入力 (SendInput)"
+
+msgid "Start Combat with F"
+msgstr "F キーで戦闘開始"
+
+msgid "F Start Delay (seconds)"
+msgstr "F キー入力後の待機時間（秒）"
+
+msgid "F Start Target Grace (seconds)"
+msgstr "F キー入力後に敵を捕捉する猶予（秒）"
+
+msgid ""
+"Press F in a focused challenge or dungeon to start combat before an enemy is"
+" visible."
+msgstr "チャレンジやダンジョンでゲームウィンドウにフォーカスしているときに F を押すと、敵が見える前に戦闘を開始します。"
+
+msgid ""
+"Wait this many seconds after pressing F. Set to 0 to start immediately."
+msgstr "F を押してから指定した秒数待ちます。0 で即時開始します。"
+
+msgid ""
+"Keep fighting for this many seconds while waiting to lock onto an enemy. Set"
+" to 0 to wait until a target is found."
+msgstr "敵を捕捉するまで指定した秒数だけ戦闘を続けます。0 の場合は敵を捕捉するまで続けます。"
+
+msgid "Weekly Boss Name"
+msgstr "週ボス名"
+
+msgid "Boss Challenge Name"
+msgstr "強敵挑戦ボス名"
+
+msgid "Special Nightmare Name"
+msgstr "特殊ナイトメア名"
+
+msgid "Select by List Position"
+msgstr "リストの位置で選択"
+
+msgid ""
+"Select a boss by name in the Simplified Chinese game client, or by list "
+"position."
+msgstr "簡体字中国語クライアントではボス名かリストの位置を選べます。"
+
+msgid ""
+"Select by list position when the game language is not Simplified Chinese."
+msgstr "簡体字中国語以外のゲーム言語ではリストの位置で選択してください。"
+
+msgid "Combat Axis Recorder"
+msgstr "コンボ記録"
+
+msgid ""
+"Record local combat inputs, switching, recognition, logs and game frames for"
+" replay. Manual recording uses the native PC game window with Auto Combat "
+"turned off."
+msgstr "入力、交代、認識結果、ログ、画面をローカルに記録します。手動記録にはネイティブ PC 版と自動戦闘のオフ設定が必要です。"
+
+msgid "Recording mode"
+msgstr "記録モード"
+
+msgid "Automatic"
+msgstr "自動"
+
+msgid "Manual"
+msgstr "手動"
+
+msgid "Record other combat tasks"
+msgstr "他の戦闘タスクも記録"
+
+msgid "Record combat recognition"
+msgstr "戦闘の認識結果を記録"
+
+msgid "Record combat logs"
+msgstr "戦闘ログを記録"
+
+msgid "Combat recording media"
+msgstr "画面の記録形式"
+
+msgid "Combat recording quality"
+msgstr "画面の記録品質"
+
+msgid "Save recognition crops"
+msgstr "認識領域の画像を保存"
+
+msgid "Keep combat recordings"
+msgstr "保持する戦闘記録数"
+
+msgid "Keep combat media"
+msgstr "画面を保持する戦闘数"
+
+msgid "Manual recording hotkey"
+msgstr "手動記録のショートカット"
+
+msgid "Start manual recording on enemy"
+msgstr "敵を検出したら手動記録を開始"
+
+msgid "Manual idle seconds"
+msgstr "手動記録の待機終了時間（秒）"
+
+msgid ""
+"Automatic follows game automation. Manual follows your own combat inputs."
+msgstr "自動は自動操作を、手動は自分の戦闘操作を記録します。"
+
+msgid "Include battles from on-demand tasks such as farming Echoes."
+msgstr "音骸周回など、手動で開始したタスクの戦闘も含めます。"
+
+msgid ""
+"Save feature matches, OCR, color ratios, cooldowns and Concerto readings."
+msgstr "特徴照合、OCR、色比率、クールダウン、協奏の結果を保存します。"
+
+msgid "Save the automation thread’s logs during each recorded battle."
+msgstr "記録した戦闘ごとに自動操作のログを保存します。"
+
+msgid "Images save about four frames per second. Video saves up to twelve."
+msgstr "画像は毎秒約4フレーム、動画は最大12フレームです。"
+
+msgid ""
+"Standard uses up to 960 px wide, High uses up to 1600 px, and Original uses "
+"the full resolution."
+msgstr "標準は幅960px、高画質は1600pxまでで、オリジナルは元の解像度を使います。"
+
+msgid "Save full-resolution crops for recorded recognition results."
+msgstr "記録した認識結果の領域を元の解像度で保存します。"
+
+msgid "Keep this many recent timelines under logs/axis_runs."
+msgstr "logs/axis_runs に保持する最近のタイムラインの件数です。"
+
+msgid "Keep images, video and crops for this many recent recordings."
+msgstr "最近のこの件数分の画像、動画、認識領域を保存します。"
+
+msgid "Start or stop recording while the native PC game has focus."
+msgstr "ネイティブ PC 版のウィンドウにフォーカスしているときに記録を開始または停止します。"
+
+msgid ""
+"Start when an enemy is detected. The manual hotkey can still start or stop "
+"recording."
+msgstr "敵を検出したら開始します。手動ショートカットも引き続き使えます。"
+
+msgid ""
+"Finish enemy-started recordings after this long without an enemy or attack."
+msgstr "指定した時間、敵も攻撃もなければ自動で始まった記録を終了します。"
+
+msgid "Off"
+msgstr "オフ"
+
+msgid "Images"
+msgstr "画像"
+
+msgid "Video"
+msgstr "動画"
+
+msgid "Standard"
+msgstr "標準"
+
+msgid "High"
+msgstr "高画質"
+
+msgid "Original"
+msgstr "オリジナル"
+
+msgid "Combat Replay"
+msgstr "戦闘リプレイ"
+
+msgid "Combat Dashboard"
+msgstr "戦闘ダッシュボード"
+
+msgid "Home"
+msgstr "ホーム"
+
+msgid "Recorder settings"
+msgstr "記録設定"
+
+msgid "Party"
+msgstr "編成"
+
+msgid "Party not recognized yet"
+msgstr "編成をまだ認識していません"
+
+msgid "Waiting for combat"
+msgstr "戦闘待機中"
+
+msgid "Recording"
+msgstr "記録中"
+
+msgid "Recorder disabled"
+msgstr "記録はオフ"
+
+msgid "Last recording"
+msgstr "最新の記録"
+
+msgid "Elapsed"
+msgstr "経過時間"
+
+msgid "Latest rotation"
+msgstr "直近のローテーション"
+
+msgid "Switches"
+msgstr "交代"
+
+msgid "On field"
+msgstr "出場中"
+
+msgid "Inputs"
+msgstr "入力"
+
+msgid "Combat logs"
+msgstr "戦闘ログ"
+
+msgid "Last 30 seconds"
+msgstr "直近30秒"
+
+msgid "Executor paused"
+msgstr "実行を一時停止中"
+
+msgid "No game selected"
+msgstr "ゲームが選択されていません"
+
+msgid "Game connection"
+msgstr "ゲーム接続"
+
+msgid "Farm 4C Echo"
+msgstr "コスト4音骸周回"
+
+msgid "{count} Echoes"
+msgstr "音骸 {count} 個"
+
+msgid "{rate} per hour"
+msgstr "毎時 {rate}"
+
+msgid ""
+"No local recordings. Enable Combat Axis Recorder in Tasks to record a "
+"battle."
+msgstr "ローカル記録はありません。タスクからコンボ記録を有効にしてください。"
+
+msgid "No recorded image at this time"
+msgstr "この時点の記録画像はありません"
+
+msgid "Video will be available after recording ends"
+msgstr "記録終了後に動画を再生できます"
+
+msgid "The selected recording could not be read."
+msgstr "選択した記録を読み込めませんでした。"
+
+msgid "Recording or interrupted"
+msgstr "記録中または中断済み"
+
+msgid "Playback speed"
+msgstr "再生速度"
+
+msgid "Seek recording"
+msgstr "再生位置"
+
+msgid "All events"
+msgstr "すべてのイベント"
+
+msgid "Event type"
+msgstr "イベントの種類"
+
+msgid "Local folder"
+msgstr "ローカルフォルダー"
+
+msgid "Play"
+msgstr "再生"
+
+msgid "Previous frame"
+msgstr "前のフレーム"
+
+msgid "Next frame"
+msgstr "次のフレーム"
+
+msgid "Previous event"
+msgstr "前のイベント"
+
+msgid "Next event"
+msgstr "次のイベント"
+
+msgid "Combat timeline"
+msgstr "戦闘タイムライン"
+
+msgid "No match"
+msgstr "一致なし"
+
+msgid "Slot {slot}"
+msgstr "スロット {slot}"
+
+msgid "Recognition"
+msgstr "認識"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Events"
+msgstr "イベント"
+
+msgid "Event"
+msgstr "イベント"
+
+msgid "Farm target"
+msgstr "周回対象"
+
+msgid "Switch delay"
+msgstr "交代遅延"
+
+msgid "Image zoom"
+msgstr "画像の拡大率"
+
+msgid "Fit to view"
+msgstr "ウィンドウに合わせる"
+
+msgid "{count} dropped frames"
+msgstr "{count} フレームを欠落"
+
+msgid "Manual recording started"
+msgstr "手動記録を開始しました"
+
+msgid "Manual recording finished"
+msgstr "手動記録が終了しました"
+
+msgid "Manual combat"
+msgstr "手動戦闘"
+
+msgid "Turn off Auto Combat for manual recording"
+msgstr "手動記録には自動戦闘をオフにしてください"
+
+msgid "Waiting for manual recording hotkey"
+msgstr "手動記録のショートカット待ち"
+
+msgid "Set All to Native"
+msgstr "全員を標準版に"
+
+msgid "Set All to Coco"
+msgstr "全員を Coco 版に"

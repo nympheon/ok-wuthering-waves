@@ -11,6 +11,9 @@ from src import text_white_color
 from src.char import BaseChar
 from src.char.BaseChar import SwitchPriority, dot_color  # noqa
 from src.char.CharFactory import apply_team_char_classes, get_char_by_pos
+from src.coco.characters.base import switch_priority as coco_switch_priority
+from src.coco.combat_timing import (check_rotation, forget_held_input, release_paused_input,
+                                    remember_held_input, set_direct_mouse_release)
 from src.combat.CombatCheck import CombatCheck
 from src.task.BaseWWTask import isolate_white_text_to_black, binarize_for_matching
 
@@ -738,6 +741,7 @@ class BaseCombatTask(CombatCheck):
         for char in candidates:
             switch_priority = char.get_switch_priority(current_char=current_char, has_intro=has_intro,
                                                        target_low_con=target_low_con)
+            switch_priority = coco_switch_priority(char, switch_priority, current_char)
             if char.healer_full_con_switch_locked():
                 if switch_priority > SwitchPriority.NO:
                     locked_healers.append(char)
@@ -998,6 +1002,7 @@ class BaseCombatTask(CombatCheck):
             timeout (float): 休眠的秒数。
             check_combat (bool, optional): 是否在休眠前检查战斗状态。默认为 True。
         """
+        check_rotation(self)
         if self.skip_combat_check:
             return
         # self.log_debug(f'sleep_check {self._in_combat}')
@@ -1005,6 +1010,48 @@ class BaseCombatTask(CombatCheck):
             self.next_frame()
             if not self.in_combat():
                 self.raise_not_in_combat('等待期间检测到战斗已结束')
+
+    def next_frame(self):
+        check_rotation(self)
+        frame = super().next_frame()
+        check_rotation(self)
+        return frame
+
+    def send_key_down(self, key, after_sleep=0):
+        super().send_key_down(key)
+        remember_held_input(self, 'key', key)
+        if after_sleep > 0:
+            self.sleep(after_sleep)
+
+    def send_key_up(self, key, after_sleep=0):
+        if not release_paused_input(self, 'key', key):
+            super().send_key_up(key)
+            forget_held_input(self, 'key', key)
+            if after_sleep > 0:
+                self.sleep(after_sleep)
+
+    def mouse_down(self, x=-1, y=-1, name=None, key='left'):
+        super().mouse_down(x, y, name=name, key=key)
+        remember_held_input(self, 'mouse', key)
+
+    def mouse_up(self, name=None, key='left'):
+        if not release_paused_input(self, 'mouse', key):
+            super().mouse_up(name=name, key=key)
+            forget_held_input(self, 'mouse', key)
+
+    def track_direct_macro_attack(self, pressed, release):
+        from src.coco.recorder.hooks import note_automation_input
+
+        def release_on_pause():
+            if release(True):
+                note_automation_input(self, 'mouse up', 'left')
+
+        if pressed:
+            note_automation_input(self, 'mouse down', 'left')
+            set_direct_mouse_release(self, release_on_pause)
+        else:
+            note_automation_input(self, 'mouse up', 'left')
+            set_direct_mouse_release(self, None)
 
     def check_combat(self):
         """检查当前是否处于战斗状态, 如果不是则抛出异常。"""

@@ -10,6 +10,7 @@ from pathlib import Path
 
 from ok import Logger
 from ok.util.config import Config
+from src.coco.macro_export import inline_macrokit
 
 logger = Logger.get_logger(__name__)
 
@@ -508,16 +509,19 @@ def export_custom_team(team, destination, name, description, author, version, al
     # A team shares its imported code whichever side is in effect right now; a team
     # never imported shares its current code.
     imported = team_code_state(class_names) != TEAM_CODE_STATE_NONE
+    codes = {}
+    for class_name in class_names:
+        if not folder.is_dir():
+            codes[class_name] = read_builtin_char_code(_registered_char_classes()[class_name])
+            continue
+        code_path = get_team_import_file(class_names, class_name) if imported else folder / f"{class_name}.py"
+        if not code_path.is_file():
+            raise ValueError(f"Missing code for {get_english_char_name(class_name)}")
+        codes[class_name] = inline_macrokit(code_path.read_text(encoding="utf-8"))
     with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.writestr(TEAM_MANIFEST_FILE, json.dumps(manifest, ensure_ascii=False, indent=2))
-        for class_name in class_names:
-            if not folder.is_dir():
-                archive.writestr(f"{class_name}.py", read_builtin_char_code(_registered_char_classes()[class_name]))
-            else:
-                code_path = get_team_import_file(class_names, class_name) if imported else folder / f"{class_name}.py"
-                if not code_path.is_file():
-                    raise ValueError(f"Missing code for {get_english_char_name(class_name)}")
-                archive.write(code_path, f"{class_name}.py")
+        for class_name, source in codes.items():
+            archive.writestr(f"{class_name}.py", source)
     return archive_path
 
 
@@ -770,7 +774,8 @@ def _load_class_from_file(char_cls, path, module_name):
         raise RuntimeError(f"Cannot load custom char module: {path}")
 
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Different snapshots can replace the same path within a single timestamp second.
+    exec(compile(path.read_bytes(), str(path), "exec", dont_inherit=True), module.__dict__)
     custom_cls = getattr(module, char_cls.__name__, None)
     if custom_cls is None:
         raise RuntimeError(f"Custom code must define class {char_cls.__name__}")

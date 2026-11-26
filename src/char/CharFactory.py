@@ -58,7 +58,9 @@ from src.char.Youhu import Youhu
 from src.char.Yuanwu import Yuanwu
 from src.char.Zani import Zani
 from src.char.Zhezhi import Zhezhi
-from src.char.CustomCharLoader import load_team_char_class, normalize_team
+from src.char.CustomCharLoader import get_custom_team_folder, load_team_char_class, normalize_team
+from src.coco.characters.base import CocoCharacter
+from src.coco.characters.defaults import resolve_default_class, source_preferences
 
 _char_dict_raw = {
     Labels.char_aalto: {'cls': Aalto, 'char_type': CharType.SUB_DPS,
@@ -230,19 +232,25 @@ def get_char_by_pos(task, box, index, old_char):
 
 
 def apply_team_char_classes(task, chars):
-    """Apply custom code only after the complete three-character team is known."""
-    if len(chars) != 3 or any(char is None for char in chars):
-        return chars
-    infos = [char_dict.get(char.char_name) for char in chars]
-    if any(info is None for info in infos):
-        return chars
-    builtin_classes = [info['cls'] for info in infos]
-    try:
-        team = normalize_team(builtin_classes)
-    except ValueError:
-        return chars
-    for index, (char, builtin_cls) in enumerate(zip(chars, builtin_classes)):
-        desired_cls = load_team_char_class(builtin_cls, team)
+    """Resolve a saved team's active code, or the fallback for each recognized character."""
+    infos = [char_dict.get(char.char_name) if char is not None else None for char in chars]
+    team = None
+    if len(chars) == 3 and all(infos):
+        builtin_classes = [info['cls'] for info in infos]
+        if len(set(builtin_classes)) == 3:
+            recognized_team = normalize_team(builtin_classes)
+            folder = get_custom_team_folder(recognized_team)
+            if any((folder / f'{member}.py').is_file() for member in recognized_team):
+                team = recognized_team
+    preferences = source_preferences() if team is None else {}
+    for index, (char, info) in enumerate(zip(chars, infos)):
+        if info is None:
+            continue
+        builtin_cls = info['cls']
+        if team is None:
+            desired_cls = resolve_default_class(builtin_cls, preferences)
+        else:
+            desired_cls = load_team_char_class(builtin_cls, team)
         if type(char) is desired_cls:
             continue
         replacement = desired_cls(
@@ -254,8 +262,14 @@ def apply_team_char_classes(task, chars):
             char_type=char.char_type,
             buff_time=char.buff_time,
         )
-        replacement.__dict__.update(char.__dict__)
-        chars[index] = replacement
+        if isinstance(char, CocoCharacter) or isinstance(replacement, CocoCharacter):
+            replacement.last_switch_time = char.last_switch_time
+            replacement.last_switch_in_time = char.last_switch_in_time
+            replacement.last_buff_time = char.last_buff_time
+            replacement.is_current_char = char.is_current_char
+        else:
+            replacement.__dict__.update(char.__dict__)
+        chars[index] = _apply_char_config(task, replacement, info)
     return chars
 
 

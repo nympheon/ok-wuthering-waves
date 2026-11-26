@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 
 from ok.task.exceptions import WaitFailedException
 
+from src.coco import boss_book, boss_entry
 from src.task.BaseCombatTask import BaseCombatTask, CharRevivedException
 from src.task.DomainTask import DomainTask
 from src.task.FarmEchoTask import FarmEchoTask
@@ -200,15 +201,17 @@ class TestFarmEchoDeathReentry(unittest.TestCase):
             with self.subTest(is_team=is_team):
                 task = FarmEchoTask.__new__(FarmEchoTask)
                 task.config = {'Teleport to Boss': 'Boss Challenge', 'Which Boss Challenge to Teleport': 1}
-                task.total_boss_number = 20
                 task.realm_entry_at_heal_point = True
                 noop = lambda *args, **kwargs: None
-                for name in ('ensure_main', 'info_set', 'openF2Book', 'open_boss_book', 'click_team_challenge',
+                for name in ('ensure_main', 'info_set', 'openF2Book',
                              'wait_click_travel', 'wait_in_team_and_world', 'sleep'):
                     setattr(task, name, noop)
-                task.click_on_book_target = lambda *args: is_team
 
-                task.teleport_to_configured_boss()
+                with (patch.object(FarmEchoTask, 'game_lang', 'en_US'),
+                      patch.object(boss_book, 'open_category'), patch.object(boss_book, 'click_boss'),
+                      patch.object(boss_entry, 'wait_after_book_click', return_value=is_team),
+                      patch.object(boss_entry, 'enter_challenge')):
+                    task.teleport_to_configured_boss()
 
                 self.assertEqual(expected, task.realm_entry_at_heal_point)
 

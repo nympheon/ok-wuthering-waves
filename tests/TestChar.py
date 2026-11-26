@@ -26,6 +26,7 @@ from src.char.Suoming import Suoming
 from src.char.Verina import Verina
 from src.char.Yangyang import Yangyang
 from src.char.YangYangSp import YangYangSp
+from src.coco.f_key_start import FKeyStart
 from src.task.BaseCombatTask import BaseCombatTask, NotInCombatException
 from src.task.AutoCombatTask import AutoCombatTask
 from src.task.FarmEchoTask import FarmEchoTask
@@ -421,6 +422,7 @@ class TestChar(TaskTestCase):
         suisui.last_forte3_switch = time.time()
 
         combat = AutoCombatTask.__new__(AutoCombatTask)
+        combat._f_key_start = FKeyStart(combat)
         combat.chars = [current, suisui]
         combat.get_current_char = lambda raise_exception=False: current
         combat.combat_end()

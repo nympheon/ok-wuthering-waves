@@ -2435,3 +2435,409 @@ msgstr "{name} ya limpiado ({defeated}/{total})"
 
 msgid "Timed out on the game login screen."
 msgstr "Se agotó el tiempo de espera en la pantalla de inicio de sesión del juego."
+
+msgid "Default Character Code"
+msgstr "Código predeterminado del personaje"
+
+msgid ""
+"A matched team uses its own code. These defaults apply to other lineups."
+msgstr ""
+"Los equipos coincidentes usan su propio código. Estas opciones se aplican a "
+"otras alineaciones."
+
+msgid "EchoDesk Native"
+msgstr "Versión nativa de EchoDesk"
+
+msgid "coco Enhanced"
+msgstr "Versión reforzada de coco"
+
+msgid "Search characters"
+msgstr "Buscar personajes"
+
+msgid "Show characters with a coco version"
+msgstr "Solo personajes con versión de coco"
+
+msgid "Selected default: {source}"
+msgstr "Versión predeterminada: {source}"
+
+msgid "No matching characters"
+msgstr "No hay personajes coincidentes"
+
+msgid "Code updated on {date}"
+msgstr "Código actualizado el {date}"
+
+msgid "Update date unavailable"
+msgstr "Fecha de actualización no disponible"
+
+msgid "coco version unavailable"
+msgstr "Versión de coco no disponible"
+
+msgid "Use as default"
+msgstr "Usar como predeterminado"
+
+msgid "Selected"
+msgstr "Seleccionado"
+
+msgid "SendInput"
+msgstr "Entrada en primer plano (SendInput)"
+
+msgid "Start Combat with F"
+msgstr "Iniciar combate con F"
+
+msgid "F Start Delay (seconds)"
+msgstr "Espera tras pulsar F (s)"
+
+msgid "F Start Target Grace (seconds)"
+msgstr "Tiempo para fijar objetivo tras pulsar F (s)"
+
+msgid ""
+"Press F in a focused challenge or dungeon to start combat before an enemy is"
+" visible."
+msgstr ""
+"Pulsa F en un desafío o mazmorra con el juego en primer plano para iniciar "
+"el combate antes de que aparezca el enemigo."
+
+msgid ""
+"Wait this many seconds after pressing F. Set to 0 to start immediately."
+msgstr ""
+"Espera este número de segundos tras pulsar F. Usa 0 para empezar de "
+"inmediato."
+
+msgid ""
+"Keep fighting for this many seconds while waiting to lock onto an enemy. Set"
+" to 0 to wait until a target is found."
+msgstr ""
+"Mantén el combate durante estos segundos mientras se busca un objetivo. Usa "
+"0 para esperar hasta encontrarlo."
+
+msgid "Weekly Boss Name"
+msgstr "Nombre del jefe semanal"
+
+msgid "Boss Challenge Name"
+msgstr "Nombre del jefe del desafío"
+
+msgid "Special Nightmare Name"
+msgstr "Nombre de la pesadilla especial"
+
+msgid "Select by List Position"
+msgstr "Seleccionar por posición"
+
+msgid ""
+"Select a boss by name in the Simplified Chinese game client, or by list "
+"position."
+msgstr ""
+"En el cliente en chino simplificado, selecciona al jefe por nombre o por "
+"posición en la lista."
+
+msgid ""
+"Select by list position when the game language is not Simplified Chinese."
+msgstr "Selecciona por posición si el juego no está en chino simplificado."
+
+msgid "Combat Axis Recorder"
+msgstr "Grabación de rotaciones"
+
+msgid ""
+"Record local combat inputs, switching, recognition, logs and game frames for"
+" replay. Manual recording uses the native PC game window with Auto Combat "
+"turned off."
+msgstr ""
+"Guarda entradas, cambios, reconocimiento, registros y fotogramas para "
+"reproducirlos localmente. La grabación manual usa el juego de PC con el "
+"combate automático desactivado."
+
+msgid "Recording mode"
+msgstr "Modo de grabación"
+
+msgid "Automatic"
+msgstr "Automático"
+
+msgid "Manual"
+msgstr "Manual"
+
+msgid "Record other combat tasks"
+msgstr "Grabar otras tareas de combate"
+
+msgid "Record combat recognition"
+msgstr "Grabar el reconocimiento de combate"
+
+msgid "Record combat logs"
+msgstr "Guardar registros de combate"
+
+msgid "Combat recording media"
+msgstr "Formato de grabación"
+
+msgid "Combat recording quality"
+msgstr "Calidad de grabación"
+
+msgid "Save recognition crops"
+msgstr "Guardar recortes de reconocimiento"
+
+msgid "Keep combat recordings"
+msgstr "Cantidad de grabaciones guardadas"
+
+msgid "Keep combat media"
+msgstr "Cantidad de grabaciones con imágenes"
+
+msgid "Manual recording hotkey"
+msgstr "Atajo de grabación manual"
+
+msgid "Start manual recording on enemy"
+msgstr "Iniciar grabación manual al detectar un enemigo"
+
+msgid "Manual idle seconds"
+msgstr "Tiempo de inactividad manual (s)"
+
+msgid ""
+"Automatic follows game automation. Manual follows your own combat inputs."
+msgstr ""
+"El modo automático sigue la automatización. El modo manual graba tus "
+"acciones de combate."
+
+msgid "Include battles from on-demand tasks such as farming Echoes."
+msgstr ""
+"Incluye los combates de tareas iniciadas manualmente, como el farmeo de "
+"ecos."
+
+msgid ""
+"Save feature matches, OCR, color ratios, cooldowns and Concerto readings."
+msgstr ""
+"Guarda coincidencias, OCR, proporciones de color, tiempos de reutilización y"
+" lecturas de Concierto."
+
+msgid "Save the automation thread’s logs during each recorded battle."
+msgstr "Guarda los registros de automatización de cada combate grabado."
+
+msgid "Images save about four frames per second. Video saves up to twelve."
+msgstr ""
+"Las imágenes se guardan a unos cuatro fotogramas por segundo. El vídeo "
+"guarda hasta doce."
+
+msgid ""
+"Standard uses up to 960 px wide, High uses up to 1600 px, and Original uses "
+"the full resolution."
+msgstr ""
+"Estándar usa un ancho máximo de 960 px, Alta hasta 1600 px y Original "
+"conserva la resolución."
+
+msgid "Save full-resolution crops for recorded recognition results."
+msgstr ""
+"Guarda los recortes de los resultados de reconocimiento en resolución "
+"original."
+
+msgid "Keep this many recent timelines under logs/axis_runs."
+msgstr "Conserva esta cantidad de cronologías recientes en logs/axis_runs."
+
+msgid "Keep images, video and crops for this many recent recordings."
+msgstr ""
+"Conserva imágenes, vídeo y recortes de esta cantidad de grabaciones "
+"recientes."
+
+msgid "Start or stop recording while the native PC game has focus."
+msgstr ""
+"Inicia o detén la grabación cuando el juego nativo de PC esté en primer "
+"plano."
+
+msgid ""
+"Start when an enemy is detected. The manual hotkey can still start or stop "
+"recording."
+msgstr ""
+"Inicia al detectar un enemigo. El atajo manual también permite iniciar o "
+"detener la grabación."
+
+msgid ""
+"Finish enemy-started recordings after this long without an enemy or attack."
+msgstr ""
+"Cierra las grabaciones automáticas tras este tiempo sin enemigos ni ataques."
+
+msgid "Off"
+msgstr "Desactivado"
+
+msgid "Images"
+msgstr "Imágenes"
+
+msgid "Video"
+msgstr "Vídeo"
+
+msgid "Standard"
+msgstr "Estándar"
+
+msgid "High"
+msgstr "Alta"
+
+msgid "Original"
+msgstr "Original"
+
+msgid "Combat Replay"
+msgstr "Repetición de combate"
+
+msgid "Combat Dashboard"
+msgstr "Panel de combate"
+
+msgid "Home"
+msgstr "Inicio"
+
+msgid "Recorder settings"
+msgstr "Ajustes de grabación"
+
+msgid "Party"
+msgstr "Equipo"
+
+msgid "Party not recognized yet"
+msgstr "Aún no se ha reconocido el equipo"
+
+msgid "Waiting for combat"
+msgstr "Esperando combate"
+
+msgid "Recording"
+msgstr "Grabando"
+
+msgid "Recorder disabled"
+msgstr "Grabación desactivada"
+
+msgid "Last recording"
+msgstr "Última grabación"
+
+msgid "Elapsed"
+msgstr "Tiempo transcurrido"
+
+msgid "Latest rotation"
+msgstr "Última rotación"
+
+msgid "Switches"
+msgstr "Cambios"
+
+msgid "On field"
+msgstr "En combate"
+
+msgid "Inputs"
+msgstr "Entradas"
+
+msgid "Combat logs"
+msgstr "Registros de combate"
+
+msgid "Last 30 seconds"
+msgstr "Últimos 30 segundos"
+
+msgid "Executor paused"
+msgstr "Ejecución en pausa"
+
+msgid "No game selected"
+msgstr "No se ha seleccionado un juego"
+
+msgid "Game connection"
+msgstr "Conexión del juego"
+
+msgid "Farm 4C Echo"
+msgstr "Farmear ecos de coste 4"
+
+msgid "{count} Echoes"
+msgstr "{count} ecos"
+
+msgid "{rate} per hour"
+msgstr "{rate} por hora"
+
+msgid ""
+"No local recordings. Enable Combat Axis Recorder in Tasks to record a "
+"battle."
+msgstr ""
+"No hay grabaciones locales. Activa la grabación de rotaciones en Tareas para"
+" grabar un combate."
+
+msgid "No recorded image at this time"
+msgstr "No hay imágenes grabadas en este instante"
+
+msgid "Video will be available after recording ends"
+msgstr "El vídeo estará disponible al terminar la grabación"
+
+msgid "The selected recording could not be read."
+msgstr "No se pudo leer la grabación seleccionada."
+
+msgid "Recording or interrupted"
+msgstr "Grabando o interrumpido"
+
+msgid "Playback speed"
+msgstr "Velocidad de reproducción"
+
+msgid "Seek recording"
+msgstr "Buscar en la grabación"
+
+msgid "All events"
+msgstr "Todos los eventos"
+
+msgid "Event type"
+msgstr "Tipo de evento"
+
+msgid "Local folder"
+msgstr "Carpeta local"
+
+msgid "Play"
+msgstr "Reproducir"
+
+msgid "Previous frame"
+msgstr "Fotograma anterior"
+
+msgid "Next frame"
+msgstr "Fotograma siguiente"
+
+msgid "Previous event"
+msgstr "Evento anterior"
+
+msgid "Next event"
+msgstr "Evento siguiente"
+
+msgid "Combat timeline"
+msgstr "Cronología de combate"
+
+msgid "No match"
+msgstr "Sin coincidencias"
+
+msgid "Slot {slot}"
+msgstr "Posición {slot}"
+
+msgid "Recognition"
+msgstr "Reconocimiento"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Events"
+msgstr "Eventos"
+
+msgid "Event"
+msgstr "Evento"
+
+msgid "Farm target"
+msgstr "Objetivo de farmeo"
+
+msgid "Switch delay"
+msgstr "Retraso al cambiar"
+
+msgid "Image zoom"
+msgstr "Zoom de imagen"
+
+msgid "Fit to view"
+msgstr "Ajustar a la ventana"
+
+msgid "{count} dropped frames"
+msgstr "{count} fotogramas omitidos"
+
+msgid "Manual recording started"
+msgstr "Grabación manual iniciada"
+
+msgid "Manual recording finished"
+msgstr "Grabación manual finalizada"
+
+msgid "Manual combat"
+msgstr "Combate manual"
+
+msgid "Turn off Auto Combat for manual recording"
+msgstr "Desactiva el combate automático para grabar manualmente"
+
+msgid "Waiting for manual recording hotkey"
+msgstr "Esperando el atajo de grabación manual"
+
+msgid "Set All to Native"
+msgstr "Todos con la nativa"
+
+msgid "Set All to Coco"
+msgstr "Todos con Coco"

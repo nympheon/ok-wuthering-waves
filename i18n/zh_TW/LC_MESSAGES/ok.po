@@ -2508,3 +2508,375 @@ msgstr "{name} 已清理（{defeated}/{total}）"
 
 msgid "Timed out on the game login screen."
 msgstr "等待遊戲登入逾時，仍停在登入畫面。"
+
+msgid "Default Character Code"
+msgstr "角色預設程式碼"
+
+msgid ""
+"A matched team uses its own code. These defaults apply to other lineups."
+msgstr "有配隊時使用隊伍程式碼，其餘陣容使用這裡的角色預設版本。"
+
+msgid "EchoDesk Native"
+msgstr "EchoDesk 原生版"
+
+msgid "coco Enhanced"
+msgstr "coco 加固版"
+
+msgid "Search characters"
+msgstr "搜尋角色"
+
+msgid "Show characters with a coco version"
+msgstr "只看有 coco 版的角色"
+
+msgid "Selected default: {source}"
+msgstr "預設使用 {source}"
+
+msgid "No matching characters"
+msgstr "沒有匹配的角色"
+
+msgid "Code updated on {date}"
+msgstr "程式碼更新於 {date}"
+
+msgid "Update date unavailable"
+msgstr "暫無更新日期"
+
+msgid "coco version unavailable"
+msgstr "暫無 coco 版"
+
+msgid "Use as default"
+msgstr "設為預設"
+
+msgid "Selected"
+msgstr "已選擇"
+
+msgid "SendInput"
+msgstr "前臺輸入 (SendInput)"
+
+msgid "Start Combat with F"
+msgstr "按 F 開始戰鬥"
+
+msgid "F Start Delay (seconds)"
+msgstr "按 F 後等待（秒）"
+
+msgid "F Start Target Grace (seconds)"
+msgstr "按 F 後等待鎖敵（秒）"
+
+msgid ""
+"Press F in a focused challenge or dungeon to start combat before an enemy is"
+" visible."
+msgstr "挑戰或副本中的遊戲視窗在前臺時，按 F 提前接管戰鬥。"
+
+msgid ""
+"Wait this many seconds after pressing F. Set to 0 to start immediately."
+msgstr "按 F 後等待指定秒數，設為 0 時立刻開戰。"
+
+msgid ""
+"Keep fighting for this many seconds while waiting to lock onto an enemy. Set"
+" to 0 to wait until a target is found."
+msgstr "未鎖到目標時繼續戰鬥的秒數。設為 0 時等到鎖定目標。"
+
+msgid "Weekly Boss Name"
+msgstr "周本 Boss 名稱"
+
+msgid "Boss Challenge Name"
+msgstr "強敵挑戰 Boss 名稱"
+
+msgid "Special Nightmare Name"
+msgstr "特殊夢魘 Boss 名稱"
+
+msgid "Select by List Position"
+msgstr "按列表位置選擇"
+
+msgid ""
+"Select a boss by name in the Simplified Chinese game client, or by list "
+"position."
+msgstr "簡體中文客戶端可按名稱或列表位置選擇 Boss。"
+
+msgid ""
+"Select by list position when the game language is not Simplified Chinese."
+msgstr "當前遊戲語言請按列表位置選擇 Boss。"
+
+msgid "Combat Axis Recorder"
+msgstr "跑軸記錄"
+
+msgid ""
+"Record local combat inputs, switching, recognition, logs and game frames for"
+" replay. Manual recording uses the native PC game window with Auto Combat "
+"turned off."
+msgstr "在本地記錄按鍵、切人、識別、日誌和畫面以便復盤。手打記錄需要原生 PC 遊戲視窗，並關閉自動戰鬥。"
+
+msgid "Recording mode"
+msgstr "記錄模式"
+
+msgid "Automatic"
+msgstr "自動"
+
+msgid "Manual"
+msgstr "手打"
+
+msgid "Record other combat tasks"
+msgstr "也記錄其他戰鬥任務"
+
+msgid "Record combat recognition"
+msgstr "記錄識別結果"
+
+msgid "Record combat logs"
+msgstr "記錄戰鬥日誌"
+
+msgid "Combat recording media"
+msgstr "畫面記錄方式"
+
+msgid "Combat recording quality"
+msgstr "畫面清晰度"
+
+msgid "Save recognition crops"
+msgstr "儲存識別區域原圖"
+
+msgid "Keep combat recordings"
+msgstr "保留記錄局數"
+
+msgid "Keep combat media"
+msgstr "保留畫面局數"
+
+msgid "Manual recording hotkey"
+msgstr "手開啟始或結束熱鍵"
+
+msgid "Start manual recording on enemy"
+msgstr "發現敵人時自動開始"
+
+msgid "Manual idle seconds"
+msgstr "手打空閒結束秒數"
+
+msgid ""
+"Automatic follows game automation. Manual follows your own combat inputs."
+msgstr "自動模式記錄指令碼操作，手打模式記錄你的戰鬥操作。"
+
+msgid "Include battles from on-demand tasks such as farming Echoes."
+msgstr "也記錄刷聲骸等手動啟動任務中的戰鬥。"
+
+msgid ""
+"Save feature matches, OCR, color ratios, cooldowns and Concerto readings."
+msgstr "記錄特徵匹配、OCR、顏色比例、冷卻和協奏讀數。"
+
+msgid "Save the automation thread’s logs during each recorded battle."
+msgstr "儲存每場戰鬥中的自動化日誌。"
+
+msgid "Images save about four frames per second. Video saves up to twelve."
+msgstr "圖片每秒約 4 幀，影片每秒最多 12 幀。"
+
+msgid ""
+"Standard uses up to 960 px wide, High uses up to 1600 px, and Original uses "
+"the full resolution."
+msgstr "標準最多 960 畫素寬，高畫質最多 1600 畫素寬，原畫保留完整解析度。"
+
+msgid "Save full-resolution crops for recorded recognition results."
+msgstr "儲存已記錄識別結果對應的原始解析度區域。"
+
+msgid "Keep this many recent timelines under logs/axis_runs."
+msgstr "在 logs/axis_runs 中保留最近這麼多局時間線。"
+
+msgid "Keep images, video and crops for this many recent recordings."
+msgstr "為最近這麼多局保留畫面、影片和識別區域。"
+
+msgid "Start or stop recording while the native PC game has focus."
+msgstr "原生 PC 遊戲視窗在前臺時，按這個鍵開始或結束記錄。"
+
+msgid ""
+"Start when an enemy is detected. The manual hotkey can still start or stop "
+"recording."
+msgstr "檢測到敵人時開始記錄，也可以用熱鍵開始或結束。"
+
+msgid ""
+"Finish enemy-started recordings after this long without an enemy or attack."
+msgstr "自動開始的記錄在指定時間內沒有敵人或進攻時結束。"
+
+msgid "Off"
+msgstr "關閉"
+
+msgid "Images"
+msgstr "圖片"
+
+msgid "Video"
+msgstr "影片"
+
+msgid "Standard"
+msgstr "標準"
+
+msgid "High"
+msgstr "高畫質"
+
+msgid "Original"
+msgstr "原畫"
+
+msgid "Combat Replay"
+msgstr "跑軸復盤"
+
+msgid "Combat Dashboard"
+msgstr "戰鬥面板"
+
+msgid "Home"
+msgstr "首頁"
+
+msgid "Recorder settings"
+msgstr "記錄設定"
+
+msgid "Party"
+msgstr "隊伍"
+
+msgid "Party not recognized yet"
+msgstr "暫未識別隊伍"
+
+msgid "Waiting for combat"
+msgstr "等待開戰"
+
+msgid "Recording"
+msgstr "記錄中"
+
+msgid "Recorder disabled"
+msgstr "記錄已關閉"
+
+msgid "Last recording"
+msgstr "最近一局"
+
+msgid "Elapsed"
+msgstr "用時"
+
+msgid "Latest rotation"
+msgstr "最近一輪"
+
+msgid "Switches"
+msgstr "切人"
+
+msgid "On field"
+msgstr "在場"
+
+msgid "Inputs"
+msgstr "按鍵"
+
+msgid "Combat logs"
+msgstr "戰鬥日誌"
+
+msgid "Last 30 seconds"
+msgstr "最近 30 秒"
+
+msgid "Executor paused"
+msgstr "執行器已暫停"
+
+msgid "No game selected"
+msgstr "未選擇遊戲"
+
+msgid "Game connection"
+msgstr "遊戲連線"
+
+msgid "Farm 4C Echo"
+msgstr "刷四費聲骸"
+
+msgid "{count} Echoes"
+msgstr "{count} 個聲骸"
+
+msgid "{rate} per hour"
+msgstr "每小時 {rate}"
+
+msgid ""
+"No local recordings. Enable Combat Axis Recorder in Tasks to record a "
+"battle."
+msgstr "暫無本地記錄。在任務頁開啟「跑軸記錄」即可記錄一場戰鬥。"
+
+msgid "No recorded image at this time"
+msgstr "這個時刻沒有記錄畫面"
+
+msgid "Video will be available after recording ends"
+msgstr "記錄結束後可回看影片"
+
+msgid "The selected recording could not be read."
+msgstr "無法讀取所選記錄。"
+
+msgid "Recording or interrupted"
+msgstr "記錄中或已中斷"
+
+msgid "Playback speed"
+msgstr "播放速度"
+
+msgid "Seek recording"
+msgstr "定位回放"
+
+msgid "All events"
+msgstr "全部事件"
+
+msgid "Event type"
+msgstr "事件型別"
+
+msgid "Local folder"
+msgstr "本地資料夾"
+
+msgid "Play"
+msgstr "播放"
+
+msgid "Previous frame"
+msgstr "上一幀"
+
+msgid "Next frame"
+msgstr "下一幀"
+
+msgid "Previous event"
+msgstr "上一個事件"
+
+msgid "Next event"
+msgstr "下一個事件"
+
+msgid "Combat timeline"
+msgstr "戰鬥時間線"
+
+msgid "No match"
+msgstr "未識別"
+
+msgid "Slot {slot}"
+msgstr "{slot} 號位"
+
+msgid "Recognition"
+msgstr "識別"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Events"
+msgstr "事件"
+
+msgid "Event"
+msgstr "事件"
+
+msgid "Farm target"
+msgstr "刷取目標"
+
+msgid "Switch delay"
+msgstr "切人延遲"
+
+msgid "Image zoom"
+msgstr "畫面縮放"
+
+msgid "Fit to view"
+msgstr "適應視窗"
+
+msgid "{count} dropped frames"
+msgstr "丟失 {count} 幀"
+
+msgid "Manual recording started"
+msgstr "已開始記錄手打"
+
+msgid "Manual recording finished"
+msgstr "手打記錄已結束"
+
+msgid "Manual combat"
+msgstr "手打戰鬥"
+
+msgid "Turn off Auto Combat for manual recording"
+msgstr "關閉自動戰鬥後可記錄手打"
+
+msgid "Waiting for manual recording hotkey"
+msgstr "等待手打記錄熱鍵"
+
+msgid "Set All to Native"
+msgstr "全部設為預設"
+
+msgid "Set All to Coco"
+msgstr "全部設為 Coco"

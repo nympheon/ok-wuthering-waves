@@ -1,6 +1,8 @@
 import os
 import json
 import tempfile
+import threading
+import time
 import unittest
 from concurrent.futures import Future
 from collections import Counter
@@ -19,6 +21,7 @@ from PySide6.QtWidgets import QLabel, QLineEdit, QTableWidget, QTextEdit, QWidge
 from ok.ui.qt.kit.buttons import Button
 from ok.ui.qt.kit.dialogs import Dialog
 from ok.ui.qt.kit.inputs import ComboBox
+from ok.ui.qt.kit.theme import theme
 
 from ok.util.config import Config
 from src.char.Chixia import Chixia
@@ -30,17 +33,19 @@ from src.Labels import Labels
 from src.char.CustomCharLoader import (
     TEAM_CODE_MODE_BUILTIN, TEAM_CODE_MODE_IMPORT, TEAM_CODE_STATE_NONE, clear_team_char_cache,
     create_custom_team, delete_custom_team, export_custom_team, get_custom_team_folder, get_team_code_mode,
-    read_builtin_char_code, read_team_char_code, read_team_import_code, read_team_manifest, save_team_char_code,
+    inspect_team_archive, read_builtin_char_code, read_team_char_code, read_team_import_code, read_team_manifest,
+    save_team_char_code,
     save_team_import_code, set_team_code_mode, switch_all_teams_code_mode, switch_team_code_mode,
     team_code_state, write_team_manifest,
 )
 from src.char.Mortefi import Mortefi
 from src.char.Suisui import Suisui
+from src.coco.team_variants import list_team_variants
 from src.char.Verina import Verina
 from src.char.WorkshopSource import DEFAULT_BASE_URL
 from src.char.YangYangSp import YangYangSp
 from src.gui.CharacterCodeTab import (
-    STATE_DOT_SIZE, CharacterCodeTab, ExportTeamDialog, ImportTeamDialog, TeamInfoDialog,
+    STATE_DOT_SIZE, TEAM_PORTRAITS_ROLE, CharacterCodeTab, ExportTeamDialog, ImportTeamDialog, TeamInfoDialog,
     WorkshopSettingsDialog,
     TeamSelectionDialog, WorkshopDialog, fetch_all_workshop_teams, fetch_workshop_codes,
     team_state_color, workshop_team_url,
@@ -63,6 +68,13 @@ class TestCharacterCodeTab(unittest.TestCase):
         Config.config_folder = self.old_config_folder
         self.temp_dir.cleanup()
 
+    def _wait_for_workshop(self, tab):
+        deadline = time.monotonic() + 3
+        while tab.workshop_busy and time.monotonic() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+        self.assertFalse(tab.workshop_busy)
+
     def test_team_lists_three_editable_character_codes(self):
         team = (Mortefi, Chixia, Verina)
         create_custom_team(team)
@@ -73,6 +85,27 @@ class TestCharacterCodeTab(unittest.TestCase):
             self.assertEqual(tab.member_combo.count(), 3)
             self.assertIsNotNone(tab.current_char_cls)
             self.assertEqual(tab.editor.toPlainText(), read_team_char_code(team, tab.current_char_cls))
+        finally:
+            tab.deleteLater()
+
+    def test_team_shows_portraits_in_character_role_order(self):
+        team = (Mortefi, Aemeath, Baizhi)
+        create_custom_team(team)
+        tab = CharacterCodeTab()
+        try:
+            theme.install(tab)
+            tab.resize(1000, 660)
+            tab.show()
+            self.app.processEvents()
+            row = tab.team_list.currentItem()
+            names = ("Aemeath", "Mortefi", "Baizhi")
+            self.assertEqual(row.text(), ", ".join(names))
+            self.assertEqual(tuple(tab.member_combo.itemData(i) for i in range(3)), names)
+            portraits = row.data(TEAM_PORTRAITS_ROLE)
+            self.assertEqual(len(portraits), 3)
+            self.assertTrue(all(not pixmap.isNull() for pixmap in portraits))
+            for button in (tab.save_button, tab.fetch_variants_button, tab.ask_ai_button):
+                self.assertTrue(tab.rect().contains(button.mapTo(tab, button.rect().bottomRight())))
         finally:
             tab.deleteLater()
 
@@ -305,6 +338,8 @@ class TestCharacterCodeTab(unittest.TestCase):
 
     def test_workshop_archive_sends_app_user_agent(self):
         tab = CharacterCodeTab()
+        dialog = WorkshopDialog([], parent=tab)
+        tab.workshop_dialog = dialog
         try:
             for field, url, expected_url in (
                 ("downloadUrl", f"{DEFAULT_BASE_URL}/team.zip", f"{DEFAULT_BASE_URL}/team.zip"),
@@ -316,19 +351,21 @@ class TestCharacterCodeTab(unittest.TestCase):
                 with (
                     self.subTest(url=url),
                     patch("src.gui.CharacterCodeTab.urlopen") as open_url,
-                    patch.object(tab, "_preview_and_import_archive") as preview,
+                    patch("src.gui.CharacterCodeTab.inspect_team_archive") as inspect_archive,
+                    patch.object(tab, "_confirm_and_import") as preview,
                 ):
                     open_url.return_value.__enter__.return_value.read.return_value = b"archive contents"
-                    preview.side_effect = lambda path, **kwargs: self.assertEqual(
-                        path.read_bytes(), b"archive contents")
-                    tab._import_workshop_code({field: url}, tab)
+                    inspect_archive.side_effect = lambda path: path.read_bytes()
+                    tab._import_workshop_code({field: url}, dialog)
+                    self._wait_for_workshop(tab)
 
                     request = open_url.call_args.args[0]
                     self.assertEqual(request.full_url, expected_url)
                     self.assertEqual(request.get_header("User-agent"), "EchoDesk")
                     self.assertEqual(open_url.call_args.kwargs, {"timeout": 30})
-                    preview.assert_called_once()
+                    preview.assert_called_once_with(b"archive contents")
         finally:
+            dialog.deleteLater()
             tab.deleteLater()
 
     def test_team_dialogs_use_qt_kit_widgets(self):
@@ -445,7 +482,7 @@ class TestCharacterCodeTab(unittest.TestCase):
                     (team_c, TEAM_CODE_MODE_BUILTIN, "Never imported code, skipped by Switch All")):
                 _row, item = self._row(tab, team)
                 self._assert_team_marked(tab, team, state)
-                self.assertEqual(item.toolTip(), tooltip)
+                self.assertEqual(item.toolTip(), f"{item.text()}\n{tooltip}")
         finally:
             tab.deleteLater()
 
@@ -882,8 +919,8 @@ class TestCharacterCodeTab(unittest.TestCase):
                 patch("src.gui.CharacterCodeTab.show_info_bar"),
             ):
                 tab._open_workshop()
+                self._wait_for_workshop(tab)
                 fetch.assert_called_once()
-                # the very call the workshop import makes after downloading
                 tab._preview_and_import_archive(archive, expected_team=None)
 
             discard.assert_called_once()
@@ -891,6 +928,91 @@ class TestCharacterCodeTab(unittest.TestCase):
             self.assertEqual(tuple(tab.team_list.currentItem().data(Qt.UserRole)), self._names(team_b))
             self.assertEqual(team_code_state(team_b), TEAM_CODE_MODE_IMPORT)
         finally:
+            tab.deleteLater()
+
+    def test_workshop_can_filter_to_the_selected_team(self):
+        tab = CharacterCodeTab()
+        current = {"team": "Verina, CHIXIA, Mortefi", "name": "Current setup"}
+        other = {"members": ["Chixia", "Mortefi", "Baizhi"], "name": "Other setup"}
+        dialog = WorkshopDialog([current, other], parent=tab, team=(Chixia, Mortefi, Verina))
+        try:
+            self.assertTrue(dialog.team_only_check.isChecked())
+            self.assertEqual(dialog.filtered_codes, [current])
+            dialog.search_edit.setText("other setup")
+            self.assertEqual(dialog.filtered_codes, [])
+            dialog.team_only_check.setChecked(False)
+            self.assertEqual(dialog.filtered_codes, [other])
+        finally:
+            dialog.deleteLater()
+            tab.deleteLater()
+
+    def test_batch_download_adds_inactive_versions_and_preserves_editor_edits(self):
+        team = (Chixia, Mortefi, Verina)
+        create_custom_team(team)
+        for char_cls in team:
+            save_team_import_code(team, char_cls, self._imported_code(char_cls.__name__))
+        archive = export_custom_team(
+            team, Path(self.temp_dir.name) / "out", "Workshop Team", "Rotation notes", "Tester", "1",
+        )
+        info = inspect_team_archive(archive)
+        tab = CharacterCodeTab()
+        blocked_download = threading.Event()
+        started_download = threading.Event()
+        worker_threads = []
+        matching = [
+            {"team": "Verina, Chixia, Mortefi", "name": "Rotation"},
+            {"members": ["Mortefi", "Chixia", "Verina"], "name": "Wrong archive"},
+        ]
+        other = {"members": ["Chixia", "Mortefi", "Baizhi"]}
+
+        def download(code):
+            worker_threads.append(threading.get_ident())
+            started_download.set()
+            if not blocked_download.wait(2):
+                raise TimeoutError("Test did not release download")
+            return info if code == matching[0] else {**info, "team": ("Chixia", "Mortefi", "Baizhi")}
+
+        try:
+            original_code = tab.editor.toPlainText()
+            changed_code = original_code + "\n# unsaved\n"
+            tab.editor.setPlainText(changed_code)
+            with (
+                patch("src.gui.CharacterCodeTab.fetch_all_workshop_teams", return_value=[*matching, other]),
+                patch("src.gui.CharacterCodeTab.download_workshop_archive", side_effect=download) as get_archive,
+                patch("src.gui.CharacterCodeTab.show_info_bar"),
+            ):
+                tab.fetch_variants_button.click()
+                self.assertTrue(started_download.wait(2))
+                self.assertTrue(tab.workshop_busy)
+                self.assertEqual(tab.editor.toPlainText(), changed_code)
+                blocked_download.set()
+                self._wait_for_workshop(tab)
+                self.assertEqual([call.args[0] for call in get_archive.call_args_list], matching)
+                self.assertNotIn(threading.get_ident(), worker_threads)
+                self.assertEqual(tab.variant_combo.count(), 2)
+                self.assertEqual(len(list_team_variants(team)), 1)
+                self.assertEqual(tab.editor.toPlainText(), changed_code)
+                self.assertEqual(team_code_state(team), TEAM_CODE_MODE_BUILTIN)
+
+                tab.fetch_variants_button.click()
+                self._wait_for_workshop(tab)
+                self.assertEqual(len(list_team_variants(team)), 1)
+                with patch.object(tab, "_confirm_switch_changes", return_value="cancel"):
+                    tab.variant_combo.setCurrentIndex(1)
+                self.assertEqual(tab.variant_combo.currentIndex(), 0)
+                self.assertEqual(tab.editor.toPlainText(), changed_code)
+
+                with patch.object(tab, "_confirm_switch_changes", return_value="discard"):
+                    tab.variant_combo.setCurrentIndex(1)
+                self.assertEqual(team_code_state(team), TEAM_CODE_MODE_IMPORT)
+                self.assertEqual(tab.editor.toPlainText(), info["codes"][tab.current_char_cls.__name__])
+                tab.variant_combo.setCurrentIndex(1)
+                self.assertEqual(team_code_state(team), TEAM_CODE_MODE_BUILTIN)
+                self.assertEqual(tab.editor.toPlainText(), original_code)
+                self.assertEqual(read_team_import_code(team, Chixia), info["codes"]["Chixia"])
+        finally:
+            blocked_download.set()
+            self._wait_for_workshop(tab)
             tab.deleteLater()
 
     def test_team_info_shows_the_description_an_import_keeps(self):
@@ -968,6 +1090,11 @@ class TestCharacterCodeTab(unittest.TestCase):
             labels = {label.text() for label in shown[1].findChildren(QLabel)}
             self.assertTrue({"Second", "Author B", "2.0.0"} <= labels)
             self.assertFalse({"First", "Author A", "1.0.0"} & labels)
+            with patch("src.gui.CharacterCodeTab.show_info_bar"):
+                tab.variant_combo.setCurrentIndex(1)
+            self.assertEqual(read_team_manifest(team)["version"], "1.0.0")
+            self.assertEqual(team_code_state(team), TEAM_CODE_MODE_IMPORT)
+            self.assertEqual(tab.variant_combo.count(), 2)
         finally:
             tab.deleteLater()
 

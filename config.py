@@ -5,6 +5,7 @@ from pathlib import Path
 from ok import Box, ConfigOption, Icon
 from ok.util.GlobalConfig import create_basic_options
 from src.game_launcher import get_game_launch_arguments
+from src.coco.foreground_input import SendInput
 from src.task.process_feature import process_feature
 from src.task.task_icons import task_icon
 from src.identity import DISPLAY_NAME, LOG_NAME
@@ -184,7 +185,11 @@ config = {
     'gui_icon': 'icons/icon.png',
     'global_configs': [basic_config_option, key_config_option, char_config_option, monthly_card_config_option],
     'custom_tabs': [
+        ["src.coco.gui.HomeTab", "HomeTab"],
         ["src.gui.CharacterCodeTab", "CharacterCodeTab"],
+        ["src.coco.gui.DefaultCharacterTab", "DefaultCharacterTab"],
+        ["src.coco.recorder.RecorderTab", "AxisRecorderTab"],
+        ["src.coco.gui.DashboardTab", "DashboardTab"],
     ],
     'ocr': {
         'lib': 'onnxocr',
@@ -224,7 +229,7 @@ config = {
         'launch_arguments': get_game_launch_arguments,
         'exe': 'Client-Win64-Shipping.exe',
         'hwnd_class': 'UnrealWindow',
-        'interaction': ['PostMessage', 'Pynput'],
+        'interaction': ['PostMessage', 'Pynput', SendInput],
         'capture_method': ['WGC', 'WGC_HDR','BitBlt_RenderFull'],  # Windows版本支持的话, 优先使用WGC, 否则使用BitBlt_Full
         'check_hdr': False,
         'force_no_hdr': False,
@@ -289,7 +294,9 @@ config = {
         ["src.task.GardenTask", "GardenTask"],
         # ["src.task.DiagnosisTask", "DiagnosisTask"],
     ], 'trigger_tasks': [
+        ["src.coco.recorder.AxisRecorder", "AxisRecorderTask"],
         ["src.task.AutoCombatTask", "AutoCombatTask"],
+        ["src.coco.f_key_start", "FStartCombatTask"],
         ["src.task.AutoPickTask", "AutoPickTask"],
         ["src.task.AutoLoginTask", "AutoLoginTask"],
         ["src.task.SkipDialogTask", "AutoDialogTask"],
